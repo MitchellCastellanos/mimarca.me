@@ -1,0 +1,95 @@
+{
+  "$schema_notes": "Mi Tarjeta Pro · data schema. Copia este archivo, renombra por <slug>.json y rellena.",
+  "slug": "ejemplo",
+  "theme": "dark-gold",
+  "language": "es-MX",
+
+  "business": {
+    "name": "Nombre del Negocio",
+    "subname": "SUBTÍTULO / GIRO",
+    "verified": true,
+    "tagline": "Frase corta que describe el negocio",
+    "rating": 5.0,
+    "established": 2023,
+    "logoUrl": "/Images/clients/<slug>/logo.png",
+    "city": "Ciudad, México"
+  },
+
+  "status": {
+    "type": "open-hours",
+    "hours": {
+      "mon": "10:00-19:00",
+      "tue": "10:00-19:00",
+      "wed": "10:00-19:00",
+      "thu": "10:00-20:00",
+      "fri": "10:00-20:00",
+      "sat": "10:00-18:00",
+      "sun": "closed"
+    }
+  },
+
+  "primaryCta": {
+    "label": "Agendar cita",
+    "subtitle": "Respuesta en minutos por WhatsApp",
+    "icon": "calendar2-check",
+    "url": "https://wa.me/5215555555555?text=Hola%20quiero%20agendar"
+  },
+
+  "links": [
+    {
+      "label": "Instagram",
+      "subtitle": "@usuario",
+      "icon": "instagram",
+      "style": "ig",
+      "url": "https://instagram.com/usuario",
+      "popular": true
+    },
+    {
+      "label": "TikTok",
+      "subtitle": "@usuario",
+      "icon": "tiktok",
+      "style": "tt",
+      "url": "https://tiktok.com/@usuario"
+    },
+    {
+      "label": "Facebook",
+      "subtitle": "Síguenos en Facebook",
+      "icon": "facebook",
+      "style": "fb",
+      "url": "https://facebook.com/usuario"
+    },
+    {
+      "label": "Sitio Web",
+      "subtitle": "tudominio.com",
+      "icon": "globe2",
+      "style": "web",
+      "url": "https://tudominio.com"
+    },
+    {
+      "label": "Ubicación",
+      "subtitle": "Cómo llegar en Google Maps",
+      "icon": "geo-alt-fill",
+      "style": "map",
+      "url": "https://maps.app.goo.gl/xxx"
+    }
+  ],
+
+  "servicesTitle": "SERVICIOS Y PRECIOS",
+  "services": [
+    { "name": "Servicio 1", "desc": "Descripción corta", "price": "$150" },
+    { "name": "Servicio 2", "desc": "Descripción corta", "price": "$200" }
+  ],
+  "servicesDisclaimer": "Los precios pueden variar según el servicio. Consulta por WhatsApp.",
+
+  "gallery": [
+    "/Images/clients/<slug>/g1.jpg",
+    "/Images/clients/<slug>/g2.jpg",
+    "/Images/clients/<slug>/g3.jpg"
+  ],
+
+  "brandCardCopy": "Frase de cierre o slogan del negocio.",
+  "copyright": "© 2025 Nombre del Negocio · Ciudad, México",
+
+  "changeRequestUrl": "https://gabansolutions.lemonsqueezy.com/buy/REPLACE-CHANGES-25MXN",
+  "ownerToken": "CAMBIAR-POR-TOKEN-UNICO"
+}

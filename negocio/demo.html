@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <title>RCR Barber Shop · Tarjeta Digital | Mi Tarjeta Pro by GABAN Solutions</title>
+  <meta name="description" content="Tarjeta digital demo de RCR Barber Shop — un ejemplo real del nivel de diseño que entregamos en Mi Tarjeta Pro. Tu propia tarjeta digital diseñada a la medida por GABAN Solutions.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0a0a0a">
+
+  <link rel="canonical" href="https://mimarca.me/negocio/demo.html">
+
+  <!-- Favicons -->
+  <link rel="icon" href="../images/favicon.ico">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="profile">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="RCR Barber Shop · Tarjeta Digital">
+  <meta property="og:description" content="Corte, barba y estilo para caballeros. Ejemplo de tarjeta digital diseñada por GABAN Solutions.">
+  <meta property="og:url" content="https://mimarca.me/negocio/demo.html">
+
+  <!-- Fonts: serif premium + clean sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root{
+      --bg-0: #050505;
+      --bg-1: #0a0a0a;
+      --bg-2: #131313;
+      --bg-3: #1c1c1c;
+      --gold: #d4b86a;
+      --gold-2: #b8973f;
+      --gold-3: #f0d98a;
+      --text: #f3f1ea;
+      --muted: #9b9789;
+      --line: rgba(212,184,106,0.18);
+      --line-strong: rgba(212,184,106,0.35);
+      --shadow-gold: 0 18px 50px rgba(184,151,63,0.25);
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body{
+      margin:0;
+      padding:0;
+      background: var(--bg-0);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body{
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(212,184,106,0.10), transparent 60%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
+      min-height: 100vh;
+    }
+
+    .serif{
+      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+      letter-spacing: .04em;
+    }
+
+    /* ===== container ===== */
+    .biz-wrap{
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    /* ===== top card with brand ===== */
+    .biz-hero{
+      position: relative;
+      background:
+        linear-gradient(135deg, rgba(212,184,106,0.08) 0%, transparent 40%, rgba(212,184,106,0.05) 100%),
+        var(--bg-1);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 36px 20px 28px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .biz-hero::before{
+      content:"";
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(135deg, rgba(212,184,106,0.04) 0 2px, transparent 2px 14px);
+      pointer-events: none;
+    }
+
+    .biz-logo{
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 30% 30%, #2a2419 0%, #0d0905 70%);
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 0 4px #0a0a0a, 0 10px 30px rgba(212,184,106,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .biz-logo img{ width:78%; height:78%; object-fit:contain; }
+
+    .biz-name{
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin: 0 0 8px;
+    }
+    .biz-sub{
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .35em;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .biz-verified{
+      display:inline-block;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #111;
+      font-size: 12px;
+      line-height: 22px;
+      text-align: center;
+      font-weight: 800;
+      border: 2px solid #111;
+    }
+    .biz-tag{
+      font-style: italic;
+      color: var(--text);
+      opacity: .92;
+      font-size: 1.05rem;
+      margin: 0 0 18px;
+    }
+
+    /* status pill */
+    .biz-status{
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+      font-size: .92rem;
+      color: var(--text);
+      flex-wrap: nowrap;
+    }
+    .biz-status .dot{
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #ff5252; box-shadow: 0 0 8px rgba(255,82,82,0.6);
+      display: inline-block; margin-right: 8px;
+    }
+    .biz-status .sep{
+      width:1px; height:14px; background: var(--line-strong); display:inline-block;
+    }
+    .biz-status i{ color: var(--gold); margin-right: 4px; }
+
+    /* ===== primary CTA ===== */
+    .biz-cta-primary{
+      display: block;
+      margin: 22px 0 14px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--gold-3) 0%, var(--gold) 50%, var(--gold-2) 100%);
+      color: #0c0a05;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: var(--shadow-gold);
+      position: relative;
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .biz-cta-primary:hover{ transform: translateY(-2px); box-shadow: 0 24px 60px rgba(184,151,63,0.35); }
+    .biz-cta-primary .row{
+      display: flex; align-items: center; gap: 14px;
+    }
+    .biz-cta-primary .ico{
+      width: 46px; height: 46px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 1.2rem;
+    }
+    .biz-cta-primary .t1{
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem; font-weight: 700; letter-spacing: .12em;
+      line-height: 1;
+    }
+    .biz-cta-primary .t2{ font-size: .82rem; opacity: .85; margin-top:4px; }
+    .biz-cta-primary .arr{ margin-left:auto; font-size: 1.2rem; }
+
+    /* ===== link buttons ===== */
+    .biz-link{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--text);
+      text-decoration: none;
+      transition: transform .15s ease, border-color .2s ease, background .2s ease;
+    }
+    .biz-link:hover{ transform: translateY(-2px); border-color: var(--line-strong); background: var(--bg-3); }
+    .biz-link .ico-wrap{
+      width: 42px; height: 42px; border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 1.25rem;
+      flex: 0 0 42px;
+    }
+    .biz-link .t1{ font-weight: 600; }
+    .biz-link .t2{ font-size: .82rem; color: var(--muted); margin-top:2px; }
+    .biz-link .arr{ margin-left:auto; color: var(--muted); }
+
+    .biz-link.ig .ico-wrap{ background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; }
+    .biz-link.fb .ico-wrap{ background: #1877f2; color:#fff; }
+    .biz-link.web .ico-wrap{ background: #0d2b3a; color:#9bd1e7; }
+    .biz-link.map .ico-wrap{ background: #2a3422; color:#a5d189; }
+
+    .biz-pill-pop{
+      display: inline-block;
+      font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      background: rgba(212,184,106,0.18);
+      color: var(--gold);
+      border: 1px solid var(--line-strong);
+      padding: 2px 8px; border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ===== section dividers ===== */
+    .biz-section-title{
+      display: flex; align-items: center; gap: 12px;
+      margin: 32px 0 16px;
+      color: var(--text);
+    }
+    .biz-section-title .line{ flex:1; height:1px; background: var(--line); }
+    .biz-section-title h2{
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem; letter-spacing: .35em;
+      font-weight: 600;
+      margin:0;
+    }
+
+    /* ===== services list ===== */
+    .biz-service{
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--gold);
+      border-radius: 12px;
+    }
+    .biz-service .info{ flex:1; }
+    .biz-service .name{
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+      font-size: 1.18rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .biz-service .desc{ color: var(--muted); font-size: .85rem; margin-top:2px; }
+    .biz-service .price{
+      background: var(--bg-3);
+      border: 1px solid var(--line-strong);
+      color: var(--gold);
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: .92rem;
+      flex: 0 0 auto;
+    }
+
+    .biz-disclaimer{
+      text-align: center;
+      color: var(--muted);
+      font-size: .82rem;
+      font-style: italic;
+      margin: 12px 0 8px;
+    }
+
+    /* ===== gallery ===== */
+    .biz-gallery{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .biz-gallery .cell{
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      color: var(--gold);
+      font-size: 1.3rem;
+      overflow: hidden;
+    }
+
+    /* ===== mini brand card ===== */
+    .biz-brand-card{
+      display: flex; gap: 14px; align-items: center;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 28px;
+    }
+    .biz-brand-card .mini-logo{
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #2a2419, #0d0905);
+      border: 1px solid var(--gold);
+      display:grid; place-items:center;
+      flex: 0 0 56px;
+    }
+    .biz-brand-card .mini-logo img{ width: 70%; height: 70%; object-fit: contain; }
+    .biz-brand-card .t1{ font-family:'Cormorant Garamond', serif; font-size:1.1rem; font-weight:700; color: var(--gold); letter-spacing:.05em; }
+    .biz-brand-card .t2{ font-size:.78rem; color: var(--muted); letter-spacing:.18em; text-transform: uppercase; margin-top:4px; }
+
+    /* ===== divider symbol ===== */
+    .biz-symbol{
+      text-align:center; margin: 28px 0 14px;
+      color: var(--gold);
+      font-size: 1.4rem;
+    }
+
+    /* ===== hours table ===== */
+    .biz-hours{
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 6px 16px;
+    }
+    .biz-hours .row-h{
+      display:flex; justify-content: space-between; align-items:center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: .95rem;
+    }
+    .biz-hours .row-h:last-child{ border-bottom: 0; }
+    .biz-hours .day{ color: var(--text); font-weight: 500; }
+    .biz-hours .hour{ color: var(--gold); font-weight: 600; }
+
+    /* ===== copyright + GABAN credit ===== */
+    .biz-copy{
+      text-align:center;
+      font-size: .78rem;
+      color: var(--muted);
+      margin: 28px 0 16px;
+    }
+    .gaban-credit{
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 0 auto;
+      padding: 12px 18px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: .85rem;
+      max-width: max-content;
+      transition: border-color .2s ease;
+    }
+    .gaban-credit:hover{ border-color: var(--gold); color: var(--gold); }
+    .gaban-credit i{ color: var(--gold); }
+    .gaban-credit strong{ color: var(--gold); font-weight: 700; letter-spacing: .04em; }
+
+    /* ===== top mini banner (only for demo) ===== */
+    .demo-banner{
+      background: linear-gradient(90deg, var(--gold-2), var(--gold));
+      color:#0a0a0a;
+      text-align:center;
+      padding: 8px 14px;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .demo-banner a{ color:#0a0a0a; text-decoration: underline; font-weight: 800; }
+
+    /* responsive tweak */
+    @media (max-width: 380px){
+      .biz-name{ font-size: 2.1rem; }
+      .biz-sub{ font-size: 1rem; letter-spacing: .25em; }
+      .biz-logo{ width: 110px; height: 110px; }
+      .biz-cta-primary .t1{ font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-banner">
+  📌 Esta es una DEMO · Versión en vivo: <a href="https://rcr-barbershop.com/enlaces/" target="_top">rcr-barbershop.com/enlaces</a> · <a href="../index.html">¿Quieres una así?</a>
+</div>
+
+<div class="biz-wrap">
+
+  <!-- HERO / BRAND -->
+  <section class="biz-hero">
+    <div class="biz-logo">
+      <!-- Logo placeholder: replace with /Images/mi-tarjeta/clients/rcr-logo.png when available -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true">
+        <defs>
+          <radialGradient id="g1" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#f0d98a"/>
+            <stop offset="100%" stop-color="#b8973f"/>
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="44" fill="none" stroke="url(#g1)" stroke-width="2"/>
+        <text x="50" y="48" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="22" font-weight="700" fill="url(#g1)">RCR</text>
+        <text x="50" y="68" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" letter-spacing="2" fill="#d4b86a">BARBERÍA &amp; SALÓN</text>
+      </svg>
+    </div>
+
+    <h1 class="biz-name serif">RCR</h1>
+    <div class="biz-sub serif">BARBER SHOP <span class="biz-verified">✓</span></div>
+    <p class="biz-tag">Corte, barba y estilo para caballeros</p>
+
+    <div class="biz-status">
+      <span><span class="dot"></span>Cerrado · abre hoy a las 11:00 am</span>
+      <span class="sep"></span>
+      <span><i class="bi bi-star-fill"></i>5.0</span>
+      <span class="sep"></span>
+      <span><i class="bi bi-calendar-check"></i>Est. 2023</span>
+    </div>
+  </section>
+
+  <!-- PRIMARY CTA -->
+  <a href="https://wa.me/5215555555555?text=Hola%20RCR%2C%20quiero%20agendar%20una%20cita" class="biz-cta-primary" target="_blank" rel="noopener">
+    <div class="row">
+      <div class="ico"><i class="bi bi-calendar2-check"></i></div>
+      <div>
+        <div class="t1 serif">AGENDAR CITA</div>
+        <div class="t2">Respuesta en minutos por WhatsApp</div>
+      </div>
+      <div class="arr">→</div>
+    </div>
+  </a>
+
+  <!-- SOCIAL / LINKS -->
+  <a href="https://instagram.com/rcr_barbershop" target="_blank" rel="noopener" class="biz-link ig">
+    <div class="ico-wrap"><i class="bi bi-instagram"></i></div>
+    <div>
+      <div class="t1">Instagram <span class="biz-pill-pop">POPULAR</span></div>
+      <div class="t2">@rcr_barbershop</div>
+    </div>
+    <div class="arr">›</div>
+  </a>
+
+  <a href="https://facebook.com/" target="_blank" rel="noopener" class="biz-link fb">
+    <div class="ico-wrap"><i class="bi bi-facebook"></i></div>
+    <div>
+      <div class="t1">Facebook</div>
+      <div class="t2">Síguenos en Facebook</div>
+    </div>
+    <div class="arr">›</div>
+  </a>
+
+  <a href="https://rcr-barbershop.com" target="_blank" rel="noopener" class="biz-link web">
+    <div class="ico-wrap"><i class="bi bi-globe2"></i></div>
+    <div>
+      <div class="t1">Sitio Web</div>
+      <div class="t2">rcr-barbershop.com</div>
+    </div>
+    <div class="arr">›</div>
+  </a>
+
+  <a href="https://maps.google.com/?q=RCR+Barber+Shop" target="_blank" rel="noopener" class="biz-link map">
+    <div class="ico-wrap"><i class="bi bi-geo-alt-fill"></i></div>
+    <div>
+      <div class="t1">Ubicación</div>
+      <div class="t2">Cómo llegar en Google Maps</div>
+    </div>
+    <div class="arr">›</div>
+  </a>
+
+  <!-- SERVICES -->
+  <div class="biz-section-title">
+    <div class="line"></div>
+    <h2>SERVICIOS Y PRECIOS</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Corte caballero</div>
+      <div class="desc">Corte personalizado a tijera o máquina</div>
+    </div>
+    <div class="price">$150</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Corte niño</div>
+      <div class="desc">Corte para los más pequeños</div>
+    </div>
+    <div class="price">$130</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Barba</div>
+      <div class="desc">Perfilado y arreglo de barba con toalla</div>
+    </div>
+    <div class="price">$110</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Barba premium</div>
+      <div class="desc">Barba completa con tratamiento y acabado</div>
+    </div>
+    <div class="price">$160</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Fade</div>
+      <div class="desc">Degradado limpio y preciso</div>
+    </div>
+    <div class="price">$180</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Afeitado clásico</div>
+      <div class="desc">Afeitado con navaja y toalla caliente</div>
+    </div>
+    <div class="price">$150</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Perfilado</div>
+      <div class="desc">Perfilado de líneas y detalle</div>
+    </div>
+    <div class="price">$80</div>
+  </div>
+
+  <div class="biz-service">
+    <div class="info">
+      <div class="name">Tratamiento capilar</div>
+      <div class="desc">Hidratación y cuidado profundo del cabello</div>
+    </div>
+    <div class="price">$250</div>
+  </div>
+
+  <div class="biz-disclaimer">
+    Los precios pueden variar según el servicio. <br>Consulta por WhatsApp para detalles.
+  </div>
+
+  <!-- GALLERY -->
+  <div class="biz-section-title">
+    <div class="line"></div>
+    <h2>GALERÍA</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="biz-gallery">
+    <div class="cell"><i class="bi bi-scissors"></i></div>
+    <div class="cell"><i class="bi bi-camera"></i></div>
+    <div class="cell"><i class="bi bi-image"></i></div>
+    <div class="cell"><i class="bi bi-camera"></i></div>
+    <div class="cell"><i class="bi bi-image"></i></div>
+    <div class="cell"><i class="bi bi-scissors"></i></div>
+    <div class="cell"><i class="bi bi-image"></i></div>
+    <div class="cell"><i class="bi bi-camera"></i></div>
+    <div class="cell"><i class="bi bi-image"></i></div>
+  </div>
+
+  <!-- BRAND MINI CARD -->
+  <div class="biz-brand-card">
+    <div class="mini-logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="50" y="60" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="32" font-weight="700" fill="#d4b86a">RCR</text>
+      </svg>
+    </div>
+    <div>
+      <div class="t1">RCR BARBER SHOP</div>
+      <div class="t2">Donde el estilo se combina con la asesoría y el mejor trato.</div>
+    </div>
+  </div>
+
+  <div class="biz-symbol"><i class="bi bi-scissors"></i></div>
+
+  <!-- HOURS -->
+  <div class="biz-section-title">
+    <div class="line"></div>
+    <h2>HORARIOS</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="biz-hours">
+    <div class="row-h"><span class="day">Lunes</span><span class="hour">11:00 am – 8:00 pm</span></div>
+    <div class="row-h"><span class="day">Martes</span><span class="hour">11:00 am – 8:00 pm</span></div>
+    <div class="row-h"><span class="day">Miércoles</span><span class="hour">11:00 am – 8:00 pm</span></div>
+    <div class="row-h"><span class="day">Jueves</span><span class="hour">11:00 am – 8:30 pm</span></div>
+    <div class="row-h"><span class="day">Viernes</span><span class="hour">11:00 am – 8:00 pm</span></div>
+    <div class="row-h"><span class="day">Sábado</span><span class="hour">11:00 am – 6:00 pm</span></div>
+    <div class="row-h"><span class="day">Domingo</span><span class="hour">11:00 am – 6:00 pm</span></div>
+  </div>
+
+  <!-- COPYRIGHT -->
+  <div class="biz-copy">© 2023 RCR Barber Shop · Querétaro, México</div>
+
+  <!-- GABAN CREDIT (always present at the bottom of every Mi Tarjeta Pro page) -->
+  <a class="gaban-credit" href="../index.html" target="_top">
+    <i class="bi bi-stars"></i>
+    <span>Diseñado por <strong>GABAN Solutions</strong></span>
+  </a>
+
+</div>
+
+</body>
+</html>

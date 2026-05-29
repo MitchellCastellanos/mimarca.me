@@ -1,178 +1,821 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html lang="es-MX">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="RCR Barber Shop - Corte, barba y estilo para caballeros" />
-  <title>RCR Barber Shop</title>
-  <link rel="icon" type="image/png" href="images/logo.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Mi Tarjeta Pro | Tarjetas digitales personalizadas para tu negocio | GABAN Solutions</title>
+
+  <meta name="description" content="Mi Tarjeta Pro: tarjetas digitales personalizadas para tu negocio en México. Promo de lanzamiento $199 MXN (regular $299). Diseño único, link propio en mimarca.me/negocio/tu-marca y QR listo para imprimir.">
+  <meta name="keywords" content="tarjeta digital México, tarjeta de presentación digital, linktree para negocios, smart link México, QR para negocio, tarjeta NFC México, mi tarjeta pro, GABAN Solutions">
+  <meta name="author" content="GABAN Solutions Numériques">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#111111">
+
+  <link rel="canonical" href="https://mimarca.me/">
+  <link rel="manifest" href="./site.webmanifest">
+
+  <!-- Favicons -->
+  <link rel="icon" href="./images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16.png">
+  <link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:locale:alternate" content="en_CA">
+  <meta property="og:locale:alternate" content="fr_CA">
+  <meta property="og:site_name" content="Mi Tarjeta Pro">
+  <meta property="og:title" content="Mi Tarjeta Pro | Tarjetas digitales personalizadas para tu negocio">
+  <meta property="og:description" content="Tu propio link tipo Linktree, pero diseñado a la medida. Promo de lanzamiento $199 MXN. Diseño único, QR listo para imprimir y soporte humano real.">
+  <meta property="og:url" content="https://mimarca.me/">
+  <meta property="og:image" content="https://mimarca.me/images/og/gaban-mi-tarjeta-preview.jpg">
+  <meta property="og:image:alt" content="Mi Tarjeta Pro by GABAN Solutions">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mi Tarjeta Pro | Tarjetas digitales para tu negocio">
+  <meta name="twitter:description" content="Tu propio link tipo Linktree, pero diseñado a la medida por humanos. Promo de lanzamiento $199 MXN.">
+  <meta name="twitter:image" content="https://mimarca.me/images/og/gaban-mi-tarjeta-preview.jpg">
+
+  <!-- Performance -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://api.qrserver.com" crossorigin>
+  <link rel="preload" href="./MyCSS.css" as="style">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="./MyCSS.css">
+
+  <!-- Schema: Service -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://mimarca.me/#service",
+    "name": "Mi Tarjeta Pro",
+    "serviceType": "Digital Business Card",
+    "areaServed": [
+      { "@type": "Country", "name": "Mexico" }
+    ],
+    "provider": {
+      "@type": "LocalBusiness",
+      "@id": "https://mimarca.me/#business",
+      "name": "GABAN Solutions Numériques",
+      "url": "https://mimarca.me/"
+    },
+    "description": "Tarjeta digital personalizada con link propio (mimarca.me/negocio/tu-marca) y código QR listo para imprimir. Diseño hecho a la medida por un equipo humano, no plantillas genéricas.",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Lanzamiento",
+        "price": "199",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/LimitedAvailability"
+      },
+      {
+        "@type": "Offer",
+        "name": "Personalizado",
+        "price": "249",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock"
+      },
+      {
+        "@type": "Offer",
+        "name": "Premium",
+        "price": "299",
+        "priceCurrency": "MXN",
+        "availability": "https://schema.org/InStock"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
-  <div class="page-wrapper">
-    <div class="card">
 
-      <!-- Header / Logo -->
-      <header class="card-header">
-        <div class="logo-container">
-          <img src="images/logo.PNG" alt="RCR Barber Shop Logo" class="logo" />
+<div id="site-navbar"></div>
+
+<!-- HERO -->
+<header class="hero hero-mt bg-dark text-white">
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+          <span class="badge text-bg-warning fw-semibold">MX · Lanzamiento</span>
+          <span class="badge text-bg-dark border border-warning text-warning fw-semibold">$199 MXN</span>
+          <span class="text-white-50 small text-decoration-line-through">$299 MXN</span>
         </div>
-        <div class="header-text">
-          <h1 class="brand-name">
-            <span class="brand-rcr">RCR</span>
-            <span class="brand-barbershop">Barber Shop</span>
-          </h1>
-          <p class="tagline">Corte, barba y estilo para caballeros</p>
+
+        <div class="text-uppercase small fw-semibold text-warning mb-2">
+          Mi Tarjeta Pro
         </div>
-        <div class="gold-divider"></div>
-      </header>
 
-      <!-- Main Links -->
-      <main class="links-section">
+        <h1 class="display-5 fw-bold mb-3">
+          Tu tarjeta digital, <span class="text-warning">diseñada a la medida</span> — no una plantilla más.
+        </h1>
 
-        <a href="https://wa.me/524423536769" target="_blank" rel="noopener" class="link-btn whatsapp">
-          <span class="btn-icon">
-            <i class="fab fa-whatsapp"></i>
-          </span>
-          <span class="btn-label">WhatsApp</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
+        <p class="lead mb-4 text-white-50">
+          Olvídate de los Linktree iguales para todos. En <strong>Mi Tarjeta Pro</strong> creamos tu propio link estilo <em>mimarca.me/negocio/tu-marca</em> con diseño único, QR listo para imprimir y soporte humano real — sí, humano: la chamba final la hace nuestro equipo, no un robot.
+        </p>
 
-        <a href="https://www.instagram.com/rcr_barbershop" target="_blank" rel="noopener" class="link-btn instagram">
-          <span class="btn-icon">
-            <i class="fab fa-instagram"></i>
-          </span>
-          <span class="btn-label">Instagram</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://www.facebook.com/rcr.carlos.2025" target="_blank" rel="noopener" class="link-btn facebook">
-          <span class="btn-icon">
-            <i class="fab fa-facebook-f"></i>
-          </span>
-          <span class="btn-label">Facebook</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://wa.me/524423536769" target="_blank" rel="noopener" class="link-btn appointment">
-          <span class="btn-icon">
-            <!-- Calendar SVG -->
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </span>
-          <span class="btn-label">Agendar Cita</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://www.rcr-barbershop.com/" target="_blank" rel="noopener" class="link-btn website">
-          <span class="btn-icon">
-            <i class="fas fa-globe"></i>
-          </span>
-          <span class="btn-label">Sitio Web</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&sa=X&ved=2ahUKEwjB_7K-5ZaTAxWFC0QIHVKZN8sQ4kB6BAgMEAA&hl=es" target="_blank" rel="noopener" class="link-btn location">
-          <span class="btn-icon">
-            <img src="images/location-pin.PNG" alt="" class="btn-img-icon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-            <i class="fas fa-map-marker-alt" style="display:none;"></i>
-          </span>
-          <span class="btn-label">Ubicación</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-      </main>
-
-      <!-- Services -->
-      <section class="services-section">
-        <h2 class="services-title">
-          <span class="gold-line"></span>
-          Servicios
-          <span class="gold-line"></span>
-        </h2>
-        <div class="services-grid">
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M6 9l6-6 6 6M6 15l6 6 6-6"/>
-            </svg>
-            Corte de Cabello
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2C7 2 3 6 3 10s4 8 9 8 9-4 9-8-4-8-9-8z"/>
-              <path d="M8 14s1 2 4 2 4-2 4-2"/>
-            </svg>
-            Barba
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Fade
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
-            </svg>
-            Afeitado
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M7 4l4 4-4 4M3 12h18M13 4l4 4-4 4"/>
-            </svg>
-            Perfilado
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
-              <path d="M12 8v4l3 3"/>
-            </svg>
-            Tratamientos Capilares
-          </div>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <a class="btn btn-warning btn-lg" href="#builder">Probar mi mockup gratis</a>
+          <a class="btn btn-outline-light btn-lg" href="#precios">Ver paquetes</a>
         </div>
-      </section>
 
-      <!-- Review Banner -->
-      <section class="review-section">
-        <a href="https://forms.gle/M6wTSV7KCRXuBDui7" target="_blank" rel="noopener" class="review-banner">
-          <img src="images/review-banner.PNG" alt="Déjanos tu opinión - Haz clic aquí" class="review-banner-img" onerror="this.style.display='none'; this.closest('.review-banner').classList.add('review-fallback');" />
-          <div class="review-fallback-content">
-            <div class="review-logo-wrap">
-              <img src="images/logo.PNG" alt="RCR" class="review-logo" />
+        <div class="small text-white-50">
+          🇲🇽 Hecho para negocios en México · Diseño humano · Link + QR incluidos
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <!-- Hero QR card -->
+        <div class="card border-0 shadow-lg reveal-right mt-qr-card">
+          <div class="card-body p-4 text-center">
+            <div class="text-uppercase small fw-semibold text-muted mb-2">Escanea para conocer</div>
+            <h2 class="h6 fw-bold mb-3">Mi Tarjeta Pro</h2>
+            <div class="mt-qr-logo-wrap mt-qr-logo-wrap--hero mx-auto">
+              <img
+                class="mt-qr-base rounded-3"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=640x640&margin=4&ecc=H&color=111111&bgcolor=FFFFFF&data=https%3A%2F%2Fmimarca.me%2F"
+                alt="Código QR que lleva al landing de Mi Tarjeta Pro"
+                width="300"
+                height="300"
+                loading="eager"
+                decoding="async">
+              <img class="mt-qr-center-logo" src="./images/apple-touch-icon.png" alt="" aria-hidden="true" width="1" height="1">
             </div>
-            <div class="review-text">
-              <p class="review-title">Déjanos tu opinión</p>
-              <p class="review-subtitle">Haz clic aquí</p>
-            </div>
+            <div class="small text-muted mt-3">mimarca.me</div>
           </div>
-        </a>
-      </section>
-
-      <!-- Hours -->
-      <footer class="hours-section">
-        <div class="barber-pole-wrap">
-          <img src="images/barber-pole.PNG" alt="" class="barber-pole-img" onerror="this.style.display='none';" />
         </div>
-        <div class="hours-info">
-          <p class="hours-line">
-            <i class="far fa-clock hours-icon"></i>
-            Lunes a Sábado: <strong>10 am – 8 pm</strong>
-          </p>
-          <p class="hours-line">
-            <i class="far fa-clock hours-icon"></i>
-            Domingos: <strong>11 am – 4 pm</strong>
-          </p>
-        </div>
-        <p class="footer-copy">© 2023 RCR Barber Shop · Est. 2023</p>
-      </footer>
-
+      </div>
     </div>
   </div>
+</header>
+
+<!-- WHAT IS IT -->
+<section class="section bg-light">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 reveal-left">
+        <div class="text-uppercase small fw-semibold text-warning mb-2">¿Qué es Mi Tarjeta Pro?</div>
+        <h2 class="fw-bold mb-3">Tu propio “Linktree”, pero <span class="text-warning">con diseño que sí grita marca</span>.</h2>
+        <p class="text-muted mb-3">
+          Es una página personal que reúne todos tus contactos, redes, menú, ubicación, WhatsApp, reservaciones — lo que necesite tu negocio — en <strong>una sola dirección fácil de compartir</strong> y con un <strong>QR listo para imprimir</strong> en tus playeras, lonas, vehículos o aparadores.
+        </p>
+        <ul class="list-unstyled mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="bi bi-check-circle-fill text-dark"></i><span>Link corto y propio: <code>mimarca.me/negocio/<strong>tu-marca</strong></code></span></li>
+          <li class="d-flex gap-2 mb-2"><i class="bi bi-check-circle-fill text-dark"></i><span>Diseño personalizado con tus colores, tu logo y tu vibe</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="bi bi-check-circle-fill text-dark"></i><span>QR descargable para imprimir donde quieras</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="bi bi-check-circle-fill text-dark"></i><span>Optimizada para celular, carga rápido y se ve pro</span></li>
+        </ul>
+        <a href="#builder" class="btn btn-dark">Empezar mi mockup</a>
+      </div>
+
+      <div class="col-lg-6 reveal-right">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="row g-3 text-center">
+              <div class="col-6">
+                <div class="p-3 border rounded-4 h-100 reveal-scale">
+                  <i class="bi bi-link-45deg fs-2 mb-2"></i>
+                  <div class="fw-semibold">Link propio</div>
+                  <div class="text-muted small">Fácil de recordar y compartir.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 border rounded-4 h-100 reveal-scale">
+                  <i class="bi bi-qr-code fs-2 mb-2"></i>
+                  <div class="fw-semibold">QR para imprimir</div>
+                  <div class="text-muted small">Para lonas, playeras, ventanas, tarjetas físicas.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 border rounded-4 h-100 reveal-scale">
+                  <i class="bi bi-palette fs-2 mb-2"></i>
+                  <div class="fw-semibold">100% personalizado</div>
+                  <div class="text-muted small">No usamos la misma plantilla para todos.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-3 border rounded-4 h-100 reveal-scale">
+                  <i class="bi bi-people fs-2 mb-2"></i>
+                  <div class="fw-semibold">Humanos detrás</div>
+                  <div class="text-muted small">La versión final la trabaja nuestro equipo.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOCKUPS GALLERY -->
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Ejemplos por giro</div>
+      <h2 class="fw-bold">Diseños pensados para tu tipo de negocio</h2>
+      <p class="text-muted">3 ideas por categoría para que veas estilos posibles. Después construimos el <strong>tuyo</strong>, único.</p>
+    </div>
+
+    <!-- Belleza -->
+    <div class="mt-mockup-row mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h3 class="h5 fw-bold mb-0"><i class="bi bi-scissors me-2"></i>Belleza & Estética</h3>
+        <span class="text-muted small">Barberías, salones, uñas, spa, lashes</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/belleza-1.png" alt="Mockup tarjeta digital belleza variante 1" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Belleza · Estilo 1</div>
+              <div class="text-muted small">Editorial, fondo claro, tipografía elegante.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/belleza-2.png" alt="Mockup tarjeta digital belleza variante 2" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Belleza · Estilo 2</div>
+              <div class="text-muted small">Oscuro premium, dorado, vibes de barbería.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/belleza-3.png" alt="Mockup tarjeta digital belleza variante 3" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Belleza · Estilo 3</div>
+              <div class="text-muted small">Pastel moderno, redondeado, joven.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comida -->
+    <div class="mt-mockup-row mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h3 class="h5 fw-bold mb-0"><i class="bi bi-egg-fried me-2"></i>Comida & Bebida</h3>
+        <span class="text-muted small">Taquerías, cafeterías, food trucks, restaurantes</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/comida-1.png" alt="Mockup tarjeta digital comida variante 1" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Comida · Estilo 1</div>
+              <div class="text-muted small">Menú QR, botón pedido, fotos sabrosas.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/comida-2.png" alt="Mockup tarjeta digital comida variante 2" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Comida · Estilo 2</div>
+              <div class="text-muted small">Estilo retro mexicano, papel kraft, colores cálidos.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/comida-3.png" alt="Mockup tarjeta digital comida variante 3" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Comida · Estilo 3</div>
+              <div class="text-muted small">Café/postres, minimal, lifestyle.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profesional -->
+    <div class="mt-mockup-row mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h3 class="h5 fw-bold mb-0"><i class="bi bi-briefcase me-2"></i>Servicios Profesionales</h3>
+        <span class="text-muted small">Médicos, dentistas, abogados, contadores, asesores</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/profesional-1.png" alt="Mockup tarjeta digital profesional variante 1" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Profesional · Estilo 1</div>
+              <div class="text-muted small">Sobrio corporate, agendar cita y mapa.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/profesional-2.png" alt="Mockup tarjeta digital profesional variante 2" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Profesional · Estilo 2</div>
+              <div class="text-muted small">Médico/salud, azul confiable, WhatsApp y reseñas.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/profesional-3.png" alt="Mockup tarjeta digital profesional variante 3" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body">
+              <div class="fw-semibold">Profesional · Estilo 3</div>
+              <div class="text-muted small">Asesor/coach, foto personal, branding fuerte.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Universal -->
+    <div class="mt-mockup-row">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h3 class="h5 fw-bold mb-0"><i class="bi bi-stars me-2"></i>Universal</h3>
+        <span class="text-muted small">Para cualquier giro: tiendas, eventos, freelancers</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 offset-md-3">
+          <div class="card mt-mockup-card border-0 shadow-sm h-100">
+            <img src="./images/mi-tarjeta/mockups/universal-1.png" alt="Mockup tarjeta digital universal" class="card-img-top mt-mockup-img" loading="lazy">
+            <div class="card-body text-center">
+              <div class="fw-semibold">Universal</div>
+              <div class="text-muted small">Plantilla flexible que se adapta a cualquier marca.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5 reveal-up">
+      <a href="./rcr-barbershop/" class="btn btn-outline-dark me-2"><i class="bi bi-eye me-1"></i>Ver tarjeta real (demo)</a>
+      <a href="#builder" class="btn btn-dark"><i class="bi bi-magic me-1"></i>Crear mi mockup</a>
+    </div>
+  </div>
+</section>
+
+<!-- BUILDER -->
+<section id="builder" class="section bg-dark text-white mt-builder-section">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Probador en vivo</div>
+      <h2 class="fw-bold">Mira cómo se vería <em>la tuya</em> en 30 segundos</h2>
+      <p class="text-white-50">Nuestro robot arma un <strong>mockup de referencia</strong> usando una de nuestras plantillas con tu logo. <br>Después un humano de carne y hueso (sí, nuestro equipo 👋) diseña la tuya <strong>desde cero</strong>.</p>
+    </div>
+
+    <div class="row g-4 align-items-start">
+      <!-- Form -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-lg">
+          <div class="card-body p-4 text-dark">
+            <h3 class="h6 fw-bold mb-3 text-uppercase">Datos de tu negocio</h3>
+
+            <!-- URL slug -->
+            <div class="mb-3">
+              <label class="form-label">Tu link público</label>
+              <div class="input-group mt-url-group">
+                <span class="input-group-text mt-url-prefix">mimarca.me/negocio/</span>
+                <input type="text" id="mtSlug" class="form-control" placeholder="mi-negocio" maxlength="40" autocomplete="off">
+              </div>
+              <div class="form-text">Solo letras, números y guiones. Sin acentos ni espacios.</div>
+            </div>
+
+            <!-- Business name -->
+            <div class="mb-3">
+              <label class="form-label" for="mtName">Nombre del negocio</label>
+              <input type="text" id="mtName" class="form-control" placeholder="Ej. Taquería La Bendita" maxlength="60">
+            </div>
+
+            <!-- Tagline -->
+            <div class="mb-3">
+              <label class="form-label" for="mtTagline">Frase corta (opcional)</label>
+              <input type="text" id="mtTagline" class="form-control" placeholder="Ej. Tacos al pastor en Polanco" maxlength="80">
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+              <label class="form-label" for="mtCategory">Tipo de negocio</label>
+              <select id="mtCategory" class="form-select">
+                <option value="belleza">Belleza & Estética</option>
+                <option value="comida">Comida & Bebida</option>
+                <option value="profesional">Servicios Profesionales</option>
+                <option value="universal">Otro / Universal</option>
+              </select>
+            </div>
+
+            <!-- Logo upload -->
+            <div class="mb-3">
+              <label class="form-label" for="mtLogo">Sube tu logo</label>
+              <input type="file" id="mtLogo" class="form-control" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+              <div class="form-text">PNG, JPG, SVG o WEBP. Mín. 400×400 px recomendado.</div>
+            </div>
+
+            <button id="mtGenerate" class="btn btn-dark w-100 btn-lg">
+              <i class="bi bi-magic me-1"></i> Generar mockup
+            </button>
+            <div class="text-muted small mt-2 text-center">
+              <i class="bi bi-shield-lock"></i> No guardamos tu logo. Es solo para el preview.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone preview -->
+      <div class="col-lg-6">
+        <div class="mt-phone-wrap">
+          <div class="mt-phone" id="mtPhone">
+            <!-- Empty state -->
+            <div class="mt-phone-empty" id="mtPhoneEmpty">
+              <i class="bi bi-phone fs-1 mb-3 d-block"></i>
+              <div class="fw-semibold mb-1">Tu mockup aparecerá aquí</div>
+              <div class="small text-muted">Llena los datos y presiona “Generar mockup”.</div>
+            </div>
+
+            <!-- Loading state -->
+            <div class="mt-phone-loading d-none" id="mtPhoneLoading">
+              <div class="spinner-border text-warning mb-3" role="status" aria-hidden="true"></div>
+              <div class="fw-semibold mb-1" id="mtLoadingTitle">Buscando el mejor diseño...</div>
+              <div class="small text-muted" id="mtLoadingSub">Probando plantillas para tu giro</div>
+            </div>
+
+            <!-- Result -->
+            <div class="mt-phone-result d-none" id="mtPhoneResult">
+              <div class="mt-result-stage">
+                <div class="mt-watermark">MOCKUP · DEMO</div>
+                <div class="mt-result-card" id="mtResultCard">
+                  <div class="mt-result-logo-wrap">
+                    <img id="mtResultLogo" alt="Tu logo" src="">
+                  </div>
+                  <div class="mt-result-name" id="mtResultName">Tu Negocio</div>
+                  <div class="mt-result-tagline" id="mtResultTagline">Tu frase corta</div>
+                  <div class="mt-result-buttons">
+                    <div class="mt-btn-fake"><i class="bi bi-whatsapp"></i> WhatsApp</div>
+                    <div class="mt-btn-fake"><i class="bi bi-instagram"></i> Instagram</div>
+                    <div class="mt-btn-fake"><i class="bi bi-geo-alt"></i> Cómo llegar</div>
+                    <div class="mt-btn-fake"><i class="bi bi-star"></i> Deja tu reseña</div>
+                  </div>
+                  <div class="mt-result-foot">mimarca.me/negocio/<span id="mtResultSlug">mi-negocio</span></div>
+                  <div class="mt-result-credit">Hecho con ♥ por GABAN Solutions</div>
+                </div>
+              </div>
+
+              <div class="mt-result-qr">
+                <div class="mt-qr-logo-wrap mx-auto" style="--mt-qr-display:220px">
+                  <img id="mtResultQR" class="mt-qr-base rounded-2" alt="QR de tu tarjeta digital (demo)" src="">
+                  <img id="mtResultQRLayer" class="mt-qr-center-logo" alt="" aria-hidden="true" width="1" height="1">
+                </div>
+                <div class="small text-muted mt-2">QR de demo · Escanéalo para ver el flujo real</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result CTA -->
+        <div class="text-center mt-4 d-none" id="mtResultCTA">
+          <h3 class="h5 fw-bold text-white mb-2">¿Te encantó? A nosotros también.</h3>
+          <p class="text-white-50 mb-3">Pide la tuya hoy mismo y eleva el potencial de tu negocio. <br>El equipo humano de GABAN la diseña <strong>desde cero</strong>, no es una plantilla.</p>
+          <a href="./contact.html?ref=mi-tarjeta-mockup" class="btn btn-warning btn-lg">
+            <i class="bi bi-rocket me-1"></i> Pedir mi tarjeta a la medida
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="precios" class="section">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Precios</div>
+      <h2 class="fw-bold">Paquetes claros, sin letras chiquitas</h2>
+      <p class="text-muted">Pago único por el diseño y publicación. Sin mensualidades obligatorias.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <!-- Lanzamiento -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card mt-price-card h-100 border-warning shadow-sm reveal-up">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge text-bg-warning">Promo de lanzamiento</span>
+              <span class="text-muted small">cupos limitados</span>
+            </div>
+            <h3 class="h4 fw-bold mb-1">Lanzamiento</h3>
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+              <div class="display-6 fw-bold mb-0">$199</div>
+              <div class="text-muted">MXN</div>
+              <div class="text-muted small text-decoration-line-through ms-2">$299</div>
+            </div>
+            <ul class="list-unstyled small mb-4">
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Diseño personalizado (1 ronda de ajustes)</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Link propio <code>/negocio/tu-marca</code></li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>QR para imprimir (PNG + SVG)</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Hasta 6 botones / links</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Optimizada para celular</li>
+              <li class="mb-2 text-muted"><i class="bi bi-dash-circle me-1"></i>El diseño queda alojado por GABAN</li>
+            </ul>
+            <a href="https://gabansolutions.lemonsqueezy.com/buy/REPLACE-LANZAMIENTO" target="_blank" rel="noopener" class="btn btn-warning w-100">Quiero el promo</a>
+            <div class="text-center small text-muted mt-2">
+              o paga por <a href="https://paypal.me/REPLACE-PAYPAL-HANDLE/199MXN" target="_blank" rel="noopener">PayPal</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personalizado -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card mt-price-card mt-price-featured h-100 shadow-lg reveal-up">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge text-bg-dark">Más popular</span>
+              <span class="text-warning small fw-semibold">⭐ recomendado</span>
+            </div>
+            <h3 class="h4 fw-bold mb-1">Personalizado</h3>
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+              <div class="display-6 fw-bold mb-0">$249</div>
+              <div class="text-muted">MXN</div>
+            </div>
+            <ul class="list-unstyled small mb-4">
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Todo lo de Lanzamiento</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i><strong>El diseño es tuyo</strong> (incluye archivos fuente)</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>2 rondas de ajustes</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Hasta 10 botones / links</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Pixel de Meta / GA opcional</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>QR personalizado con tu color</li>
+            </ul>
+            <a href="https://gabansolutions.lemonsqueezy.com/buy/REPLACE-PERSONALIZADO" target="_blank" rel="noopener" class="btn btn-dark w-100">Elegir Personalizado</a>
+            <div class="text-center small text-muted mt-2">
+              o paga por <a href="https://paypal.me/REPLACE-PAYPAL-HANDLE/249MXN" target="_blank" rel="noopener">PayPal</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium -->
+      <div class="col-md-6 col-lg-4">
+        <div class="card mt-price-card h-100 shadow-sm reveal-up">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge text-bg-light border">Premium</span>
+              <span class="text-muted small">para los detallistas</span>
+            </div>
+            <h3 class="h4 fw-bold mb-1">Premium</h3>
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+              <div class="display-6 fw-bold mb-0">$299</div>
+              <div class="text-muted">MXN</div>
+            </div>
+            <ul class="list-unstyled small mb-4">
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Todo lo de Personalizado</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Animaciones y micro-interacciones</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Galería de fotos o menú visual</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Sección de reseñas integrada</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Hasta 3 rondas de ajustes</li>
+              <li class="mb-2"><i class="bi bi-check-circle-fill text-dark me-1"></i>Soporte prioritario WhatsApp</li>
+            </ul>
+            <a href="https://gabansolutions.lemonsqueezy.com/buy/REPLACE-PREMIUM" target="_blank" rel="noopener" class="btn btn-outline-dark w-100">Elegir Premium</a>
+            <div class="text-center small text-muted mt-2">
+              o paga por <a href="https://paypal.me/REPLACE-PAYPAL-HANDLE/299MXN" target="_blank" rel="noopener">PayPal</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5 reveal-up">
+      <div class="mt-changes-card mx-auto p-4 rounded-4">
+        <h3 class="h6 fw-bold text-uppercase mb-2">¿Y si después quiero cambios?</h3>
+        <p class="mb-2">Cambios chiquitos cuestan solo <strong>$25 MXN por orden</strong>. Justo para mantenerlo simple.</p>
+        <a class="small fw-semibold" href="#politica">Ver qué entra (y qué no) en $25 MXN ↓</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANGE POLICY -->
+<section id="politica" class="section bg-light">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Política de cambios</div>
+      <h2 class="fw-bold">Cambios por <span class="text-warning">$25 MXN</span> — claro y honesto</h2>
+      <p class="text-muted">Para que nadie se aproveche y para que tú no pagues de más.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6 reveal-left">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-check2-square text-success me-1"></i>Sí entra por $25 MXN</h3>
+            <ul class="small mb-0">
+              <li class="mb-2">Cambios de texto: nombre, frase, descripciones, horarios.</li>
+              <li class="mb-2">Actualizar links (cambiar URL de WhatsApp, IG, menú, mapa…).</li>
+              <li class="mb-2">Reordenar botones o secciones existentes.</li>
+              <li class="mb-2">Cambiar colores <em>dentro</em> de la paleta original.</li>
+              <li class="mb-2">Reemplazar logo por una versión nueva del mismo logo.</li>
+              <li class="mb-2">Agregar <strong>hasta 2 links/botones</strong> nuevos.</li>
+              <li class="mb-2">Quitar hasta 3 elementos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 reveal-right">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h3 class="h6 fw-bold mb-3"><i class="bi bi-x-octagon text-danger me-1"></i>NO entra por $25 MXN (cotización aparte)</h3>
+            <ul class="small mb-0">
+              <li class="mb-2">Rediseño completo o cambio de plantilla / categoría.</li>
+              <li class="mb-2">Cambio de identidad (logo distinto, nombre del negocio diferente).</li>
+              <li class="mb-2">Animaciones nuevas, ilustraciones a la medida o fotografía nueva.</li>
+              <li class="mb-2">Más de 1 orden de cambios en el mismo mes → la 2da cuesta <strong>$50 MXN</strong>, la 3ra <strong>$75 MXN</strong>.</li>
+              <li class="mb-2">Cambios que requieran más de 30 min de trabajo del equipo.</li>
+              <li class="mb-2">Cambios que se debieron haber pedido en las rondas iniciales del paquete.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="alert alert-warning border-0 shadow-sm small mb-0">
+          <strong>Cómo funciona una “orden de cambios”:</strong> Nos mandas <em>una sola lista</em> con todos los cambios que quieres. Una vez enviada, contamos esa lista como 1 orden de $25 MXN. Si recuerdas otra cosa después de enviar, eso ya cuenta como una nueva orden. <strong>Tiempo de entrega:</strong> 3–5 días hábiles. <strong>Pago:</strong> antes de aplicar los cambios.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Cómo funciona</div>
+      <h2 class="fw-bold">De idea a tarjeta digital en menos de una semana</h2>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3 reveal-up">
+          <div class="display-6 mb-2">1️⃣</div>
+          <div class="fw-semibold">Pruebas tu mockup</div>
+          <div class="text-muted small">Subes logo, eliges giro y ves un preview con QR. Es de referencia.</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3 reveal-up">
+          <div class="display-6 mb-2">2️⃣</div>
+          <div class="fw-semibold">Confirmas tu paquete</div>
+          <div class="text-muted small">Eliges Lanzamiento, Personalizado o Premium y pagas en línea.</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3 reveal-up">
+          <div class="display-6 mb-2">3️⃣</div>
+          <div class="fw-semibold">Un humano la diseña</div>
+          <div class="text-muted small">Nuestro equipo (no un bot) la crea desde cero con tu marca.</div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3 reveal-up">
+          <div class="display-6 mb-2">4️⃣</div>
+          <div class="fw-semibold">Recibes tu link + QR</div>
+          <div class="text-muted small">Listo para compartir, imprimir y poner en tus redes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section bg-light">
+  <div class="container">
+    <div class="text-center mb-5 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">Preguntas frecuentes</div>
+      <h2 class="fw-bold">Lo que todo el mundo nos pregunta</h2>
+    </div>
+
+    <div class="accordion accordion-flush mx-auto mt-faq" id="mtFaq">
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq1">¿Es lo mismo que Linktree?</button></h3>
+        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">No. Linktree usa la <em>misma</em> plantilla para todo el mundo. Aquí cada tarjeta se diseña desde cero por nuestro equipo humano, con los colores, estilo y vibe de <strong>tu</strong> marca. No queda igual a la del vecino.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq2">¿Quién hace mi tarjeta, un robot o un humano?</button></h3>
+        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">El mockup que pruebas en esta página es generado al instante para que veas la idea. <strong>Tu tarjeta real la diseña una persona</strong> de nuestro equipo, no un bot. Esa es justo la diferencia con las plataformas auto-servicio.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq3">¿En cuánto tiempo me la entregan?</button></h3>
+        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">Entre 3 y 5 días hábiles desde que confirmas pago y mandas tu info (logo, links, fotos). Las rondas de ajustes suman 1–2 días extra cada una.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq4">¿El QR cambia si actualizo cosas dentro?</button></h3>
+        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">No. El QR apunta a tu link <code>mimarca.me/negocio/tu-marca</code>. Aunque cambies texto, links o fotos adentro, <strong>el mismo QR sigue funcionando</strong>. Por eso lo puedes imprimir tranquilo en lonas, playeras o vehículos.</div></div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq5">¿Y si quiero migrar a mi propio dominio después?</button></h3>
+        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">Se puede. En el paquete <strong>Personalizado</strong> y <strong>Premium</strong> los archivos fuente son tuyos y podemos ayudarte a migrarlo a un dominio propio (cotización aparte por el setup técnico).</div></div>
+      </div>
+      <div class="accordion-item">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq6">¿Y por qué $25 MXN por cambios y no gratis?</button></h3>
+        <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#mtFaq"><div class="accordion-body small">Porque la chamba la hace una persona, no un panel auto-servicio. $25 MXN es prácticamente el costo de la comisión del banco — lo cobramos para que la gente mande los cambios pensados, no de uno en uno. Revisa la política de arriba para ver qué entra en esos $25.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREMIUM WEBSITES UPSELL (near footer/logo) -->
+<section class="section mt-upsell-section">
+  <div class="container">
+    <div class="text-center mb-4 reveal-up">
+      <div class="text-uppercase small fw-semibold text-warning mb-2">¿Quieres ir más allá?</div>
+      <h2 class="fw-bold">También diseñamos <span class="text-warning">sitios web completos y premium</span></h2>
+      <p class="text-muted mb-0">Mi Tarjeta Pro es nuestro punto de entrada. Si tu negocio ya está listo para crecer en grande, te construimos un sitio web completo con identidad, reservaciones, menú, e-commerce, SEO local y todo lo necesario.</p>
+    </div>
+
+    <div class="row g-4 align-items-center justify-content-center mt-2 reveal-up">
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge text-bg-dark">Caso real</span>
+              <span class="badge text-bg-light border">Sitio + Tarjeta</span>
+            </div>
+            <h3 class="h5 fw-bold mb-2">RCR Barber Shop · Querétaro</h3>
+            <p class="text-muted small mb-3">Un sitio premium completo con identidad sólida, agenda en línea y una tarjeta digital tipo Mi Tarjeta Pro integrada. Mismo nivel, mismo equipo.</p>
+            <ul class="list-unstyled small mb-3">
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> Sitio web completo en <code>rcr-barbershop.com</code></li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> Tarjeta digital en vivo en <code>mimarca.me/rcr-barbershop</code></li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> Reservas por WhatsApp, galería y reseñas</li>
+            </ul>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="https://rcr-barbershop.com" target="_blank" rel="noopener" class="btn btn-dark btn-sm">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Ver sitio
+              </a>
+              <a href="./rcr-barbershop/" class="btn btn-outline-dark btn-sm">
+                <i class="bi bi-link-45deg me-1"></i> Ver su tarjeta digital
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm h-100 mt-upsell-card-cta">
+          <div class="card-body p-4">
+            <h3 class="h5 fw-bold mb-2">¿Tu negocio necesita más?</h3>
+            <p class="text-muted small mb-3">Si lo tuyo es un sitio web full con dominio propio, identidad de marca, blog, tienda en línea o reservaciones automatizadas — eso también lo hacemos. Mismo equipo humano, mismo nivel premium.</p>
+            <ul class="list-unstyled small mb-3">
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> Sitios web completos con dominio propio</li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> SEO local + Google Business</li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-dark me-1"></i> Integraciones (WhatsApp, reservas, pagos)</li>
+            </ul>
+            <div class="d-flex gap-2 flex-wrap">
+              <a href="./grow-package.html" class="btn btn-warning btn-sm">
+                <i class="bi bi-rocket me-1"></i> Ver Grow Package
+              </a>
+              <a href="./contact.html?ref=upsell-premium" class="btn btn-outline-dark btn-sm">
+                Hablemos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section bg-dark text-white">
+  <div class="container">
+    <div class="row align-items-center g-3 reveal-up">
+      <div class="col-lg-8">
+        <h2 class="fw-bold mb-2">¿Lista o listo para tu Mi Tarjeta Pro?</h2>
+        <p class="mb-0 text-white-50">Cupos limitados de lanzamiento a <strong>$199 MXN</strong>. Después sube a $299. Vamos.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a class="btn btn-warning btn-lg" href="./contact.html?ref=mi-tarjeta-cta">Pedir mi tarjeta</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="./js/components.js"></script>
+<script src="./js/scroll-reveal.js"></script>
+<script src="./js/mi-tarjeta.js"></script>
+<script>
+  mountSharedLayout("home");
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,31 @@
+{
+  "slug": "test-client",
+  "theme": "minimal-coffee",
+  "language": "es-MX",
+  "business": {
+    "name": "Test Client (CI)",
+    "subname": "QA",
+    "tagline": "Archivo mínimo para validar schema y stubs.",
+    "city": "Ciudad de México"
+  },
+  "status": {
+    "type": "open-hours",
+    "hours": {
+      "mon": "10:00-18:00",
+      "tue": "10:00-18:00",
+      "wed": "closed",
+      "thu": "closed",
+      "fri": "closed",
+      "sat": "closed",
+      "sun": "closed"
+    }
+  },
+  "primaryCta": {
+    "label": "WhatsApp",
+    "subtitle": "Solo prueba",
+    "icon": "whatsapp",
+    "url": "https://wa.me/5215555555555"
+  },
+  "links": [],
+  "ownerToken": "test-client-ci-placeholder"
+}

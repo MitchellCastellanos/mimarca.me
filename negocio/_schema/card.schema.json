@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mimarca.me/negocio/_schema/card.schema.json",
+  "title": "Mi Tarjeta Pro · tarjeta JSON",
+  "type": "object",
+  "required": ["slug", "theme", "business", "primaryCta"],
+  "additionalProperties": true,
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "theme": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "enum": ["es-MX", "en-US", "fr-CA"]
+    },
+    "business": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": true,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "subname": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "tagline": { "type": "string" },
+        "rating": { "type": "number" },
+        "established": { "type": "integer" },
+        "logoUrl": { "type": "string" },
+        "city": { "type": "string" }
+      }
+    },
+    "status": { "type": "object" },
+    "primaryCta": {
+      "type": "object",
+      "required": ["url", "label"],
+      "additionalProperties": true,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "icon": { "type": "string" },
+        "url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "links": { "type": "array" },
+    "servicesTitle": { "type": "string" },
+    "services": { "type": "array" },
+    "servicesDisclaimer": { "type": "string" },
+    "gallery": { "type": "array" },
+    "brandCardCopy": { "type": "string" },
+    "copyright": { "type": "string" },
+    "changeRequestUrl": { "type": "string" },
+    "ownerToken": { "type": "string" }
+  }
+}

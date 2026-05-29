@@ -1,0 +1,103 @@
+{
+  "slug": "lulu",
+  "theme": "dark-gold",
+  "language": "es-MX",
+
+  "business": {
+    "name": "RCR",
+    "subname": "BARBER SHOP",
+    "verified": true,
+    "tagline": "Corte, barba y estilo para caballeros",
+    "rating": 5.0,
+    "established": 2023,
+    "logoUrl": "",
+    "city": "Querétaro, México"
+  },
+
+  "status": {
+    "type": "open-hours",
+    "hours": {
+      "mon": "11:00-20:00",
+      "tue": "11:00-20:00",
+      "wed": "11:00-20:00",
+      "thu": "11:00-20:30",
+      "fri": "11:00-20:00",
+      "sat": "11:00-18:00",
+      "sun": "11:00-18:00"
+    }
+  },
+
+  "primaryCta": {
+    "label": "Agendar cita",
+    "subtitle": "Respuesta en minutos por WhatsApp",
+    "icon": "calendar2-check",
+    "url": "https://wa.me/524423536769?text=Hola%20RCR%2C%20quiero%20agendar%20una%20cita"
+  },
+
+  "links": [
+    {
+      "label": "Instagram",
+      "subtitle": "@rcr_barbershop",
+      "icon": "instagram",
+      "style": "ig",
+      "url": "https://www.instagram.com/rcr_barbershop",
+      "popular": true
+    },
+    {
+      "label": "Facebook",
+      "subtitle": "Síguenos en Facebook",
+      "icon": "facebook",
+      "style": "fb",
+      "url": "https://www.facebook.com/rcr.carlos.2025"
+    },
+    {
+      "label": "Sitio web",
+      "subtitle": "rcr-barbershop.com",
+      "icon": "globe2",
+      "style": "web",
+      "url": "https://www.rcr-barbershop.com/"
+    },
+    {
+      "label": "Tu página de enlaces",
+      "subtitle": "Versión en vivo (tarjeta digital)",
+      "icon": "link",
+      "style": "web",
+      "url": "https://rcr-barbershop.com/enlaces/"
+    },
+    {
+      "label": "Ubicación",
+      "subtitle": "Cómo llegar en Google Maps",
+      "icon": "geo-alt-fill",
+      "style": "map",
+      "url": "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&hl=es"
+    },
+    {
+      "label": "Déjanos tu opinión",
+      "subtitle": "Responde una breve encuesta",
+      "icon": "star",
+      "style": "menu",
+      "url": "https://forms.gle/M6wTSV7KCRXuBDui7"
+    }
+  ],
+
+  "servicesTitle": "SERVICIOS Y PRECIOS",
+  "services": [
+    { "name": "Corte caballero", "desc": "Corte personalizado a tijera o máquina", "price": "$150" },
+    { "name": "Corte niño", "desc": "Corte para los más pequeños", "price": "$130" },
+    { "name": "Barba", "desc": "Perfilado y arreglo de barba con toalla", "price": "$110" },
+    { "name": "Barba premium", "desc": "Barba completa con tratamiento y acabado", "price": "$160" },
+    { "name": "Fade", "desc": "Degradado limpio y preciso", "price": "$180" },
+    { "name": "Afeitado clásico", "desc": "Afeitado con navaja y toalla caliente", "price": "$150" },
+    { "name": "Perfilado", "desc": "Perfilado de líneas y detalle", "price": "$80" },
+    { "name": "Tratamiento capilar", "desc": "Hidratación y cuidado profundo del cabello", "price": "$250" }
+  ],
+  "servicesDisclaimer": "Los precios pueden variar según el servicio. Consulta por WhatsApp para detalles.",
+
+  "gallery": [],
+
+  "brandCardCopy": "Estilo y confianza en cada corte.",
+  "copyright": "© 2023 RCR Barber Shop · Querétaro, México",
+
+  "changeRequestUrl": "https://gabansolutions.lemonsqueezy.com/buy/REPLACE-CHANGES-25MXN",
+  "ownerToken": "lulu-x7a9k2"
+}
