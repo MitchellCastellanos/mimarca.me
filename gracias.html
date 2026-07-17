@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>¡Gracias por tu compra! | Mi Tarjeta Pro · GABAN Solutions</title>
+  <title>¡Gracias por tu compra! | Mi Tarjeta Pro · mimarca</title>
   <meta name="description" content="¡Bienvenido a Mi Tarjeta Pro! Cuéntanos de tu negocio y en 3-5 días tu tarjeta digital está lista.">
   <meta name="robots" content="noindex, follow">
   <meta name="theme-color" content="#111111">
@@ -12,12 +12,12 @@
   <link rel="canonical" href="https://mimarca.me/gracias.html">
 
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="GABAN Solutions Numériques">
+  <meta property="og:site_name" content="mimarca">
   <meta property="og:title" content="¡Gracias por tu compra! | Mi Tarjeta Pro">
   <meta property="og:description" content="Recibimos tu pago. Llena el formulario y en 3-5 días tu tarjeta digital está lista.">
   <meta property="og:url" content="https://mimarca.me/gracias.html">
   <meta property="og:image" content="https://mimarca.me/images/og/gaban-mi-tarjeta-preview.jpg">
-  <meta property="og:image:alt" content="Mi Tarjeta Pro by GABAN Solutions">
+  <meta property="og:image:alt" content="Mi Tarjeta Pro by mimarca">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -51,6 +51,7 @@
     <p class="lead text-white-50 mb-2 mx-auto" style="max-width:620px;">
       Llena el formulario abajo con los datos de tu negocio. En cuanto lo recibamos, nuestro equipo humano empieza a diseñar tu tarjeta digital personalizada.
     </p>
+    <p class="small text-white-50 mb-1">Te acabamos de mandar un correo de confirmación con tu recibo y los siguientes pasos.</p>
     <p class="small text-white-50 mb-0" id="orderRef">Cargando referencia de tu orden…</p>
   </div>
 </header>
@@ -145,24 +146,26 @@
 <script>
   mountSharedLayout("home");
 
-  // Parse URL params from Lemon Squeezy redirect
+  // Parse URL params from the Stripe Payment Link redirect
+  // Each Stripe Payment Link's "after payment" redirect should point to:
+  //   https://mimarca.me/gracias.html?package=<lanzamiento|personalizado|premium>&session_id={CHECKOUT_SESSION_ID}
   (function () {
     const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("order_id") || params.get("order") || "";
-    const pkg = params.get("package") || params.get("product") || "";
+    const sessionId = params.get("session_id") || "";
+    const pkg = params.get("package") || "";
 
     const ref = document.getElementById("orderRef");
-    if (orderId) {
-      ref.innerHTML = `Referencia de tu orden: <strong>${orderId.replace(/[^a-zA-Z0-9-]/g,"")}</strong>${pkg ? ` · Paquete: <strong>${pkg.replace(/[^a-zA-Z0-9-_ ]/g,"")}</strong>` : ""}`;
+    if (sessionId) {
+      ref.innerHTML = `Referencia de tu orden: <strong>${sessionId.replace(/[^a-zA-Z0-9_-]/g,"")}</strong>${pkg ? ` · Paquete: <strong>${pkg.replace(/[^a-zA-Z0-9-_ ]/g,"")}</strong>` : ""}`;
     } else {
       ref.textContent = "Si llegaste aquí desde otro lado, no te preocupes — solo llena el form abajo.";
     }
 
     // pre-fill Tally with URL params
     const frame = document.getElementById("tallyFrame");
-    if (frame && (orderId || pkg)) {
+    if (frame && (sessionId || pkg)) {
       const url = new URL(frame.src);
-      if (orderId) url.searchParams.set("order_id", orderId);
+      if (sessionId) url.searchParams.set("session_id", sessionId);
       if (pkg) url.searchParams.set("package", pkg);
       frame.src = url.toString();
     }

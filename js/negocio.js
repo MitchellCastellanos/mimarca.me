@@ -247,7 +247,7 @@
         </div>
         <a class="gaban-credit" href="../index.html">
           <i class="bi bi-stars"></i>
-          <span>Diseñado por <strong>GABAN Solutions</strong></span>
+          <span>Diseñado por <strong>mimarca</strong></span>
         </a>
       </div>
     `;
@@ -432,7 +432,7 @@
 
         <a class="gaban-credit" href="../index.html">
           <i class="bi bi-stars"></i>
-          <span>${escapeHtml(S.designed)} <strong>GABAN Solutions</strong></span>
+          <span>${escapeHtml(S.designed)} <strong>mimarca</strong></span>
         </a>
       </div>
     `;

@@ -21,12 +21,9 @@ function renderNavbar(activePage = "") {
           <li class="nav-item">
             <a class="nav-link ${activePage === "demo" ? "active" : ""}" href="./rcr-barbershop/">Demo en vivo</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link ${activePage === "contact" ? "active" : ""}" href="./contact.html">Contacto</a>
-          </li>
         </ul>
 
-        <a class="btn btn-warning ms-lg-3" href="./contact.html?ref=nav-cta">Pedir mi tarjeta</a>
+        <a class="btn btn-warning ms-lg-3" href="./index.html?ref=nav-cta#precios">Pedir mi tarjeta</a>
       </div>
     </div>
   </nav>
@@ -37,12 +34,13 @@ function renderFooter() {
   return `
   <footer class="py-4 border-top">
     <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
-      <div class="small text-muted">© <span id="year"></span> Mi Tarjeta Pro · GABAN Solutions</div>
+      <div class="small text-muted">© <span id="year"></span> Mi Tarjeta Pro · mimarca</div>
       <div class="small">
         <a class="text-decoration-none me-3" href="./index.html#precios">Precios</a>
         <a class="text-decoration-none me-3" href="./index.html#politica">Política de cambios</a>
         <a class="text-decoration-none me-3" href="./rcr-barbershop/">Demo</a>
         <a class="text-decoration-none me-3" href="./onboarding.html">Onboarding</a>
+        <a class="text-decoration-none me-3" href="./terminos.html">Términos y condiciones</a>
         <a class="text-decoration-none" href="./contact.html">Contacto</a>
       </div>
     </div>

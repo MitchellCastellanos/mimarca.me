@@ -124,7 +124,7 @@
     { t: "Analizando tu logo...", s: "Detectando colores dominantes" },
     { t: "Buscando el mejor diseño...", s: "Probando plantillas para tu giro" },
     { t: "Ajustando tipografía...", s: "Eligiendo combinaciones premium" },
-    { t: "Casi listo...", s: "Pasándolo al equipo humano de GABAN" }
+    { t: "Casi listo...", s: "Pasándolo al equipo humano de mimarca" }
   ];
 
   function runLoadingSequence(onDone) {

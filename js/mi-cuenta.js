@@ -50,7 +50,7 @@
           <div class="display-1 mb-3">🔒</div>
           <h1 class="h4 fw-bold">${escapeHtml(message || 'Token inválido')}</h1>
           <p class="text-muted">Si crees que es un error, contáctanos.</p>
-          <a href="../contact.html" class="btn btn-dark">Contactar a GABAN</a>
+          <a href="../contact.html" class="btn btn-dark">Contactar soporte</a>
         </div>
       </div>
     `;

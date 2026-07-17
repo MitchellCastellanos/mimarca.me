@@ -1,0 +1,111 @@
+<!--
+  ORDER CONFIRMATION EMAIL — sent to the customer
+  Trigger: Stripe webhook `checkout.session.completed` (or `payment_intent.succeeded`)
+  Send via: Resend / SendGrid / Postmark — pick one when wiring the backend.
+
+  Template variables (simple {{mustache}} placeholders — replace with your
+  templating engine of choice, or a plain .replace() chain):
+    {{customer_name}}     - from Checkout Session customer_details.name (fallback: "").
+    {{package_name}}      - "Lanzamiento" | "Personalizado" | "Premium" (from Payment Link metadata).
+    {{amount}}            - formatted amount, e.g. "199.00"
+    {{currency}}          - "MXN"
+    {{session_id}}        - Stripe Checkout Session id (cs_...)
+    {{order_date}}        - formatted date/time of purchase
+    {{onboarding_url}}    - https://mimarca.me/gracias.html?package={{package}}&session_id={{session_id}}
+    {{support_email}}     - contacto@mimarca.me
+
+  Suggested subject line:
+    "¡Recibimos tu pago! Tu Mi Tarjeta Pro está en camino 🎉"
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¡Recibimos tu pago! — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+
+          <!-- header -->
+          <tr>
+            <td style="background-color:#111111;padding:32px 32px 28px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;margin-bottom:8px;">
+                mimarca · Mi Tarjeta Pro
+              </div>
+              <div style="width:56px;height:56px;border-radius:50%;background-color:#c9a227;display:inline-block;line-height:56px;font-size:26px;color:#111111;">
+                &#10003;
+              </div>
+              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;">¡Recibimos tu pago!</h1>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:32px;">
+              <p style="font-size:15px;color:#212529;margin:0 0 16px;">
+                Hola {{customer_name}}, gracias por tu compra. Este correo es tu confirmación — guárdalo como tu recibo.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:10px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;font-size:14px;color:#6c757d;">Paquete</td>
+                  <td style="padding:16px 20px;font-size:14px;color:#212529;font-weight:700;text-align:right;">{{package_name}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 20px 16px;font-size:14px;color:#6c757d;">Monto</td>
+                  <td style="padding:0 20px 16px;font-size:14px;color:#212529;font-weight:700;text-align:right;">${{amount}} {{currency}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 20px 16px;font-size:14px;color:#6c757d;">Referencia de orden</td>
+                  <td style="padding:0 20px 16px;font-size:13px;color:#212529;text-align:right;font-family:monospace;">{{session_id}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 20px 16px;font-size:14px;color:#6c757d;">Fecha</td>
+                  <td style="padding:0 20px 16px;font-size:14px;color:#212529;text-align:right;">{{order_date}}</td>
+                </tr>
+              </table>
+
+              <h2 style="font-size:15px;color:#212529;margin:0 0 12px;">Siguientes pasos</h2>
+              <ol style="font-size:14px;color:#212529;padding-left:18px;margin:0 0 24px;">
+                <li style="margin-bottom:8px;"><strong>Cuéntanos de tu negocio.</strong> Sube tu logo, links y fotos en el formulario.</li>
+                <li style="margin-bottom:8px;"><strong>Diseño humano.</strong> Nuestro equipo construye tu tarjeta desde cero.</li>
+                <li style="margin-bottom:8px;"><strong>Entrega.</strong> Recibes tu link y tu QR listo para imprimir en 3–5 días hábiles.</li>
+              </ol>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#c9a227;">
+                    <a href="{{onboarding_url}}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;">
+                      Llenar mi información →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:13px;color:#6c757d;margin:0 0 4px;">
+                ¿Dudas sobre tu pago o tu pedido? Escríbenos a
+                <a href="mailto:{{support_email}}" style="color:#111111;">{{support_email}}</a>.
+              </p>
+              <p style="font-size:13px;color:#6c757d;margin:0;">
+                Consulta nuestros <a href="https://mimarca.me/terminos.html" style="color:#111111;">términos y condiciones</a>, incluyendo la política de cambios y reembolsos.
+              </p>
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td style="padding:20px 32px;background-color:#f8f9fa;text-align:center;font-size:12px;color:#6c757d;">
+              mimarca · mimarca.me · Este es un correo transaccional relacionado a tu compra.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
