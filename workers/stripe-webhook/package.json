@@ -1,0 +1,15 @@
+{
+  "name": "mimarca-stripe-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Webhook de Stripe para Mi Tarjeta Pro: recibe checkout.session.completed y dispara los correos de emails/ via Resend.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

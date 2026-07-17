@@ -28,30 +28,32 @@ pendiente — ver nota al final).
    (con su `ownerToken`) para ver su tarjeta, descargar el QR y pedir
    cambios ($25 MXN por orden vía otro Stripe Payment Link).
 
-## 2. Qué crear en Stripe (dashboard, sin código)
+## 2. Productos y Payment Links en Stripe — ✅ creados (LIVE)
 
-Para cada uno de los 4 productos, crear un **Payment Link**:
+Los 4 productos y sus Payment Links ya existen en **modo live** en la cuenta
+de Stripe de Mimarca.me (`acct_1Tu10QJGvovZxLEx`). Cada link tiene su
+metadata `package` / `package_name` y su redirect de éxito a
+`gracias.html?package=<tier>&session_id={CHECKOUT_SESSION_ID}`:
 
-| Producto | Precio | Placeholder en el código a reemplazar |
-|---|---|---|
-| Lanzamiento | $199 MXN | `index.html` → `REPLACE-STRIPE-LANZAMIENTO` |
-| Personalizado | $249 MXN | `index.html` → `REPLACE-STRIPE-PERSONALIZADO` |
-| Premium | $299 MXN | `index.html` → `REPLACE-STRIPE-PREMIUM` |
-| Cambios post-entrega | $25 MXN | `negocio/_data/*.json` → `REPLACE-STRIPE-CHANGES-25MXN` (uno por cliente, o reusar el mismo link para todos) |
+| Producto | Precio | Payment Link (live) | Ya conectado en |
+|---|---|---|---|
+| Lanzamiento | $199 MXN | `https://buy.stripe.com/eVqcN67HF1xkdP7gQjgjC00` | `index.html` #precios |
+| Personalizado | $249 MXN | `https://buy.stripe.com/4gM28s6DB0tgh1j1VpgjC01` | `index.html` #precios |
+| Premium | $299 MXN | `https://buy.stripe.com/5kQcN64vt5NA7qJ7fJgjC02` | `index.html` #precios |
+| Cambios post-entrega | $25 MXN | `https://buy.stripe.com/cNieVee63b7U26p0RlgjC03` | `negocio/_data/*.json` (`changeRequestUrl`) |
 
-Para cada Payment Link, en **"After payment" → "Redirect to a website"**,
-configurar la URL de éxito con el paquete y el session id:
+Cada tarjeta real futura debe llevar el mismo link de Cambios en su
+`changeRequestUrl` (la plantilla `negocio/_data/_example.json` ya lo trae),
+o crear uno por cliente si se quiere separar la contabilidad.
 
-```
-https://mimarca.me/gracias.html?package=lanzamiento&session_id={CHECKOUT_SESSION_ID}
-https://mimarca.me/gracias.html?package=personalizado&session_id={CHECKOUT_SESSION_ID}
-https://mimarca.me/gracias.html?package=premium&session_id={CHECKOUT_SESSION_ID}
-```
+**Pendiente manual en el Stripe Dashboard** (no tiene API):
+- Settings → **Emails → Successful payments**: activar recibo automático.
+- Settings → **Notifications**: activar alerta de pago al owner (respaldo
+  del correo de marca que ya manda el webhook).
 
-Activar también (sin código, en Stripe Dashboard → Settings):
-- **Emails → Successful payments**: recibo automático al cliente.
-- **Notifications**: alerta por correo al owner en cada pago (respaldo
-  simple mientras se conecta el webhook con el correo de marca).
+Para pruebas sin cobrar de verdad, existe la misma configuración en el
+sandbox "Mimarca.me sandbox" (`acct_1Tu10vR5M14IEE7l`), con links
+`buy.stripe.com/test_...` y la tarjeta `4242 4242 4242 4242`.
 
 ## 3. Correos de marca (`emails/`)
 
@@ -64,23 +66,23 @@ Dos plantillas HTML listas para usar, con variables `{{en_llaves}}`:
 Cada archivo trae en un comentario al inicio: el trigger (evento de
 webhook), las variables esperadas, y el asunto sugerido.
 
-## 4. Lo que falta conectar (a propósito, pendiente)
+## 4. Webhook — ✅ construido (`workers/stripe-webhook/`)
 
-El cableado real de Stripe (crear los Payment Links, el webhook que dispare
-`emails/*.html` vía Resend/SendGrid, y las variables de entorno) se deja
-pendiente a propósito — se va a resolver después con el plugin de Stripe en
-Cursor. Lo que necesita ese trabajo:
+Cloudflare Worker (el sitio sigue 100% estático en GitHub Pages; el Worker
+vive aparte). Recibe `checkout.session.completed`, valida la firma con
+`STRIPE_WEBHOOK_SECRET`, y manda los dos correos de `emails/` vía Resend:
 
-- Los 4 Payment Links de la sección 2 (o Price IDs si se arma un Checkout
-  Session dinámico en vez de Payment Links).
-- Un endpoint/función que reciba el webhook `checkout.session.completed` de
-  Stripe, valide la firma, y dispare los dos correos de `emails/` con los
-  datos de la sesión.
-- Dónde hostear esa función (Vercel/Netlify/Cloudflare Workers — el sitio
-  hoy es 100% estático en GitHub Pages, así que esto implica agregar un
-  runtime).
-- Variables de entorno típicas: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-  proveedor de correo (`RESEND_API_KEY` o similar), `OWNER_ALERT_EMAIL`.
+- `emails/order-confirmation.html` → al cliente (`customer_details.email`).
+- `emails/payment-alert.html` → al owner (`OWNER_ALERT_EMAIL`).
+
+Ver `workers/stripe-webhook/README.md` para deploy, pruebas locales y
+variables de entorno (documentadas en `workers/stripe-webhook/.env.example`).
+
+**Pendiente para dejarlo en producción:**
+1. Cuenta de Resend con el dominio `mimarca.me` verificado → `RESEND_API_KEY`.
+2. `npx wrangler deploy` (requiere cuenta de Cloudflare).
+3. Crear el endpoint de webhook en el Stripe Dashboard apuntando a la URL
+   del Worker y cargar su `whsec_...` como secret.
 
 ## 5. Entrega y seguimiento (sin backend nuevo)
 

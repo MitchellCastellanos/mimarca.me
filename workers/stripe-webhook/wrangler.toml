@@ -1,0 +1,19 @@
+name = "mimarca-stripe-webhook"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+# Las plantillas de emails/ (raiz del repo) se importan como texto y quedan
+# empaquetadas dentro del Worker al hacer deploy.
+rules = [
+  { type = "Text", globs = ["**/*.html"], fallthrough = true }
+]
+
+# Secrets (configurar con `wrangler secret put <NOMBRE>`):
+#   STRIPE_WEBHOOK_SECRET  - whsec_... del endpoint en el Stripe Dashboard
+#   RESEND_API_KEY         - re_... de https://resend.com/api-keys
+#
+# Variables no sensibles:
+[vars]
+OWNER_ALERT_EMAIL = "contacto@mimarca.me"
+FROM_EMAIL = "mimarca <pedidos@mimarca.me>"
+SUPPORT_EMAIL = "contacto@mimarca.me"

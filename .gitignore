@@ -1,1 +1,5 @@
 _gaban_extract/
+node_modules/
+.dev.vars
+.env
+.wrangler/
