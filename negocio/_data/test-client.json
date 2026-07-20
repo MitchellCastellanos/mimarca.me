@@ -8,6 +8,9 @@
     "tagline": "Archivo mínimo para validar schema y stubs.",
     "city": "Ciudad de México"
   },
+  "orderStage": "review",
+  "ownerEmail": "test-client-ci@mimarca.me",
+
   "status": {
     "type": "open-hours",
     "hours": {

@@ -1,0 +1,57 @@
+<!--
+  DESIGN APPROVED ALERT — sent to the OWNER when a client clicks
+  "Me encanta, publíquenla" in mi-cuenta (orderStage === 'review').
+  Trigger: POST /notify/approved on the portal worker (client-triggered,
+  authenticated with the client's own slug+token — no admin secret needed).
+  Send via: Resend, to OWNER_ALERT_EMAIL.
+
+  Template variables (simple {{mustache}} placeholders):
+    {{slug}}          - the client's slug
+    {{business_name}} - data.business.name
+    {{mi_cuenta_url}} - link back to their panel, for convenience
+
+  Suggested subject line:
+    "✅ <slug> aprobó su diseño — publícalo"
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diseño aprobado — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+          <tr>
+            <td style="background-color:#111111;padding:24px 32px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;">
+                mimarca · Panel interno
+              </div>
+              <h1 style="color:#ffffff;font-size:20px;margin:8px 0 0;">✅ Diseño aprobado</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px;">
+              <p style="font-size:15px;color:#212529;margin:0 0 16px;">
+                <strong>{{business_name}}</strong> ({{slug}}) aprobó su diseño desde mi-cuenta. Ya puedes marcarla como <code>published</code> en <code>negocio/_data/{{slug}}.json</code> y mandarle el correo de "tarjeta publicada".
+              </p>
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#c9a227;">
+                    <a href="{{mi_cuenta_url}}" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:700;color:#111111;text-decoration:none;">
+                      Ver su panel →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

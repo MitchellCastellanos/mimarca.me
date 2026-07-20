@@ -56,6 +56,67 @@ export function buildTemplateVars(session, livemode, env) {
   };
 }
 
+/**
+ * Vars para emails/access-link.html. `data` es el JSON ya obtenido de
+ * negocio/_data/<slug>.json (fetch lo hace el caller en index.js).
+ */
+export function buildAccessLinkVars(data, env) {
+  const accessUrl = new URL("https://mimarca.me/mi-cuenta/");
+  accessUrl.searchParams.set("n", data.slug);
+  accessUrl.searchParams.set("token", data.ownerToken);
+  return {
+    business_name: data.business?.name || data.slug,
+    access_url: accessUrl.toString(),
+    support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
+  };
+}
+
+/** Vars para emails/card-published.html. */
+export function buildCardPublishedVars(data, env) {
+  return {
+    business_name: data.business?.name || data.slug,
+    public_url: `https://mimarca.me/${data.slug}/`,
+    mi_cuenta_url: `https://mimarca.me/mi-cuenta/?n=${encodeURIComponent(data.slug)}&token=${encodeURIComponent(data.ownerToken || "")}`,
+    support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
+  };
+}
+
+/** Vars para emails/change-request-received.html. */
+export function buildChangeRequestVars(data, env, when = new Date()) {
+  return {
+    business_name: data.business?.name || data.slug,
+    order_date: new Intl.DateTimeFormat("es-MX", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "America/Mexico_City",
+    }).format(when),
+    support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
+  };
+}
+
+/** Vars para emails/asset-uploaded.html (al owner). */
+export function buildAssetUploadedVars(data, assetUrl, when = new Date()) {
+  return {
+    slug: data.slug,
+    business_name: data.business?.name || data.slug,
+    asset_url: assetUrl,
+    uploaded_at: new Intl.DateTimeFormat("es-MX", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "America/Mexico_City",
+    }).format(when),
+  };
+}
+
+/** Vars para emails/design-approved-alert.html (al owner). */
+export function buildApprovedAlertVars(data) {
+  return {
+    slug: data.slug,
+    business_name: data.business?.name || data.slug,
+    mi_cuenta_url: `https://mimarca.me/mi-cuenta/?n=${encodeURIComponent(data.slug)}&token=${encodeURIComponent(data.ownerToken || "")}`,
+  };
+}
+
 export function renderTemplate(template, vars) {
   return template.replace(/\{\{\s*([\w]+)\s*\}\}/g, (match, name) =>
     name in vars ? escapeHtml(String(vars[name])) : match

@@ -1,0 +1,93 @@
+<!--
+  CARD PUBLISHED EMAIL — sent to the client when their card goes live
+  Trigger: POST /notify/published on the portal worker (team-triggered,
+  requires the X-Admin-Secret header — see workers/stripe-webhook/README.md).
+  Send via: Resend.
+
+  Template variables (simple {{mustache}} placeholders):
+    {{business_name}}   - data.business.name
+    {{public_url}}       - https://mimarca.me/<slug>/
+    {{mi_cuenta_url}}    - https://mimarca.me/mi-cuenta/?n=<slug>&token=<ownerToken>
+    {{support_email}}    - contacto@mimarca.me
+
+  Suggested subject line:
+    "¡Tu tarjeta digital ya está en vivo! 🎉"
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¡Tu tarjeta ya está en vivo! — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+
+          <!-- header -->
+          <tr>
+            <td style="background-color:#111111;padding:32px 32px 28px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;margin-bottom:8px;">
+                mimarca · Mi Tarjeta Pro
+              </div>
+              <div style="width:56px;height:56px;border-radius:50%;background-color:#c9a227;display:inline-block;line-height:56px;font-size:26px;color:#111111;">
+                &#127881;
+              </div>
+              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;">¡{{business_name}} ya está en vivo!</h1>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:32px;">
+              <p style="font-size:15px;color:#212529;margin:0 0 20px;">
+                Tu tarjeta digital ya está publicada y lista para compartir. Tu link:
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:10px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:16px 20px;font-size:15px;color:#111111;font-weight:700;text-align:center;word-break:break-all;">
+                    <a href="{{public_url}}" style="color:#111111;">{{public_url}}</a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#c9a227;">
+                    <a href="{{mi_cuenta_url}}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;">
+                      Ver mi QR y descargarlo →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <h2 style="font-size:15px;color:#212529;margin:0 0 12px;">Ya puedes:</h2>
+              <ul style="font-size:14px;color:#212529;padding-left:18px;margin:0 0 24px;">
+                <li style="margin-bottom:8px;">Descargar tu QR (PNG o SVG) e imprimirlo donde quieras.</li>
+                <li style="margin-bottom:8px;">Poner el link en tu bio de Instagram o WhatsApp Business.</li>
+                <li style="margin-bottom:8px;">Compartir tu link con otros negocios y ganar un cambio gratis si compran por ti.</li>
+              </ul>
+
+              <p style="font-size:13px;color:#6c757d;margin:0;">
+                ¿Algo que ajustar? Desde tu cuenta puedes pedir cambios chiquitos por $25 MXN, o escríbenos a
+                <a href="mailto:{{support_email}}" style="color:#111111;">{{support_email}}</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td style="padding:20px 32px;background-color:#f8f9fa;text-align:center;font-size:12px;color:#6c757d;">
+              mimarca · mimarca.me · Correo transaccional relacionado a tu tarjeta.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

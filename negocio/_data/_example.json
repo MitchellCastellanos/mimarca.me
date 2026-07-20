@@ -15,6 +15,9 @@
     "city": "Ciudad, México"
   },
 
+  "orderStage": "published",
+  "ownerEmail": "cliente@correo.com",
+
   "status": {
     "type": "open-hours",
     "hours": {

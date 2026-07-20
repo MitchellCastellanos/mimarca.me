@@ -1,6 +1,7 @@
 // ============================================================
-// Mi Tarjeta Pro · Panel cliente (token-gated, sin backend)
+// Mi Tarjeta Pro · Panel cliente (token-gated, sin login con password)
 // URL: /mi-cuenta/?token=<token>&n=<slug>
+// Sin token: formulario "pedir acceso" (slug + correo) -> worker /access
 // ============================================================
 
 (function () {
@@ -11,10 +12,24 @@
   const slug = (params.get('n') || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
   const token = (params.get('token') || '').trim();
 
+  const ORDER_STAGES = [
+    { key: 'paid', label: 'Pago confirmado', icon: 'bi-credit-card' },
+    { key: 'designing', label: 'En diseño', icon: 'bi-palette' },
+    { key: 'review', label: 'Tu revisión', icon: 'bi-eye' },
+    { key: 'published', label: 'Publicada', icon: 'bi-rocket-takeoff' },
+  ];
+
   function escapeHtml(str) {
     return String(str ?? '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function portalApiBase() {
+    const meta = document.querySelector('meta[name="mitp-portal-api"]');
+    const url = meta && meta.getAttribute('content') && meta.getAttribute('content').trim();
+    if (!url || url.indexOf('REPLACE') !== -1) return null;
+    return url.replace(/\/$/, '');
   }
 
   function pickNumericStats(obj) {
@@ -43,17 +58,100 @@
     }
   }
 
+  // ---------- "pedir acceso" (magic link, sin password) ----------
+  function renderAccessRequest(opts) {
+    const message = (opts && opts.message) || '';
+    const prefillSlug = (opts && opts.slug) || '';
+    const apiBase = portalApiBase();
+
+    app.innerHTML = `
+      <div class="mc-locked">
+        <div style="max-width:420px;width:100%;">
+          <div class="display-1 mb-3">🔑</div>
+          <h1 class="h4 fw-bold mb-2">Entra a tu cuenta</h1>
+          <p class="text-muted mb-4">${message ? escapeHtml(message) + ' ' : ''}Escribe el link de tu tarjeta y tu correo — te reenviamos tu acceso.</p>
+
+          <form id="mcAccessForm" class="text-start mb-3">
+            <div class="mb-2">
+              <label class="form-label small fw-semibold" for="mcAccessSlug">Tu link (mimarca.me/<strong>tu-marca</strong>)</label>
+              <div class="input-group">
+                <span class="input-group-text">mimarca.me/</span>
+                <input id="mcAccessSlug" type="text" class="form-control" placeholder="tu-marca" value="${escapeHtml(prefillSlug)}" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold" for="mcAccessEmail">Tu correo</label>
+              <input id="mcAccessEmail" type="email" class="form-control" placeholder="tucorreo@ejemplo.com" required>
+            </div>
+            <button type="submit" class="btn btn-dark w-100" id="mcAccessSubmit">
+              <i class="bi bi-envelope me-1"></i> Enviarme mi acceso
+            </button>
+            <div id="mcAccessNote" class="form-text small mt-2"></div>
+          </form>
+
+          <a href="../contact.html" class="btn btn-outline-dark btn-sm">Contactar soporte</a>
+        </div>
+      </div>
+    `;
+
+    const form = document.getElementById('mcAccessForm');
+    const note = document.getElementById('mcAccessNote');
+    const submitBtn = document.getElementById('mcAccessSubmit');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const s = document.getElementById('mcAccessSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const email = document.getElementById('mcAccessEmail').value.trim();
+      if (!s || !email) return;
+
+      if (!apiBase) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'El envío automático no está disponible todavía. Escríbenos por WhatsApp y te mandamos tu acceso.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando…';
+      note.className = 'form-text small mt-2';
+      note.textContent = '';
+
+      try {
+        await fetch(`${apiBase}/access`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: s, email }),
+        });
+      } catch {
+        // Aun si falla la red, mostramos el mismo mensaje genérico abajo:
+        // no queremos que alguien deduzca si un correo/slug existe según el error.
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-envelope me-1"></i> Enviarme mi acceso';
+      note.className = 'form-text small mt-2 text-success';
+      note.textContent = 'Si el correo coincide con esa tarjeta, te mandamos tu link de acceso. Revisa tu bandeja (y spam).';
+      form.reset();
+    });
+  }
+
   function renderLocked(message) {
     app.innerHTML = `
       <div class="mc-locked">
         <div>
           <div class="display-1 mb-3">🔒</div>
           <h1 class="h4 fw-bold">${escapeHtml(message || 'Token inválido')}</h1>
-          <p class="text-muted">Si crees que es un error, contáctanos.</p>
-          <a href="../contact.html" class="btn btn-dark">Contactar soporte</a>
+          <p class="text-muted">Si perdiste tu link, pídelo de nuevo con tu correo.</p>
+          <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <button type="button" id="mcRetryAccess" class="btn btn-dark">Pedir mi acceso</button>
+            <a href="../contact.html" class="btn btn-outline-dark">Contactar soporte</a>
+          </div>
         </div>
       </div>
     `;
+    const retry = document.getElementById('mcRetryAccess');
+    if (retry) {
+      retry.addEventListener('click', () => renderAccessRequest({ slug }));
+    }
   }
 
   function qrServerUrl(target, px, margin, format) {
@@ -61,14 +159,108 @@
     return `https://api.qrserver.com/v1/create-qr-code/?size=${px}x${px}&margin=${margin}&ecc=H&color=111111&bgcolor=FFFFFF${fmt}&data=${encodeURIComponent(target)}`;
   }
 
+  // ---------- estatus de la orden ----------
+  function stageStepperHtml(currentStage) {
+    const idx = ORDER_STAGES.findIndex((s) => s.key === currentStage);
+    if (idx === -1) return '';
+    return `
+      <div class="card mc-card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold text-uppercase mb-3"><i class="bi bi-signpost-split me-1"></i>Estatus de tu pedido</h2>
+          <div class="mc-stepper">
+            ${ORDER_STAGES.map((s, i) => {
+              const state = i < idx ? 'done' : (i === idx ? 'active' : 'pending');
+              return `
+                <div class="mc-step mc-step--${state}">
+                  <div class="mc-step-dot"><i class="bi ${i < idx ? 'bi-check-lg' : s.icon}"></i></div>
+                  <div class="mc-step-label">${escapeHtml(s.label)}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---------- aprobar diseño / pedir ajuste (solo en 'review') ----------
+  function reviewBlockHtml(data) {
+    if (data.orderStage !== 'review') return '';
+    const name = escapeHtml(data.business?.name || 'mi negocio');
+    const waAdjust = `https://wa.me/15142580648?text=${encodeURIComponent(`Hola, vi el diseño de ${data.business?.name || 'mi tarjeta'} y quiero pedir un ajuste antes de publicarla: `)}`;
+    return `
+      <div class="col-md-12">
+        <div class="card mc-card border-0 shadow-sm" style="border:1px solid #d4b86a !important;">
+          <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-stars me-1"></i>Tu diseño está listo para revisión</h2>
+            <p class="small text-muted mb-3">Revisa la vista previa de arriba. Si te encanta, apruébalo y lo publicamos. Si algo no cuadra, mándanos el ajuste antes de que salga en vivo — es gratis mientras siga en revisión.</p>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" id="mcApproveBtn" class="btn btn-success">
+                <i class="bi bi-hand-thumbs-up me-1"></i> Me encanta, publíquenla
+              </button>
+              <a href="${waAdjust}" target="_blank" rel="noopener" class="btn btn-outline-dark">
+                <i class="bi bi-pencil me-1"></i> Pedir un ajuste
+              </a>
+            </div>
+            <div id="mcApproveNote" class="form-text small mt-2"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---------- referidos ----------
+  function referralBlockHtml(data, refUrl) {
+    return `
+      <div class="col-md-12">
+        <div class="card mc-card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-gift me-1"></i>Comparte y gana</h2>
+            <p class="small text-muted mb-3">Recomienda Mi Tarjeta Pro con otros negocios usando tu link. Cuando compren y nos digan que fue por ti, te damos un cambio gratis en tu próxima orden.</p>
+            <div class="input-group mb-2">
+              <input id="mcRefInput" type="text" class="form-control" readonly value="${escapeHtml(refUrl)}">
+              <button id="mcRefCopyBtn" class="btn btn-dark" type="button"><i class="bi bi-clipboard me-1"></i>Copiar</button>
+            </div>
+            <button type="button" id="mcRefWaBtn" class="btn btn-success btn-sm">
+              <i class="bi bi-whatsapp me-1"></i> Compartir con un negocio amigo
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ---------- subir logo / fotos ----------
+  function uploadBlockHtml() {
+    return `
+      <div class="col-md-12">
+        <div class="card mc-card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-cloud-arrow-up me-1"></i>Subir logo o fotos</h2>
+            <p class="small text-muted mb-3">Sube tu logo o fotos para tu galería. Nuestro equipo las aplica a tu tarjeta en menos de 1 día hábil (esto no cuenta como cambio de pago).</p>
+            <form id="mcUploadForm" class="d-flex flex-column flex-sm-row gap-2">
+              <input type="file" id="mcUploadFile" class="form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml" required>
+              <button type="submit" class="btn btn-dark text-nowrap" id="mcUploadSubmit">
+                <i class="bi bi-upload me-1"></i> Subir
+              </button>
+            </form>
+            <div id="mcUploadNote" class="form-text small mt-2"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderDashboard(data) {
     const publicUrl = `${window.location.origin}/${encodeURIComponent(data.slug)}/`;
+    const refUrl = `${publicUrl}?ref=${encodeURIComponent(data.slug)}`;
     const qrUrl = qrServerUrl(publicUrl, 440, 6);
     const qrDownloadPng = qrServerUrl(publicUrl, 2000, 24);
     const qrDownloadSvg = qrServerUrl(publicUrl, 2000, 24, 'svg');
     const changeUrl = data.changeRequestUrl || '../contact.html';
     const logoUrl = (data.business && data.business.logoUrl) ? escapeHtml(data.business.logoUrl) : '';
     const logoLayerClass = logoUrl ? 'mt-qr-center-logo' : 'mt-qr-center-logo d-none';
+    const stepper = stageStepperHtml(data.orderStage);
 
     app.innerHTML = `
       <header class="hero hero-mt bg-dark text-white py-5">
@@ -97,6 +289,10 @@
 
             <div class="col-lg-7">
               <div class="row g-3">
+
+                ${stepper ? `<div class="col-md-12">${stepper}</div>` : ''}
+
+                ${reviewBlockHtml(data)}
 
                 <div class="col-md-12">
                   <div class="card mc-card border-0 shadow-sm">
@@ -156,6 +352,10 @@
                   </div>
                 </div>
 
+                ${uploadBlockHtml()}
+
+                ${referralBlockHtml(data, refUrl)}
+
                 <div class="col-md-12">
                   <div class="card mc-card border-0 shadow-sm">
                     <div class="card-body p-4">
@@ -184,6 +384,10 @@
       </section>
     `;
 
+    wireDashboardEvents(data, { publicUrl, refUrl });
+  }
+
+  function wireDashboardEvents(data, { publicUrl, refUrl }) {
     const btn = document.getElementById('mcCopyBtn');
     const input = document.getElementById('mcLinkInput');
     btn.addEventListener('click', async () => {
@@ -208,6 +412,107 @@
       });
     }
 
+    // ----- aprobar diseño -----
+    const approveBtn = document.getElementById('mcApproveBtn');
+    if (approveBtn) {
+      approveBtn.addEventListener('click', async () => {
+        const note = document.getElementById('mcApproveNote');
+        approveBtn.disabled = true;
+        approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando…';
+        const apiBase = portalApiBase();
+        const waText = encodeURIComponent(`¡Apruebo el diseño de ${data.business?.name || 'mi tarjeta'}! Ya pueden publicarla.`);
+        try {
+          if (apiBase) {
+            await fetch(`${apiBase}/notify/approved`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug: data.slug, token }),
+            });
+          }
+        } catch {
+          // seguimos con el fallback de WhatsApp de cualquier forma
+        }
+        note.className = 'form-text small mt-2 text-success';
+        note.innerHTML = '¡Gracias! Le avisamos a nuestro equipo. Si quieres confirmarlo también por WhatsApp: ' +
+          `<a href="https://wa.me/15142580648?text=${waText}" target="_blank" rel="noopener">mándanos un mensaje</a>.`;
+        approveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> ¡Aprobado!';
+      });
+    }
+
+    // ----- referidos -----
+    const refInput = document.getElementById('mcRefInput');
+    const refCopyBtn = document.getElementById('mcRefCopyBtn');
+    if (refCopyBtn) {
+      refCopyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(refInput.value);
+        } catch {
+          refInput.select();
+          document.execCommand('copy');
+        }
+        const orig = refCopyBtn.innerHTML;
+        refCopyBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i>¡Copiado!';
+        refCopyBtn.classList.add('copy-btn-flash');
+        setTimeout(() => { refCopyBtn.innerHTML = orig; refCopyBtn.classList.remove('copy-btn-flash'); }, 1500);
+      });
+    }
+    const refWaBtn = document.getElementById('mcRefWaBtn');
+    if (refWaBtn) {
+      refWaBtn.addEventListener('click', () => {
+        const text = `Yo pedí mi tarjeta digital con Mi Tarjeta Pro (mimarca) y me encantó. Si quieres la tuya, usa mi link: ${refUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+      });
+    }
+
+    // ----- subir logo/fotos -----
+    const uploadForm = document.getElementById('mcUploadForm');
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const note = document.getElementById('mcUploadNote');
+        const fileInput = document.getElementById('mcUploadFile');
+        const submitBtn = document.getElementById('mcUploadSubmit');
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        if (file.size > 8 * 1024 * 1024) {
+          note.className = 'form-text small mt-2 text-danger';
+          note.textContent = 'El archivo es muy pesado (máx 8MB).';
+          return;
+        }
+
+        const apiBase = portalApiBase();
+        if (!apiBase) {
+          note.className = 'form-text small mt-2 text-danger';
+          note.innerHTML = 'La subida directa no está disponible todavía. ' +
+            `<a href="https://wa.me/15142580648" target="_blank" rel="noopener">Mándanoslo por WhatsApp</a> mientras tanto.`;
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Subiendo…';
+        note.className = 'form-text small mt-2';
+        note.textContent = '';
+
+        try {
+          const form = new FormData();
+          form.append('slug', data.slug);
+          form.append('token', token);
+          form.append('file', file);
+          const res = await fetch(`${apiBase}/upload`, { method: 'POST', body: form });
+          if (!res.ok) throw new Error('upload failed');
+          note.className = 'form-text small mt-2 text-success';
+          note.textContent = 'Listo, lo recibimos. Lo aplicamos a tu tarjeta en menos de 1 día hábil.';
+          uploadForm.reset();
+        } catch {
+          note.className = 'form-text small mt-2 text-danger';
+          note.innerHTML = 'No se pudo subir. ' +
+            `<a href="https://wa.me/15142580648" target="_blank" rel="noopener">Mándanoslo por WhatsApp</a>.`;
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-upload me-1"></i> Subir';
+      });
+    }
+
     loadVisitStats(data.slug).then((n) => {
       const el = document.getElementById('mcStatsValue');
       if (!el) return;
@@ -220,21 +525,20 @@
   }
 
   if (!slug || !token) {
-    renderLocked('Falta token o tarjeta en el link');
-    return;
+    renderAccessRequest({ slug });
+  } else {
+    fetch(`../negocio/_data/${slug}.json`, { cache: 'no-cache' })
+      .then((r) => {
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      })
+      .then((data) => {
+        if (!data.ownerToken || data.ownerToken !== token) {
+          renderLocked('Token inválido');
+          return;
+        }
+        renderDashboard(data);
+      })
+      .catch(() => renderLocked('Esta tarjeta no existe'));
   }
-
-  fetch(`../negocio/_data/${slug}.json`, { cache: 'no-cache' })
-    .then((r) => {
-      if (!r.ok) throw new Error('not found');
-      return r.json();
-    })
-    .then((data) => {
-      if (!data.ownerToken || data.ownerToken !== token) {
-        renderLocked('Token inválido');
-        return;
-      }
-      renderDashboard(data);
-    })
-    .catch(() => renderLocked('Esta tarjeta no existe'));
 })();

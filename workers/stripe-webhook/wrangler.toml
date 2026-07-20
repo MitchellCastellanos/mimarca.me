@@ -8,12 +8,23 @@ rules = [
   { type = "Text", globs = ["**/*.html"], fallthrough = true }
 ]
 
+# Bucket R2 donde caen los logos/fotos subidos desde mi-cuenta (POST /upload).
+# Crear con `npx wrangler r2 bucket create mimarca-portal-uploads` y habilitar
+# acceso publico (o un dominio propio) para que R2_PUBLIC_BASE_URL sirva los
+# archivos. Sin este binding, /upload responde 503 y el front cae al fallback
+# de WhatsApp.
+[[r2_buckets]]
+binding = "PORTAL_UPLOADS"
+bucket_name = "mimarca-portal-uploads"
+
 # Secrets (configurar con `wrangler secret put <NOMBRE>`):
 #   STRIPE_WEBHOOK_SECRET  - whsec_... del endpoint en el Stripe Dashboard
 #   RESEND_API_KEY         - re_... de https://resend.com/api-keys
+#   ADMIN_SECRET           - compartido para /notify/published y /notify/change-received
 #
 # Variables no sensibles:
 [vars]
 OWNER_ALERT_EMAIL = "contacto@mimarca.me"
 FROM_EMAIL = "mimarca <pedidos@mimarca.me>"
 SUPPORT_EMAIL = "contacto@mimarca.me"
+R2_PUBLIC_BASE_URL = "https://uploads.mimarca.me"

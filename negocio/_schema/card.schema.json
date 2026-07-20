@@ -34,6 +34,15 @@
       }
     },
     "status": { "type": "object" },
+    "orderStage": {
+      "type": "string",
+      "enum": ["paid", "designing", "review", "published"],
+      "description": "Estatus del pedido mostrado en mi-cuenta. 'published' es el estado final una vez que la tarjeta ya está en vivo."
+    },
+    "ownerEmail": {
+      "type": "string",
+      "description": "Correo del cliente. El endpoint /access del worker lo valida contra este campo antes de reenviar el link de mi-cuenta por correo."
+    },
     "primaryCta": {
       "type": "object",
       "required": ["url", "label"],

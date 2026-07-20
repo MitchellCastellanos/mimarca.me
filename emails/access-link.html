@@ -1,0 +1,87 @@
+<!--
+  ACCESS LINK EMAIL — magic link, sent to the client (no password involved)
+  Trigger: POST /access on the portal worker, after matching {slug, email}
+  against negocio/_data/<slug>.json's ownerEmail field.
+  Send via: Resend (same as the other templates in this folder).
+
+  Template variables (simple {{mustache}} placeholders):
+    {{business_name}}   - data.business.name for the matched slug.
+    {{access_url}}       - https://mimarca.me/mi-cuenta/?n=<slug>&token=<ownerToken>
+    {{support_email}}    - contacto@mimarca.me
+
+  Suggested subject line:
+    "Tu acceso a Mi Tarjeta Pro"
+
+  Note: this re-sends the same permanent link the client already has —
+  there's no separate password to reset, so this is the only "recovery"
+  email the account needs.
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu acceso a Mi Tarjeta Pro — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+
+          <!-- header -->
+          <tr>
+            <td style="background-color:#111111;padding:32px 32px 28px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;margin-bottom:8px;">
+                mimarca · Mi Tarjeta Pro
+              </div>
+              <div style="width:56px;height:56px;border-radius:50%;background-color:#c9a227;display:inline-block;line-height:56px;font-size:26px;color:#111111;">
+                &#128273;
+              </div>
+              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;">Tu acceso a Mi Tarjeta Pro</h1>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:32px;">
+              <p style="font-size:15px;color:#212529;margin:0 0 16px;">
+                Hola, nos pediste tu link de acceso al panel de <strong>{{business_name}}</strong>. Aquí está:
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#c9a227;">
+                    <a href="{{access_url}}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;">
+                      Entrar a mi cuenta →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:13px;color:#6c757d;margin:0 0 4px;">
+                Este link es tu acceso permanente — no necesitas contraseña ni la vas a tener que resetear. Guárdalo o pídelo de nuevo cuando quieras desde <a href="https://mimarca.me/mi-cuenta/" style="color:#111111;">mimarca.me/mi-cuenta</a>.
+              </p>
+              <p style="font-size:13px;color:#6c757d;margin:12px 0 0;">
+                ¿No pediste este correo? Ignóralo, tu cuenta sigue segura.
+              </p>
+              <p style="font-size:13px;color:#6c757d;margin:12px 0 0;">
+                ¿Dudas? Escríbenos a
+                <a href="mailto:{{support_email}}" style="color:#111111;">{{support_email}}</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td style="padding:20px 32px;background-color:#f8f9fa;text-align:center;font-size:12px;color:#6c757d;">
+              mimarca · mimarca.me · Correo transaccional relacionado a tu cuenta.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

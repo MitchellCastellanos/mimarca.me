@@ -1,0 +1,74 @@
+<!--
+  ASSET UPLOADED EMAIL — sent to the OWNER (not the client), notifying that
+  a client self-served a logo/photo upload through mi-cuenta.
+  Trigger: POST /upload on the portal worker, after a successful save to R2.
+  Send via: Resend, to OWNER_ALERT_EMAIL (same var used by payment-alert.html).
+
+  Template variables (simple {{mustache}} placeholders):
+    {{slug}}          - the client's slug
+    {{business_name}} - data.business.name, if available
+    {{asset_url}}     - public R2 URL of the uploaded file
+    {{uploaded_at}}   - formatted date/time
+
+  Suggested subject line:
+    "📎 <slug> subió un archivo — aplícalo a su tarjeta"
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuevo archivo subido — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+
+          <!-- header -->
+          <tr>
+            <td style="background-color:#111111;padding:24px 32px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;">
+                mimarca · Panel interno
+              </div>
+              <h1 style="color:#ffffff;font-size:20px;margin:8px 0 0;">📎 Nuevo archivo subido</h1>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:28px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;border:1px solid #e9ecef;border-radius:10px;margin:0 0 20px;">
+                <tr>
+                  <td style="padding:14px 18px;font-size:14px;color:#6c757d;">Cliente</td>
+                  <td style="padding:14px 18px;font-size:14px;color:#212529;font-weight:700;text-align:right;">{{business_name}} ({{slug}})</td>
+                </tr>
+                <tr>
+                  <td style="padding:0 18px 14px;font-size:14px;color:#6c757d;">Subido</td>
+                  <td style="padding:0 18px 14px;font-size:14px;color:#212529;text-align:right;">{{uploaded_at}}</td>
+                </tr>
+              </table>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+                <tr>
+                  <td style="border-radius:8px;background-color:#c9a227;">
+                    <a href="{{asset_url}}" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:700;color:#111111;text-decoration:none;">
+                      Ver / descargar archivo →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size:13px;color:#6c757d;margin:16px 0 0;">
+                Aplícalo en <code>negocio/_data/{{slug}}.json</code> (logoUrl o gallery) y publícalo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

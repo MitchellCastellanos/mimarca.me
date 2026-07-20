@@ -987,6 +987,84 @@ MI CUENTA (client dashboard)
   text-align:center;
 }
 
+.mc-stepper{
+  display:flex;
+  align-items:flex-start;
+  gap:4px;
+}
+
+.mc-step{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  position:relative;
+}
+
+.mc-step::before{
+  content:"";
+  position:absolute;
+  top:17px;
+  left:-50%;
+  width:100%;
+  height:2px;
+  background:#e9ecef;
+  z-index:0;
+}
+
+.mc-step:first-child::before{
+  content:none;
+}
+
+.mc-step-dot{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#f1f3f5;
+  color:#adb5bd;
+  border:2px solid #e9ecef;
+  font-size:.85rem;
+  position:relative;
+  z-index:1;
+}
+
+.mc-step-label{
+  font-size:.72rem;
+  font-weight:600;
+  margin-top:6px;
+  color:#adb5bd;
+  line-height:1.2;
+}
+
+.mc-step--done .mc-step-dot{
+  background:#c9a227;
+  border-color:#c9a227;
+  color:#111;
+}
+
+.mc-step--done::before{
+  background:#c9a227;
+}
+
+.mc-step--done .mc-step-label{
+  color:#212529;
+}
+
+.mc-step--active .mc-step-dot{
+  background:#111;
+  border-color:#111;
+  color:#f0d98a;
+  box-shadow:0 0 0 4px rgba(201,162,39,0.18);
+}
+
+.mc-step--active .mc-step-label{
+  color:#111;
+  font-weight:700;
+}
+
 .copy-btn-flash{
   background:#198754 !important;
   color:#fff !important;

@@ -1,0 +1,68 @@
+<!--
+  CHANGE REQUEST RECEIVED EMAIL — sent to the client after they pay the
+  $25 MXN "cambios post-entrega" Payment Link.
+  Trigger: POST /notify/change-received on the portal worker (team-triggered,
+  requires X-Admin-Secret — see workers/stripe-webhook/README.md). Not tied
+  to a Stripe webhook because the team still reviews the change list by hand
+  before starting the work.
+
+  Template variables (simple {{mustache}} placeholders):
+    {{business_name}}   - data.business.name
+    {{order_date}}       - formatted date/time of the request
+    {{support_email}}    - contacto@mimarca.me
+
+  Suggested subject line:
+    "Recibimos tu solicitud de cambios"
+-->
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recibimos tu solicitud de cambios — mimarca</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:14px;overflow:hidden;">
+
+          <!-- header -->
+          <tr>
+            <td style="background-color:#111111;padding:32px 32px 28px;text-align:center;">
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c9a227;font-weight:700;margin-bottom:8px;">
+                mimarca · Mi Tarjeta Pro
+              </div>
+              <div style="width:56px;height:56px;border-radius:50%;background-color:#c9a227;display:inline-block;line-height:56px;font-size:26px;color:#111111;">
+                &#9999;
+              </div>
+              <h1 style="color:#ffffff;font-size:22px;margin:16px 0 0;">Recibimos tu solicitud</h1>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td style="padding:32px;">
+              <p style="font-size:15px;color:#212529;margin:0 0 16px;">
+                Hola, ya vimos tu pago de $25 MXN y la lista de cambios para <strong>{{business_name}}</strong> ({{order_date}}). Nuestro equipo los aplica en 1–2 días hábiles y te avisamos por WhatsApp cuando estén listos.
+              </p>
+              <p style="font-size:13px;color:#6c757d;margin:0;">
+                ¿Se te olvidó algo o quieres agregar algo a la lista? Escríbenos a
+                <a href="mailto:{{support_email}}" style="color:#111111;">{{support_email}}</a> antes de que empecemos.
+              </p>
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td style="padding:20px 32px;background-color:#f8f9fa;text-align:center;font-size:12px;color:#6c757d;">
+              mimarca · mimarca.me · Correo transaccional relacionado a tu pedido de cambios.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
