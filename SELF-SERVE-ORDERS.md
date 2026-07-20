@@ -22,8 +22,10 @@ pendiente — ver nota al final).
 5. Webhook de Stripe (`checkout.session.completed`) dispara:
    - El correo de confirmación de marca al cliente (`emails/order-confirmation.html`).
    - La alerta de pago al owner (`emails/payment-alert.html`).
-6. Equipo humano diseña la tarjeta (3–5 días hábiles) y publica en
-   `negocio/<slug>`.
+6. Equipo humano diseña la tarjeta (3–5 días hábiles), agrega
+   `negocio/_data/<slug>.json` y publica la página pública en `/<slug>/`
+   (copia de `negocio/index.html` con el `<link>` de `negocio.css` en
+   ruta absoluta — el motor en `js/negocio.js` lee el slug de la URL).
 7. Cliente recibe su link + QR. A partir de ahí puede entrar a `mi-cuenta/`
    (con su `ownerToken`) para ver su tarjeta, descargar el QR y pedir
    cambios ($25 MXN por orden vía otro Stripe Payment Link).

@@ -62,7 +62,7 @@
   }
 
   function renderDashboard(data) {
-    const publicUrl = `${window.location.origin}/negocio/?n=${encodeURIComponent(data.slug)}`;
+    const publicUrl = `${window.location.origin}/${encodeURIComponent(data.slug)}/`;
     const qrUrl = qrServerUrl(publicUrl, 440, 6);
     const qrDownloadPng = qrServerUrl(publicUrl, 2000, 24);
     const qrDownloadSvg = qrServerUrl(publicUrl, 2000, 24, 'svg');
@@ -88,7 +88,7 @@
 
             <div class="col-lg-5 text-center">
               <div class="mc-preview mx-auto">
-                <iframe src="../negocio/?n=${encodeURIComponent(data.slug)}" title="Preview de tu tarjeta"></iframe>
+                <iframe src="../${encodeURIComponent(data.slug)}/" title="Preview de tu tarjeta"></iframe>
               </div>
               <a href="${escapeHtml(publicUrl)}" target="_blank" rel="noopener" class="btn btn-outline-dark mt-3">
                 <i class="bi bi-box-arrow-up-right me-1"></i> Abrir en nueva pestaña

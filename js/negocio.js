@@ -1,6 +1,8 @@
 // ============================================================
 // Mi Tarjeta Pro · JSON-driven business card renderer
-// Reads ?n=<slug> → fetches /negocio/_data/<slug>.json → renders
+// Public card: /<slug>/ (slug read from the URL path)
+// Internal preview: /negocio/?n=<slug> (query param, still supported)
+// Either way it fetches /negocio/_data/<slug>.json → renders
 // ============================================================
 
 (function () {
@@ -8,8 +10,19 @@
   if (!app) return;
 
   // ---------- helpers ----------
+  function cleanSlug(value) {
+    return (value || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  }
+
+  function slugFromPath() {
+    const RESERVED = new Set(['negocio', 'mi-cuenta', 'rcr-barbershop', 'images', 'js', 'workers', 'emails']);
+    const first = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    const s = cleanSlug(first);
+    return RESERVED.has(s) ? '' : s;
+  }
+
   const params = new URLSearchParams(window.location.search);
-  const slug = (params.get('n') || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  const slug = cleanSlug(params.get('n')) || slugFromPath();
 
   const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -449,7 +462,7 @@
     return;
   }
 
-  fetch(`./_data/${slug}.json`, { cache: 'no-cache' })
+  fetch(`/negocio/_data/${slug}.json`, { cache: 'no-cache' })
     .then((r) => {
       if (!r.ok) {
         const err = new Error('http');
