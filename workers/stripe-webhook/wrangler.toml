@@ -25,6 +25,8 @@ bucket_name = "mimarca-portal-uploads"
 # Variables no sensibles:
 [vars]
 OWNER_ALERT_EMAIL = "contacto@mimarca.me"
-FROM_EMAIL = "mimarca <pedidos@mimarca.me>"
+# Dominio verificado en Resend hoy: updates.mimarca.me (mimarca.me raiz pendiente).
+# Cuando mimarca.me este verificado en Resend, volver a pedidos@mimarca.me.
+FROM_EMAIL = "mimarca <pedidos@updates.mimarca.me>"
 SUPPORT_EMAIL = "contacto@mimarca.me"
 R2_PUBLIC_BASE_URL = "https://uploads.mimarca.me"

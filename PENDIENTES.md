@@ -9,44 +9,45 @@ partes.
 
 ## Parte 1 — Requiere acceso a plugins/servicios externos (Cloudflare, Resend, Stripe)
 
-Nada de esto se puede hacer solo con el repo; necesita credenciales/cuentas
-reales. Mientras no se haga, el sitio sigue funcionando igual que antes (todo
-cae a un fallback de WhatsApp, nada se rompe).
+### Estado del deploy (cerrado 2026-07-20)
 
-1. **Resend**: crear cuenta, verificar el dominio `mimarca.me` (DNS: SPF/DKIM),
-   y generar `RESEND_API_KEY`.
+Worker: `https://mimarca-stripe-webhook.mimarca.workers.dev`
+
+1. **Resend**: [x] API key cargada. Dominio verificado:
+   `updates.mimarca.me`. `FROM_EMAIL` =
+   `mimarca <pedidos@updates.mimarca.me>` (smoke + alerta de pago OK).
+   - [ ] Opcional: verificar `mimarca.me` raíz y volver a
+     `pedidos@mimarca.me`.
 2. **Cloudflare Worker**:
-   - `cd workers/stripe-webhook && npx wrangler login`
-   - `npx wrangler secret put STRIPE_WEBHOOK_SECRET`
-   - `npx wrangler secret put RESEND_API_KEY`
-   - `npx wrangler secret put ADMIN_SECRET` (generar con `openssl rand -hex 24`;
-     protege `/notify/published` y `/notify/change-received`)
-   - `npx wrangler r2 bucket create mimarca-portal-uploads`
-   - Habilitar acceso público al bucket (o colgarle un dominio propio, p. ej.
-     `uploads.mimarca.me`) desde el dashboard de Cloudflare → R2 → el bucket
-     → Settings, y poner esa URL en `R2_PUBLIC_BASE_URL` (`wrangler.toml`).
-   - `npx wrangler deploy` → imprime la URL pública del worker.
-3. **Stripe Dashboard**: crear el endpoint de webhook apuntando a la raíz de
-   esa URL (sin path extra), suscrito solo a `checkout.session.completed`, y
-   copiar su `whsec_...` al secret `STRIPE_WEBHOOK_SECRET` de arriba.
-4. **Actualizar `mi-cuenta/index.html`**: reemplazar el meta
-   `<meta name="mitp-portal-api" content="REPLACE-PORTAL_API_BASE_URL">`
-   con la URL real del worker deployado. Esto activa el magic link, la
-   subida de logo/fotos y "aprobar diseño" (ahora mismo muestran el
-   fallback de WhatsApp).
-5. **(Opcional) Umami**: si se quiere activar analytics por tarjeta, ver
-   `AUTOMATION.md` — configurar `mitp-umami-config` en cada
-   `negocio/index.html`/`/<slug>/index.html` y `mitp-umami-share-url` en
-   `mi-cuenta/index.html`.
-6. **Por cada cliente (nuevo o existente)**: llenar `ownerEmail` y
-   `orderStage` en su `negocio/_data/<slug>.json` (ver
-   `negocio/_schema/card.schema.json` y `negocio/_data/_example.json`).
-   Sin `ownerEmail`, el magic link (`/access`) no encuentra a ese cliente.
-   Sin `orderStage`, el stepper de estatus no se muestra para esa tarjeta
-   (no rompe nada, solo no aparece el bloque).
+   - [x] `wrangler login`
+   - [x] `STRIPE_WEBHOOK_SECRET` (live `whsec_…`, 2026-07-20)
+   - [x] `RESEND_API_KEY`
+   - [x] `ADMIN_SECRET` (local: `workers/stripe-webhook/.admin_secret.tmp`,
+     no commitear)
+   - [x] Bucket `mimarca-portal-uploads` + binding `PORTAL_UPLOADS`
+   - [x] Dominio público `uploads.mimarca.me` conectado al bucket
+     (SSL/ownership pueden tardar unos minutos en quedar `active`)
+   - [x] `npx wrangler deploy`
+3. **Stripe**: [x] Webhook live apuntando a la URL del worker,
+   `checkout.session.completed`. Webhook test también existía de la sesión
+   anterior.
+4. **`mi-cuenta/index.html`**: [x] meta `mitp-portal-api` → URL del worker.
+5. **(Opcional) Umami**: sin cambios.
+6. **Clientes**: `lulu` / `test-client` ya tienen `ownerEmail` + `orderStage`
+   en el repo.
+7. **`.nojekyll`**: [x] añadido para que GitHub Pages sirva
+   `negocio/_data/*.json` (Jekyll ocultaba las carpetas `_…`).
 
-Todos los pasos de deploy están también en `workers/stripe-webhook/README.md`
-con más detalle y ejemplos de `curl` para probar cada ruta.
+### Pruebas (2026-07-20)
+
+| Ruta / flujo | Resultado |
+|--------------|-----------|
+| Stripe `trigger` test → Resend | OK — alerta a `contacto@mimarca.me` |
+| Resend smoke `pedidos@updates.mimarca.me` | OK delivered |
+| `POST /access` | 200 `{ok:true}` |
+| Portal end-to-end con JSON live | Requiere Pages con `.nojekyll` publicado |
+
+Detalle de deploy/curl: `workers/stripe-webhook/README.md`.
 
 ## Parte 2 — Trabajo de producto/código para después (no depende de infraestructura)
 
@@ -89,13 +90,3 @@ Nada de esto es urgente ni bloquea lo anterior. En orden sugerido de valor:
    además la carpeta real es `images/` en minúscula). Es un bug preexistente
    no relacionado a este trabajo; hay que generar esos íconos o corregir las
    rutas.
-
-## Qué NO se pudo probar en este entorno
-
-El código del worker (`workers/stripe-webhook/src/index.js`) se validó con
-`node --check` (sintaxis) y `node --test` (la lógica pura de armado de
-variables/plantillas, 9/9 tests). No se pudo probar en un Cloudflare real
-(sin cuenta/credenciales en este entorno): ni `wrangler dev` contra R2 de
-verdad, ni el envío real de correos vía Resend, ni el flujo completo
-`/upload` con un bucket real. Recomendado probar cada ruta con los `curl` de
-ejemplo del README apenas esté deployado, antes de darlo por bueno.
