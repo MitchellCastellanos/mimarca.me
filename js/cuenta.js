@@ -264,6 +264,12 @@
           </div>
         </div>
         ${d.logoDataUrl ? `<div class="mt-2 d-flex align-items-center gap-2"><img src="${escapeHtml(d.logoDataUrl)}" alt="Logo" style="height:36px;border-radius:8px;object-fit:cover;"><span class="small text-muted">Logo recibido — para cambiarlo, escríbenos por WhatsApp.</span></div>` : ""}
+        ${d.orderOfficial ? `
+          <div class="alert alert-success small mt-3 mb-2">
+            <div class="fw-semibold mb-1"><i class="bi bi-check-circle me-1"></i>Pedido oficial recibido · ${escapeHtml(d.selectedPackageName || order.packageName || "Mi Tarjeta Pro")}</div>
+            <div><strong>Links (${Number(d.linksCount) || 0}):</strong> ${escapeHtml((d.requestedLinks || []).join(", ") || "Por definir")}</div>
+            <div><strong>Funciones:</strong> ${escapeHtml((d.requestedFeatures || []).join(", ") || "Diseño estándar del paquete")}</div>
+          </div>` : ""}
         <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
           <button type="button" class="btn btn-dark btn-sm mc-draft-save">
             <i class="bi bi-check-lg me-1"></i> Guardar info

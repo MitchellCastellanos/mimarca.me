@@ -895,6 +895,18 @@ RESPONSIVE
 MI CUENTA (client dashboard)
 =============================== */
 
+.mt-order-config{border-radius:24px;background:linear-gradient(145deg,#fff 0%,#fffdf5 100%);scroll-margin-top:90px}
+.mt-order-step{background:#111;color:#fff;border-radius:999px;padding:.65rem 1rem}
+.mt-order-step span{color:#adb5bd}
+.mt-feature-check{display:flex;align-items:center;gap:.5rem;min-height:46px;padding:.7rem .8rem;border:1px solid #dee2e6;border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+.mt-feature-check:has(input:checked){border-color:#c9a227;background:#fff8df;box-shadow:0 0 0 2px rgba(201,162,39,.15)}
+.mt-feature-check input{accent-color:#111}
+.mt-order-recommendation{border-radius:18px;background:#f8f9fa;border:1px solid #e9ecef}
+.mt-order-recommendation .progress{height:10px}
+.mt-order-summary{scroll-margin-top:100px}
+.mt-summary-item{display:flex;flex-direction:column;gap:.25rem;height:100%;padding:1rem;border-radius:12px;background:#f8f9fa;border:1px solid #e9ecef}
+.mt-summary-item span{color:#6c757d;font-size:.75rem;text-transform:uppercase;font-weight:700}
+
 .mc-shell{
   background:#fafafa;
   min-height:100vh;

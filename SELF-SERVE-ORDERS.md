@@ -6,6 +6,14 @@ pendiente — ver nota al final).
 
 ## 1. Flujo completo, de punta a punta
 
+> Actualización: `index.html#order-config` es ahora el paso oficial previo
+> al pago. Funciona tanto después del mockup como de forma independiente,
+> cuenta los links solicitados, sube automáticamente al tier mínimo que
+> soporte las funciones marcadas y muestra un resumen antes de abrir Stripe.
+> El borrador guarda `orderOfficial`, `selectedPackage`, `requestedLinks` y
+> `requestedFeatures`; el Dashboard los muestra mientras el pedido no tenga
+> `slug`.
+
 1. Cliente entra a `index.html` y arma su tarjeta en el builder con datos
    reales (WhatsApp, Instagram, Maps, logo) — el mismo motor que renderiza
    las tarjetas ya publicadas (ver sección 8). Este paso es opcional: si lo
