@@ -28,6 +28,11 @@
   <link rel="icon" href="./images/favicon.ico">
   <link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
 
+  <!-- URL base del worker de portal (recuperar el borrador del builder por
+       session_id). Ver workers/stripe-webhook/README.md. Mientras diga
+       REPLACE, esta página funciona igual, solo sin el recap. -->
+  <meta name="mitp-portal-api" content="REPLACE-PORTAL_API_BASE_URL">
+
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preload" href="./MyCSS.css" as="style">
 
@@ -101,6 +106,16 @@
       <p class="text-muted">Sube tu logo, links, servicios y todo lo que quieras que aparezca en tu tarjeta.</p>
     </div>
 
+    <div id="draftRecap" class="d-none mx-auto mb-4" style="max-width:760px;">
+      <div class="card border-0 shadow-sm" style="background:linear-gradient(135deg,#fff8e1 0%,#fff 100%);border:1px solid #f0d98a !important;">
+        <div class="card-body p-4">
+          <h3 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-check2-circle me-1"></i>Ya tenemos esto de tu mockup</h3>
+          <p class="small text-muted mb-2">No hace falta que lo repitas abajo — nuestro equipo ya lo tiene. El formulario es para lo que falte (fotos, servicios, horarios).</p>
+          <div id="draftRecapBody" class="small"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="mx-auto" style="max-width:760px;">
       <iframe
         id="tallyFrame"
@@ -169,6 +184,56 @@
       if (pkg) url.searchParams.set("package", pkg);
       frame.src = url.toString();
     }
+
+    // Recap del borrador que se guardó en el builder antes de pagar (si lo hubo).
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function portalApiBase() {
+      const meta = document.querySelector('meta[name="mitp-portal-api"]');
+      const url = meta && meta.getAttribute("content") && meta.getAttribute("content").trim();
+      if (!url || url.indexOf("REPLACE") !== -1) return null;
+      return url.replace(/\/$/, "");
+    }
+
+    async function loadDraftRecap() {
+      const apiBase = portalApiBase();
+      if (!apiBase || !sessionId) return;
+
+      let json;
+      try {
+        const res = await fetch(`${apiBase}/draft-by-session/${encodeURIComponent(sessionId)}`);
+        if (!res.ok) return;
+        json = await res.json();
+      } catch {
+        return;
+      }
+
+      const data = json && json.data;
+      if (!data) return;
+
+      const rows = [];
+      if (data.business?.name) rows.push(`<strong>${escapeHtml(data.business.name)}</strong>`);
+      if (data.business?.tagline) rows.push(escapeHtml(data.business.tagline));
+      if (data.primaryCta?.url) rows.push(`${escapeHtml(data.primaryCta.label || "CTA")}: ${escapeHtml(data.primaryCta.url)}`);
+      (data.links || []).forEach((l) => {
+        if (l?.url) rows.push(`${escapeHtml(l.label || "Link")}: ${escapeHtml(l.url)}`);
+      });
+      if (data.business?.logoUrl) rows.push("Logo: recibido ✓");
+
+      if (!rows.length) return;
+
+      const body = document.getElementById("draftRecapBody");
+      const box = document.getElementById("draftRecap");
+      if (!body || !box) return;
+      body.innerHTML = rows.map((r) => `<div>${r}</div>`).join("");
+      box.classList.remove("d-none");
+    }
+
+    loadDraftRecap();
   })();
 </script>
 <script src="https://tally.so/widgets/embed.js"></script>

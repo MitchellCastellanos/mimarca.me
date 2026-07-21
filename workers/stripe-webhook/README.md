@@ -5,10 +5,16 @@ Cloudflare Worker que le da backend al sitio estático.
 ## Rutas
 
 - `POST /` — webhook Stripe (`checkout.session.completed`) → correos de
-  pedido + tracking de referidos si viene `client_reference_id`.
+  pedido + tracking de referidos y de borrador si viene `client_reference_id`.
 - `POST /access` — magic link `{slug,email}` (rate-limit 5/h/IP). Secretos en KV.
 - `POST /session` — `{slug,token}` → datos públicos + `referralCode` (sin
   `ownerToken`/`ownerEmail`).
+- `POST /draft` — `{email,data}` → guarda el borrador del builder (antes de
+  pagar) en KV con TTL de 30 días, regresa `{draftId}`. Ver "Borrador" abajo.
+- `GET /draft/:id` — lee un borrador por su id.
+- `GET /draft-by-session/:sessionId` — igual, pero buscando por el
+  `session_id` de Stripe (lo que trae `gracias.html` en la URL justo
+  después de pagar — no conoce el `draftId` directo).
 - `POST /upload` — logo/fotos → R2 + aviso al owner.
 - `POST /notify/approved` — cliente aprueba diseño.
 - `POST /notify/published` / `POST /notify/change-received` — admin
@@ -19,8 +25,38 @@ Cloudflare Worker que le da backend al sitio estático.
 | Recurso | Uso |
 |---------|-----|
 | JSON `negocio/_data/<slug>.json` | Datos públicos de la tarjeta (`orderStage`, negocio, etc.) |
-| KV `PORTAL_KV` | `secrets:<slug>`, `ref:<CODE>`, `redeem:*`, `rl:access:*` |
+| KV `PORTAL_KV` | `secrets:<slug>`, `ref:<CODE>`, `redeem:*`, `rl:access:*`, `draft:<id>`, `session-draft:<sessionId>`, `orders:<email>` |
 | R2 `PORTAL_UPLOADS` | Archivos de `/upload` → `https://uploads.mimarca.me/...` |
+
+## Borrador antes de pagar (builder → checkout → gracias.html)
+
+1. En `index.html`, al dar clic en "Pedir mi tarjeta a la medida" con un
+   correo válido, `js/mi-tarjeta.js` manda `POST /draft` con los datos que
+   ya armó el builder (igual que los de una tarjeta real) y guarda el
+   `draftId` + correo en `sessionStorage`.
+2. `js/ref-capture.js` (ahora también hace esto, no solo referidos) mete
+   ese `draftId` en `client_reference_id` de los links de Stripe —
+   combinado con el código de referido si también hay uno, como
+   `r.<CODE>_d.<draftId>` (`parseClientReferenceId` en `portal.js` separa
+   los dos, y sigue leyendo bien los links viejos sin el prefijo) — y el
+   correo en `prefilled_email`.
+3. El webhook, al recibir el pago, busca el borrador, lo mete en la fila
+   "borrador" de la alerta al owner (`emails/payment-alert.html`), agrega
+   `?draft=` a `onboarding_url` (el link del correo de confirmación al
+   cliente), y guarda el mapeo `session_id → draftId` para que
+   `gracias.html` lo encuentre aunque el cliente no espere el correo.
+4. `gracias.html` llama `GET /draft-by-session/:sessionId` y muestra una
+   cajita "ya tenemos esto" arriba del formulario de Tally.
+5. También queda una entrada en `orders:<email>` (KV) por cada pago — es
+   la semilla de la futura cuenta multi-negocio, todavía sin UI. Cuando el
+   equipo publique la tarjeta y cree su `secrets:<slug>`, conviene ir a
+   editar esa entrada a mano para dejar el `slug` correspondiente (campo
+   `slug: null` por ahora) — no es obligatorio, solo ayuda a no perder el
+   historial cuando se construya el dashboard.
+
+Sin `PORTAL_KV` o sin el meta `mitp-portal-api` configurado en `index.html`
+/ `gracias.html`, todo esto se salta solo — el checkout sigue funcionando
+exactamente igual que antes, nomás sin el borrador ni el recap.
 
 ## Deploy
 
@@ -68,6 +104,13 @@ curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/session \
 curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/access \
   -H 'content-type: application/json' \
   -d '{"slug":"test-client","email":"test-client-ci@mimarca.me"}'
+
+# Borrador
+curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/draft \
+  -H 'content-type: application/json' \
+  -d '{"email":"prueba@mimarca.me","data":{"business":{"name":"Prueba"}}}'
+# -> {"ok":true,"draftId":"..."}
+curl https://mimarca-stripe-webhook.mimarca.workers.dev/draft/<draftId-de-arriba>
 ```
 
 Vars/secrets: ver `.env.example` y `wrangler.toml`.

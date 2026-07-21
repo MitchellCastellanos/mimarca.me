@@ -46,6 +46,49 @@ Worker: `https://mimarca-stripe-webhook.mimarca.workers.dev`
 7. **`site.webmanifest`**: [x] (2026-07-20) — rutas `/images/...` + íconos
    192/512/maskable generados desde `apple-touch-icon.png`.
 
+## Parte 3 — Builder real + captura de correo antes de pagar (2026-07-21)
+
+Decisión tomada con Mitchell: no pedir login antes de pagar (fricción en el
+peor momento) — solo el correo, como parte del mismo formulario que ya
+iban a llenar. La "cuenta" de verdad (ver todas sus tarjetas) queda como
+fase aparte, reusando el magic link ya construido pero agregando por
+correo. Las solicitudes de cambio se quedan por tarjeta específica, no a
+nivel cuenta (confirmado).
+
+Lo que sí se construyó ahora:
+
+1. **Builder con datos reales**: [x] — el mockup de `index.html` ya usa el
+   mismo motor (`js/negocio.js` + `negocio.css`, en iframe aislado) con
+   WhatsApp/Instagram/Maps/logo reales, no una tarjeta de mentiras.
+2. **Captura de correo + borrador antes de pagar**: [x] — al dar clic en
+   "Pedir mi tarjeta a la medida", `js/mi-tarjeta.js` pide el correo y
+   guarda el borrador (`POST /draft`, KV con TTL 30 días).
+3. **`client_reference_id` combinado**: [x] — `js/ref-capture.js` mete
+   referido + draftId juntos (`r.<CODE>_d.<draftId>`); `parseClientReferenceId`
+   en `portal.js` los separa y sigue leyendo links viejos sin prefijo.
+4. **Webhook enriquecido**: [x] — la alerta al owner ya trae el negocio y
+   links del borrador (filas nuevas en `payment-alert.html`); se guarda
+   `session_id → draftId` para que `gracias.html` encuentre su borrador
+   sin depender del correo.
+5. **Recap en `gracias.html`**: [x] — caja "ya tenemos esto" arriba del
+   formulario de Tally, vía `GET /draft-by-session/:sessionId`.
+6. **Semilla de cuenta multi-negocio**: [x] pero **sin UI todavía** — cada
+   pago deja una entrada en KV `orders:<email>`. Falta: el dashboard que
+   liste todas las tarjetas de un correo (fase aparte, abrir cuando haya
+   demanda de clientes con más de un negocio).
+
+**Pendiente manual para que esto funcione en producción:**
+- Agregar el meta `mitp-portal-api` (ya con la URL real del worker, la
+  misma que ya está en `mi-cuenta/index.html`) en `index.html` y
+  `gracias.html` — hoy ambos tienen el placeholder `REPLACE-PORTAL_API_BASE_URL`.
+  Mientras sigan así, el checkout funciona exactamente igual que antes,
+  nomás sin guardar el borrador ni mostrar el recap.
+- No requiere ningún recurso nuevo de Cloudflare — reusa el mismo
+  `PORTAL_KV` que ya existe.
+
+Detalle técnico completo: `workers/stripe-webhook/README.md` (sección
+"Borrador antes de pagar") y `SELF-SERVE-ORDERS.md` (sección 8).
+
 ### Operación: alta de cliente (secretos)
 
 ```bash

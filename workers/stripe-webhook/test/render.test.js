@@ -8,6 +8,7 @@ import {
   buildChangeRequestVars,
   buildAssetUploadedVars,
   buildApprovedAlertVars,
+  buildDraftSummaryFields,
   renderTemplate,
 } from "../src/render.js";
 
@@ -45,6 +46,7 @@ test("las dos plantillas reales quedan sin ningun {{placeholder}}", async () => 
   const vars = buildTemplateVars(fakeSession, true, {
     SUPPORT_EMAIL: "contacto@mimarca.me",
   });
+  Object.assign(vars, buildDraftSummaryFields(null));
   for (const file of [
     "../../../emails/order-confirmation.html",
     "../../../emails/payment-alert.html",
@@ -123,4 +125,25 @@ test("las plantillas nuevas quedan sin ningun {{placeholder}}", async () => {
     const body = rendered.slice(rendered.indexOf("<!doctype"));
     assert.doesNotMatch(body, /\{\{[\w]+\}\}/, `placeholders sin reemplazar en ${file}`);
   }
+});
+
+test("buildDraftSummaryFields sin borrador cae en guiones", () => {
+  assert.deepEqual(buildDraftSummaryFields(null), {
+    draft_business_name: "—",
+    draft_links_summary: "—",
+  });
+});
+
+test("buildDraftSummaryFields arma el resumen de links del borrador", () => {
+  const fields = buildDraftSummaryFields({
+    email: "cliente@correo.com",
+    data: {
+      business: { name: "Taquería La Bendita" },
+      primaryCta: { label: "WhatsApp", url: "https://wa.me/5215555555555" },
+      links: [{ label: "Instagram", url: "https://instagram.com/labendita" }],
+    },
+  });
+  assert.equal(fields.draft_business_name, "Taquería La Bendita");
+  assert.match(fields.draft_links_summary, /WhatsApp: https:\/\/wa\.me\/5215555555555/);
+  assert.match(fields.draft_links_summary, /Instagram: https:\/\/instagram\.com\/labendita/);
 });

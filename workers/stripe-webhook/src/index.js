@@ -7,6 +7,8 @@
  *   POST /                    Webhook de Stripe (checkout.session.completed)
  *   POST /access              Magic link: {slug, email} -> reenvía el link de mi-cuenta
  *   POST /session             Valida slug+token (secretos en KV) y devuelve datos públicos
+ *   POST /draft                Guarda el borrador del builder (antes de pagar)
+ *   GET  /draft/:id             Lo lee (gracias.html lo usa para el recap)
  *   POST /upload               Logo/fotos del cliente -> R2 + aviso al owner
  *   POST /notify/approved      Cliente aprueba su diseño en revisión -> aviso al owner
  *   POST /notify/published     (admin) avisa al cliente que ya está publicada
@@ -31,6 +33,7 @@ import {
   buildChangeRequestVars,
   buildAssetUploadedVars,
   buildApprovedAlertVars,
+  buildDraftSummaryFields,
   renderTemplate,
 } from "./render.js";
 import {
@@ -38,11 +41,17 @@ import {
   resolveClient,
   rateLimitAccess,
   recordReferralRedemption,
+  parseClientReferenceId,
+  saveDraft,
+  getDraft,
+  linkSessionToDraft,
+  getDraftBySession,
+  recordPendingOrder,
 } from "./portal.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, X-Admin-Secret",
 };
 
@@ -52,6 +61,25 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
+    // GET /draft/:id y /draft-by-session/:id son de solo lectura
+    // (gracias.html las consulta directo, sin ningun POST de por medio).
+    if (request.method === "GET" && url.pathname.startsWith("/draft/")) {
+      try {
+        return await handleGetDraft(env, url.pathname.slice("/draft/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
+    if (request.method === "GET" && url.pathname.startsWith("/draft-by-session/")) {
+      try {
+        return await handleGetDraftBySession(env, url.pathname.slice("/draft-by-session/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
     }
 
     if (request.method !== "POST") {
@@ -67,6 +95,9 @@ export default {
       }
       if (url.pathname === "/session") {
         return await handleSession(request, env);
+      }
+      if (url.pathname === "/draft") {
+        return await handleSaveDraft(request, env);
       }
       if (url.pathname === "/upload") {
         return await handleUpload(request, env);
@@ -133,6 +164,28 @@ async function handleStripeWebhook(request, env) {
   const session = event.data.object;
   const vars = buildTemplateVars(session, event.livemode, env);
 
+  // Borrador del builder (si el cliente pasó por ahí antes de pagar): se
+  // agrega a onboarding_url para que gracias.html muestre el recap, y se
+  // usa para llenar las filas "borrador" de la alerta al owner.
+  const { draftId } = parseClientReferenceId(session.client_reference_id);
+  const draftRecord = draftId ? await getDraft(env, draftId).catch(() => null) : null;
+  if (draftRecord) {
+    try {
+      const u = new URL(vars.onboarding_url);
+      u.searchParams.set("draft", draftId);
+      vars.onboarding_url = u.toString();
+    } catch {
+      // onboarding_url siempre es una URL valida armada arriba; por si acaso.
+    }
+    // El redirect que arma Stripe justo despues de pagar solo trae
+    // session_id (se configura una vez en el Dashboard) — este mapeo deja
+    // que gracias.html encuentre el borrador con eso, sin esperar el correo.
+    await linkSessionToDraft(env, session.id, draftId).catch((err) =>
+      console.error("linkSessionToDraft failed:", err)
+    );
+  }
+  Object.assign(vars, buildDraftSummaryFields(draftRecord));
+
   const results = await Promise.allSettled([
     vars.customer_email
       ? sendEmail(env, {
@@ -153,6 +206,14 @@ async function handleStripeWebhook(request, env) {
     console.error("Email delivery failed:", failures);
     return jsonResponse({ received: true, errors: failures }, 500);
   }
+
+  // Semilla de la futura cuenta multi-negocio — best-effort.
+  await recordPendingOrder(env, {
+    email: vars.customer_email || draftRecord?.email || "",
+    draftId: draftId || null,
+    sessionId: session.id,
+    packageName: vars.package_name,
+  }).catch((err) => console.error("recordPendingOrder failed:", err));
 
   // Referidos: best-effort, no tumba el webhook si falla.
   await recordReferralRedemption(
@@ -220,6 +281,47 @@ async function handleSession(request, env) {
       orderStage: data.orderStage || "",
     },
   });
+}
+
+// ============================================================
+// POST /draft — guarda el borrador del builder (antes de pagar)
+// GET  /draft/:id — lo lee (gracias.html lo usa para el recap)
+// ============================================================
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function handleSaveDraft(request, env) {
+  const body = await safeJson(request);
+  const email = String(body?.email || "").trim().toLowerCase();
+  const data = body?.data;
+
+  if (!email || !EMAIL_RE.test(email) || !data || typeof data !== "object") {
+    return jsonResponse({ error: "missing fields" }, 400);
+  }
+  if (!env.PORTAL_KV) {
+    return jsonResponse({ error: "drafts not configured" }, 503);
+  }
+
+  try {
+    const draftId = await saveDraft(env, email, data);
+    return jsonResponse({ ok: true, draftId });
+  } catch (err) {
+    console.error("saveDraft failed:", err);
+    return jsonResponse({ error: "could not save draft" }, 413);
+  }
+}
+
+async function handleGetDraft(env, draftId) {
+  if (!draftId || !env.PORTAL_KV) return jsonResponse({ error: "not found" }, 404);
+  const draft = await getDraft(env, draftId);
+  if (!draft) return jsonResponse({ error: "not found" }, 404);
+  return jsonResponse({ ok: true, email: draft.email, data: draft.data });
+}
+
+async function handleGetDraftBySession(env, sessionId) {
+  if (!sessionId || !env.PORTAL_KV) return jsonResponse({ error: "not found" }, 404);
+  const found = await getDraftBySession(env, sessionId);
+  if (!found) return jsonResponse({ error: "not found" }, 404);
+  return jsonResponse({ ok: true, draftId: found.draftId, email: found.email, data: found.data });
 }
 
 // ============================================================

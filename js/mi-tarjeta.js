@@ -33,8 +33,18 @@
   const elResultQR      = $("mtResultQR");
   const elResultQRLayer = $("mtResultQRLayer");
   const elResultCTA     = $("mtResultCTA");
+  const elEmail         = $("mtEmail");
+  const elProceedBtn    = $("mtProceedBtn");
+  const elProceedNote   = $("mtProceedNote");
 
   if (!elGenerate) return; // not on this page
+
+  function portalApiBase() {
+    const meta = document.querySelector('meta[name="mitp-portal-api"]');
+    const url = meta && meta.getAttribute('content') && meta.getAttribute('content').trim();
+    if (!url || url.indexOf('REPLACE') !== -1) return null;
+    return url.replace(/\/$/, '');
+  }
 
   // ----- slug normalization -----
   function slugify(value) {
@@ -228,4 +238,56 @@
       if (e.key === "Enter") { e.preventDefault(); elGenerate.click(); }
     });
   });
+
+  // ----- "Pedir mi tarjeta a la medida": guarda el borrador y avanza a #precios -----
+  if (elProceedBtn) {
+    elProceedBtn.addEventListener("click", async () => {
+      const email = (elEmail.value || "").trim();
+      if (!email || !elEmail.checkValidity()) {
+        elEmail.classList.add("is-invalid");
+        elEmail.focus();
+        setTimeout(() => elEmail.classList.remove("is-invalid"), 1500);
+        return;
+      }
+
+      elProceedBtn.disabled = true;
+      const origLabel = elProceedBtn.innerHTML;
+      elProceedBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando…';
+
+      const apiBase = portalApiBase();
+      if (apiBase) {
+        try {
+          const res = await fetch(`${apiBase}/draft`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, data: buildCardData() }),
+          });
+          if (res.ok) {
+            const { draftId } = await res.json();
+            if (draftId) {
+              try {
+                sessionStorage.setItem("mitp_draft_id", draftId);
+                sessionStorage.setItem("mitp_draft_email", email);
+              } catch { /* sessionStorage no disponible, seguimos igual */ }
+            }
+          }
+        } catch {
+          // si falla el guardado no bloqueamos al cliente — sigue a pagar igual,
+          // solo no llegará prellenado a gracias.html.
+        }
+        // aplica los nuevos parámetros (client_reference_id/prefilled_email) a
+        // los links de Stripe antes de que el cliente les dé clic.
+        if (typeof window.MTP_applyCheckoutParams === "function") {
+          window.MTP_applyCheckoutParams();
+        }
+      }
+
+      elProceedBtn.disabled = false;
+      elProceedBtn.innerHTML = origLabel;
+      if (elProceedNote && !apiBase) {
+        elProceedNote.textContent = "";
+      }
+      document.getElementById("precios")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 })();

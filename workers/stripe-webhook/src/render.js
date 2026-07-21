@@ -108,6 +108,30 @@ export function buildAssetUploadedVars(data, assetUrl, when = new Date()) {
   };
 }
 
+/**
+ * Vars del "borrador" (builder, antes de pagar) para las filas opcionales
+ * de emails/payment-alert.html. `draftRecord` es lo que regresa
+ * portal.js#getDraft ({ email, data, createdAt }) o null/undefined si el
+ * pago no traía draftId — en ese caso todo queda en "—".
+ */
+export function buildDraftSummaryFields(draftRecord) {
+  const data = draftRecord?.data;
+  if (!data) {
+    return { draft_business_name: "—", draft_links_summary: "—" };
+  }
+
+  const parts = [];
+  if (data.primaryCta?.url) parts.push(`${data.primaryCta.label || "CTA"}: ${data.primaryCta.url}`);
+  (data.links || []).forEach((l) => {
+    if (l?.url) parts.push(`${l.label || "Link"}: ${l.url}`);
+  });
+
+  return {
+    draft_business_name: data.business?.name || "—",
+    draft_links_summary: parts.length ? parts.join("  ·  ") : "—",
+  };
+}
+
 /** Vars para emails/design-approved-alert.html (al owner). */
 export function buildApprovedAlertVars(data) {
   return {

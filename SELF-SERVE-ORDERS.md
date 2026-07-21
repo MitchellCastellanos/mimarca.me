@@ -6,19 +6,24 @@ pendiente — ver nota al final).
 
 ## 1. Flujo completo, de punta a punta
 
-1. Cliente entra a `index.html`, prueba el mockup interactivo, y da clic en
-   **"Pedir mi tarjeta"** (navbar, CTA de resultado del mockup, o CTA final).
-   Todos apuntan directo a `#precios` — ya no pasan por `contact.html`.
-2. En `#precios` elige uno de los 3 paquetes (Lanzamiento / Personalizado /
-   Premium) y dala clic en el botón, que lo lleva a un **Stripe Payment
-   Link**.
+1. Cliente entra a `index.html` y arma su tarjeta en el builder con datos
+   reales (WhatsApp, Instagram, Maps, logo) — el mismo motor que renderiza
+   las tarjetas ya publicadas (ver sección 8). Este paso es opcional: si lo
+   salta, sigue funcionando igual que antes, solo sin borrador guardado.
+2. Si usa el builder, al dar clic en **"Pedir mi tarjeta a la medida"**
+   deja su correo, se guarda un borrador (`POST /draft`), y baja a
+   `#precios`. Elige uno de los 3 paquetes (Lanzamiento / Personalizado /
+   Premium) y da clic en el botón, que lo lleva a un **Stripe Payment
+   Link** (ya con su correo prellenado y el borrador enlazado).
 3. Stripe procesa el pago (tarjeta), manda automáticamente:
    - Recibo de pago al cliente (si está activado en Stripe Dashboard →
      Settings → Emails), y/o el correo de confirmación con marca propia (ver
      sección 3).
    - Redirige al cliente a `gracias.html?package=<tier>&session_id={CHECKOUT_SESSION_ID}`.
-4. En `gracias.html`, el cliente llena el formulario de onboarding (Tally)
-   con logo, links, servicios y fotos — o manda todo por WhatsApp.
+4. En `gracias.html`, si hubo borrador aparece un recap ("ya tenemos
+   esto") arriba del formulario. El cliente llena el formulario de
+   onboarding (Tally) con lo que falte (fotos, servicios, horarios) — o
+   manda todo por WhatsApp.
 5. Webhook de Stripe (`checkout.session.completed`) dispara:
    - El correo de confirmación de marca al cliente (`emails/order-confirmation.html`).
    - La alerta de pago al owner (`emails/payment-alert.html`).
@@ -142,9 +147,33 @@ resetear). Con `js/mi-cuenta.js` + el Worker:
 `negocio/_schema/card.schema.json` y `negocio/_data/_example.json`) — sin
 esto el magic link y el stepper no funcionan para esa tarjeta.
 
-**Limitación conocida**: `negocio/_data/<slug>.json` es público (así es como
-lo lee la tarjeta en el navegador), lo que incluye `ownerToken` y ahora
-`ownerEmail`. El "login" de `mi-cuenta` es honestidad basada en no compartir
-el link, no un secreto criptográfico — suficiente para el volumen actual de
-clientes, pero si esto crece vale la pena mover `ownerToken`/`ownerEmail`
-fuera del JSON público hacia el propio Worker (KV/D1).
+Los secretos (`ownerToken`, `ownerEmail`, `referralCode`) ya no viven en el
+JSON público de `negocio/_data/<slug>.json` — están en Cloudflare KV
+(`secrets:<slug>`), y `POST /session` los resuelve sin exponerlos. Ver
+`workers/stripe-webhook/README.md` para el detalle de alta de cliente.
+
+## 8. Borrador antes de pagar (mockup real → cuenta futura)
+
+El builder de `index.html` ya arma el mismo objeto de datos que usa una
+tarjeta real (mismo motor `js/negocio.js` + `negocio/negocio.css`, en un
+iframe aislado — no es una plantilla de mentiras). Cuando el cliente da
+clic en "Pedir mi tarjeta a la medida":
+
+1. Dejando su correo, `js/mi-tarjeta.js` guarda ese borrador vía
+   `POST /draft` (KV, TTL 30 días) y lo enlaza a los links de Stripe como
+   `client_reference_id` + `prefilled_email` (`js/ref-capture.js`).
+2. Al pagar, el webhook usa el borrador para enriquecer la alerta al owner
+   (ya no depende de esperar a que llene Tally para ver su logo/links) y
+   arma el recap que ve en `gracias.html`.
+3. Queda una entrada en KV `orders:<email>` por cada compra — es la
+   semilla de una futura cuenta multi-negocio (ver punto 5 más abajo),
+   pero **todavía no hay dashboard** que la use.
+
+Esto es la Fase A de "cuenta de cliente" que se decidió: en vez de pedir
+login antes de pagar (fricción justo en el peor momento), se captura solo
+el correo como parte del formulario que ya iban a llenar, y la "cuenta" de
+verdad (ver todas sus tarjetas, sus pedidos) se construye después, cuando
+haya demanda real de clientes con más de un negocio — reusando el mismo
+mecanismo de magic link que ya existe en `mi-cuenta`, ahora agregando por
+correo en vez de por slug. Las solicitudes de cambio se quedan como están:
+por tarjeta específica, no a nivel cuenta.

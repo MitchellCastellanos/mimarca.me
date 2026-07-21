@@ -51,11 +51,36 @@ export async function lookupReferral(env, code) {
 }
 
 /**
+ * client_reference_id combina el código de referido y el draftId del
+ * borrador (ver js/ref-capture.js): "r.<CODE>_d.<draftId>", cualquiera de
+ * los dos puede faltar. Los links viejos (de antes de que existiera el
+ * draft) mandan el código "pelón", sin prefijo — se detecta por regex y se
+ * sigue leyendo como referido para no romper links ya compartidos.
+ */
+export function parseClientReferenceId(raw) {
+  const value = String(raw || "").trim();
+  const out = { ref: null, draftId: null };
+  if (!value) return out;
+
+  if (value.includes("r.") || value.includes("d.")) {
+    value.split("_").forEach((part) => {
+      if (part.startsWith("r.")) out.ref = part.slice(2);
+      else if (part.startsWith("d.")) out.draftId = part.slice(2);
+    });
+    return out;
+  }
+
+  if (/^[A-Z0-9]{4,16}$/i.test(value)) out.ref = value;
+  return out;
+}
+
+/**
  * Registra una redención idempotente por session.id y avisa al referidor.
  * No lanza: el caller envuelve en catch.
  */
 export async function recordReferralRedemption(env, session, sendEmailFn, renderFn) {
-  const code = String(session.client_reference_id || "").trim().toUpperCase();
+  const { ref: parsedRef } = parseClientReferenceId(session.client_reference_id);
+  const code = String(parsedRef || "").trim().toUpperCase();
   if (!code || !env.PORTAL_KV) return null;
 
   const ref = await lookupReferral(env, code);
@@ -108,3 +133,68 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
 
   return record;
 }
+
+// ============================================================
+// Borrador del builder (antes de pagar) — ver js/mi-tarjeta.js
+// ============================================================
+
+const DRAFT_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 dias
+const MAX_DRAFT_BYTES = 200 * 1024; // logo en dataURL es lo que más pesa
+
+/** Guarda {email, data} en KV con TTL y regresa el draftId generado. */
+export async function saveDraft(env, email, data) {
+  if (!env.PORTAL_KV) return null;
+  const record = JSON.stringify({ email, data, createdAt: Date.now() });
+  if (record.length > MAX_DRAFT_BYTES) {
+    throw new Error("draft too large");
+  }
+  const draftId = crypto.randomUUID();
+  await env.PORTAL_KV.put(`draft:${draftId}`, record, {
+    expirationTtl: DRAFT_TTL_SECONDS,
+  });
+  return draftId;
+}
+
+/** Lee un borrador guardado. null si no existe/expiró. */
+export async function getDraft(env, draftId) {
+  if (!env.PORTAL_KV || !draftId) return null;
+  return env.PORTAL_KV.get(`draft:${draftId}`, { type: "json" });
+}
+
+/**
+ * El redirect que Stripe manda al navegador justo después de pagar solo
+ * trae `session_id` (se configura una sola vez en el Dashboard, no se le
+ * puede pegar un `draft=` dinámico por sesión) — así que el webhook deja
+ * este mapeo para que gracias.html pueda encontrar su borrador con lo
+ * único que sí tiene a la mano.
+ */
+export async function linkSessionToDraft(env, sessionId, draftId) {
+  if (!env.PORTAL_KV || !sessionId || !draftId) return;
+  await env.PORTAL_KV.put(`session-draft:${sessionId}`, draftId, {
+    expirationTtl: DRAFT_TTL_SECONDS,
+  });
+}
+
+/** { draftId, email, data } a partir del session_id que trae la URL de gracias.html. */
+export async function getDraftBySession(env, sessionId) {
+  if (!env.PORTAL_KV || !sessionId) return null;
+  const draftId = await env.PORTAL_KV.get(`session-draft:${sessionId}`);
+  if (!draftId) return null;
+  const draft = await getDraft(env, draftId);
+  if (!draft) return null;
+  return { draftId, ...draft };
+}
+
+/**
+ * Semilla de la futura cuenta multi-negocio: una lista (por correo) de
+ * pedidos ya pagados, sin UI todavía — el equipo la usa a mano para saber
+ * qué borrador corresponde a qué pago mientras no exista el dashboard.
+ */
+export async function recordPendingOrder(env, { email, draftId, sessionId, packageName }) {
+  if (!env.PORTAL_KV || !email) return;
+  const key = `orders:${email.trim().toLowerCase()}`;
+  const prev = (await env.PORTAL_KV.get(key, { type: "json" })) || [];
+  prev.push({ draftId: draftId || null, sessionId, packageName, at: Date.now(), slug: null });
+  await env.PORTAL_KV.put(key, JSON.stringify(prev.slice(-50)));
+}
+

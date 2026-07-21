@@ -13,6 +13,8 @@
     {{session_id}}           - Stripe Checkout Session id (cs_...)
     {{order_date}}           - formatted date/time of purchase
     {{stripe_dashboard_url}} - https://dashboard.stripe.com/payments/{{payment_intent_id}}
+    {{draft_business_name}} - nombre que llenó en el builder antes de pagar, o "—"
+    {{draft_links_summary}} - resumen de sus links del builder ("WhatsApp: ...  ·  Instagram: ..."), o "—"
 
   Suggested subject line:
     "💰 Nuevo pago — {{package_name}} (${{amount}} {{currency}}) — {{customer_name}}"
@@ -61,6 +63,14 @@
                 <tr>
                   <td style="padding:14px 18px;font-size:13px;color:#6c757d;border-bottom:1px solid #e9ecef;">Monto</td>
                   <td style="padding:14px 18px;font-size:13px;color:#212529;font-weight:700;text-align:right;border-bottom:1px solid #e9ecef;">${{amount}} {{currency}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;font-size:13px;color:#6c757d;border-bottom:1px solid #e9ecef;">Negocio (borrador)</td>
+                  <td style="padding:14px 18px;font-size:13px;color:#212529;font-weight:700;text-align:right;border-bottom:1px solid #e9ecef;">{{draft_business_name}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 18px;font-size:13px;color:#6c757d;border-bottom:1px solid #e9ecef;">Links (borrador)</td>
+                  <td style="padding:14px 18px;font-size:12px;color:#212529;text-align:right;border-bottom:1px solid #e9ecef;">{{draft_links_summary}}</td>
                 </tr>
                 <tr>
                   <td style="padding:14px 18px;font-size:13px;color:#6c757d;border-bottom:1px solid #e9ecef;">Referencia</td>

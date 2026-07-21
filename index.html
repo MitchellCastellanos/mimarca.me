@@ -41,6 +41,11 @@
   <meta name="twitter:description" content="Tu propio link tipo Linktree, pero diseñado a la medida por humanos. Promo de lanzamiento $199 MXN.">
   <meta name="twitter:image" content="https://mimarca.me/images/og/mimarca-mi-tarjeta-preview.jpg">
 
+  <!-- URL base del worker de portal (guardar borrador antes de pagar). Ver
+       workers/stripe-webhook/README.md. Mientras diga REPLACE, el builder
+       sigue funcionando pero no guarda el borrador antes de pagar. -->
+  <meta name="mitp-portal-api" content="REPLACE-PORTAL_API_BASE_URL">
+
   <!-- Performance -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://api.qrserver.com" crossorigin>
@@ -489,9 +494,14 @@
         <div class="text-center mt-4 d-none" id="mtResultCTA">
           <h3 class="h5 fw-bold text-white mb-2">Esto ya es tuyo — solo falta pulirlo.</h3>
           <p class="text-white-50 mb-3">Es tu tarjeta con tus datos reales, no una plantilla genérica. Al pagar, un diseñador humano la toma, la perfecciona y te manda tu <strong>propuesta personalizada</strong> a tu panel para que le des tu <strong>visto bueno</strong> antes de publicarla.</p>
-          <a href="#precios" class="btn btn-warning btn-lg">
+          <div class="mt-email-gate mx-auto mb-3">
+            <label class="form-label small text-white-50 mb-1" for="mtEmail">Tu correo (para guardar esto y avisarte)</label>
+            <input type="email" id="mtEmail" class="form-control" placeholder="tucorreo@ejemplo.com" required>
+          </div>
+          <button type="button" id="mtProceedBtn" class="btn btn-warning btn-lg">
             <i class="bi bi-rocket me-1"></i> Pedir mi tarjeta a la medida
-          </a>
+          </button>
+          <div id="mtProceedNote" class="form-text small mt-2"></div>
         </div>
       </div>
     </div>
