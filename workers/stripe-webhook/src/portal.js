@@ -289,3 +289,68 @@ export async function setLinks(env, slug, links) {
   await env.PORTAL_KV.put(`links:${slug}`, JSON.stringify({ links, updatedAt: Date.now() }));
 }
 
+// ============================================================
+// Servicios / precios (autoedición, mi-cuenta "Tus precios") —
+// pensado para tarjetas premium / hechas a mano (piloto RCR).
+// ============================================================
+
+/** Cupo de servicios por paquete. Premium es la vitrina (menú amplio). */
+export const SERVICES_QUOTA_BY_PACKAGE = {
+  lanzamiento: 0,
+  personalizado: 8,
+  premium: 20,
+};
+
+const DEFAULT_SERVICES_QUOTA = SERVICES_QUOTA_BY_PACKAGE.personalizado;
+
+export function resolveServicesQuota(packageName, currentCount = 0) {
+  const known = SERVICES_QUOTA_BY_PACKAGE[normalizePackageKey(packageName)];
+  if (known != null) return known;
+  return Math.max(DEFAULT_SERVICES_QUOTA, currentCount);
+}
+
+/**
+ * Valida el array de servicios/precios. Acepta price numérico o string
+ * tipo "$150" / "150". Lanza Error con mensaje seguro para el panel.
+ */
+export function validateServices(services, quota) {
+  if (!Array.isArray(services)) throw new Error("formato inválido");
+  if (quota <= 0) throw new Error("tu paquete no incluye edición de precios");
+  if (services.length > quota) {
+    throw new Error(`tu paquete incluye hasta ${quota} servicios — quita alguno o sube de paquete`);
+  }
+
+  return services.map((raw, i) => {
+    if (!raw || typeof raw !== "object") throw new Error(`servicio #${i + 1} inválido`);
+    const name = String(raw.name || "").trim().slice(0, 80);
+    if (!name) throw new Error(`al servicio #${i + 1} le falta un nombre`);
+
+    let price = raw.price;
+    if (typeof price === "string") {
+      const cleaned = price.replace(/[^0-9.]/g, "");
+      price = cleaned === "" ? null : Number(cleaned);
+    }
+    if (price != null && (typeof price !== "number" || Number.isNaN(price) || price < 0 || price > 999999)) {
+      throw new Error(`el precio de "${name}" no es válido`);
+    }
+
+    const description = String(raw.description || raw.desc || "").trim().slice(0, 200);
+    const note = String(raw.note || "").trim().slice(0, 120);
+    const id = String(raw.id || `svc-${i + 1}`).trim().slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, "") || `svc-${i + 1}`;
+    const order = Number.isFinite(Number(raw.order)) ? Number(raw.order) : i;
+    const active = raw.active === false ? false : true;
+
+    return { id, name, description, price: price == null ? null : price, note, order, active };
+  });
+}
+
+export async function getServices(env, slug) {
+  if (!env.PORTAL_KV || !slug) return null;
+  return env.PORTAL_KV.get(`services:${slug}`, { type: "json" });
+}
+
+export async function setServices(env, slug, services) {
+  if (!env.PORTAL_KV || !slug) return;
+  await env.PORTAL_KV.put(`services:${slug}`, JSON.stringify({ services, updatedAt: Date.now() }));
+}
+

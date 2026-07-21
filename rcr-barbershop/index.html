@@ -2,30 +2,33 @@
 <html lang="es-MX">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RCR Barber Shop en Querétaro | Cortes y barba</title>
-  <meta name="description" content="RCR Barber Shop en Querétaro: cortes de cabello, barba, fade, afeitado y tratamientos capilares. Consulta horarios, ubicación y agenda por WhatsApp." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="RCR Barber Shop en Querétaro: cortes de cabello, barba, fade, afeitado y tratamientos. Reserva, ubicación, precios y galería en un solo lugar." />
+  <meta name="author" content="mimarca" />
   <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#111111" />
+  <meta name="theme-color" content="#0A0A0A" />
   <meta name="mitp-portal-api" content="https://mimarca-stripe-webhook.mimarca.workers.dev" />
   <meta name="mitp-slug" content="rcr-barbershop" />
   <link rel="canonical" href="https://mimarca.me/rcr-barbershop/" />
-  <link rel="icon" type="image/png" href="../images/logo.PNG" />
-  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
 
+  <!-- Open Graph -->
   <meta property="og:type" content="business.business" />
   <meta property="og:locale" content="es_MX" />
   <meta property="og:site_name" content="RCR Barber Shop" />
   <meta property="og:title" content="RCR Barber Shop en Querétaro" />
-  <meta property="og:description" content="Cortes, barba y estilo para caballeros. Consulta horarios, ubicación y agenda por WhatsApp." />
-  <meta property="og:url" content="https://mimarca.me/rcr-barbershop/" />
+  <meta property="og:description" content="Reserva, ubicación, precios y galería. Corte, barba y estilo para caballeros." />
   <meta property="og:image" content="https://mimarca.me/images/portfolio/CoverRCR.jpg" />
   <meta property="og:image:alt" content="RCR Barber Shop en Querétaro" />
+  <meta property="og:url" content="https://mimarca.me/rcr-barbershop/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="RCR Barber Shop en Querétaro" />
   <meta name="twitter:description" content="Cortes, barba y estilo para caballeros. Agenda por WhatsApp." />
   <meta name="twitter:image" content="https://mimarca.me/images/portfolio/CoverRCR.jpg" />
-  <meta name="twitter:image:alt" content="RCR Barber Shop en Querétaro" />
+
+  <title>RCR Barber Shop en Querétaro | Cortes y barba</title>
+
+  <link rel="icon" type="image/png" href="Images/favicon-32x32.png" />
+  <link rel="apple-touch-icon" href="Images/Logo_RCR_2025.PNG" />
 
   <script type="application/ld+json">
   {
@@ -42,200 +45,524 @@
       "https://www.instagram.com/rcr_barbershop",
       "https://www.facebook.com/rcr.carlos.2025",
       "https://www.rcr-barbershop.com/"
-    ],
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "opens": "10:00",
-        "closes": "20:00"
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": "Sunday",
-        "opens": "11:00",
-        "closes": "16:00"
-      }
     ]
   }
   </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="page-wrapper">
-    <div class="card">
 
-      <header class="card-header">
-        <div class="logo-container">
-          <img src="../images/logo.PNG" alt="RCR Barber Shop Logo" class="logo" />
+  <div class="bg-aurora" aria-hidden="true">
+    <span class="aurora a1"></span>
+    <span class="aurora a2"></span>
+    <span class="aurora a3"></span>
+  </div>
+  <div class="bg-grain" aria-hidden="true"></div>
+
+  <main class="page-wrapper">
+
+    <article class="card" id="card">
+
+      <!-- ───────────── HERO ───────────── -->
+      <header class="hero">
+        <div class="hero-bg" aria-hidden="true">
+          <div class="hero-stripes"></div>
+          <div class="hero-glow"></div>
         </div>
-        <div class="header-text">
-          <h1 class="brand-name">
+
+        <div class="hero-content">
+          <div class="avatar-wrap reveal" style="--d:0ms">
+            <span class="avatar-ring"></span>
+            <span class="avatar-glow"></span>
+            <img src="Images/Logo_RCR_2025.PNG" alt="RCR Barber Shop" class="avatar" />
+            <span class="avatar-sparkle s1"></span>
+            <span class="avatar-sparkle s2"></span>
+            <span class="avatar-sparkle s3"></span>
+          </div>
+
+          <h1 class="brand-name reveal" style="--d:80ms">
             <span class="brand-rcr">RCR</span>
-            <span class="brand-barbershop">Barber Shop</span>
+            <span class="brand-row">
+              <span class="brand-barbershop">Barber Shop</span>
+              <span class="verified" title="Cuenta oficial verificada" aria-label="Cuenta oficial verificada">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path fill="currentColor" d="M12 1.5l2.5 2.1 3.3-.4.9 3.2 3 1.5-1.2 3.1 1.2 3.1-3 1.5-.9 3.2-3.3-.4L12 22.5l-2.5-2.1-3.3.4-.9-3.2-3-1.5 1.2-3.1L2.3 9.9l3-1.5.9-3.2 3.3.4L12 1.5z"/>
+                  <path fill="#0A0A0A" d="M10.6 15.4l-3-3 1.4-1.4 1.6 1.6 4.6-4.6 1.4 1.4-6 6z"/>
+                </svg>
+              </span>
+            </span>
           </h1>
-          <p class="tagline">Corte, barba y estilo para caballeros</p>
+
+          <p class="tagline reveal" style="--d:140ms" data-bind="tagline">Corte, barba y estilo para caballeros</p>
+
+          <div class="hero-meta reveal" style="--d:200ms">
+            <span class="status-pill" id="statusPill" aria-live="polite">
+              <span class="status-dot"></span>
+              <span class="status-text">Cargando…</span>
+            </span>
+            <span class="meta-divider"></span>
+            <span class="meta-item">
+              <i class="fas fa-star"></i>
+              <strong data-bind="rating">5.0</strong>
+            </span>
+            <span class="meta-divider"></span>
+            <span class="meta-item">
+              <i class="far fa-calendar-check"></i>
+              Est. <span data-bind="established">2023</span>
+            </span>
+          </div>
         </div>
-        <div class="gold-divider"></div>
       </header>
 
-      <main class="links-section" data-mitp-links>
+      <!-- ───────────── FEATURED CTA ───────────── -->
+      <a href="#" target="_blank" rel="noopener" class="featured-cta reveal" style="--d:260ms" data-link="bookingCta">
+        <span class="cta-shine" aria-hidden="true"></span>
+        <span class="cta-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+            <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </span>
+        <span class="cta-text">
+          <span class="cta-title">Agendar Cita</span>
+          <span class="cta-subtitle">Respuesta en minutos por WhatsApp</span>
+        </span>
+        <span class="cta-arrow"><i class="fas fa-arrow-right"></i></span>
+      </a>
 
-        <a href="https://wa.me/524423536769" target="_blank" rel="noopener" class="link-btn whatsapp">
-          <span class="btn-icon">
-            <i class="fab fa-whatsapp"></i>
+      <!-- ───────────── LINKS (autoeditables vía wire-card.js) ───────────── -->
+      <section class="links-section" aria-label="Enlaces principales" data-mitp-links>
+
+        <a href="#" target="_blank" rel="noopener" class="link-btn instagram reveal" style="--d:320ms" data-link="instagram">
+          <span class="btn-icon"><i class="fab fa-instagram"></i></span>
+          <span class="btn-body">
+            <span class="btn-label">Instagram <span class="badge badge-popular">POPULAR</span></span>
+            <span class="btn-meta" data-bind="instagramHandle">@rcr_barbershop</span>
           </span>
-          <span class="btn-label">WhatsApp</span>
           <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
 
-        <a href="https://www.instagram.com/rcr_barbershop" target="_blank" rel="noopener" class="link-btn instagram">
-          <span class="btn-icon">
-            <i class="fab fa-instagram"></i>
+        <a href="#" target="_blank" rel="noopener" class="link-btn facebook reveal" style="--d:440ms" data-link="facebook">
+          <span class="btn-icon"><i class="fab fa-facebook-f"></i></span>
+          <span class="btn-body">
+            <span class="btn-label">Facebook</span>
+            <span class="btn-meta">Síguenos en Facebook</span>
           </span>
-          <span class="btn-label">Instagram</span>
           <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
 
-        <a href="https://www.facebook.com/rcr.carlos.2025" target="_blank" rel="noopener" class="link-btn facebook">
-          <span class="btn-icon">
-            <i class="fab fa-facebook-f"></i>
+        <a href="#" target="_blank" rel="noopener" class="link-btn website reveal" style="--d:500ms" data-link="website">
+          <span class="btn-icon"><i class="fas fa-globe"></i></span>
+          <span class="btn-body">
+            <span class="btn-label">Sitio Web</span>
+            <span class="btn-meta" data-bind="websiteLabel">rcr-barbershop.com</span>
           </span>
-          <span class="btn-label">Facebook</span>
           <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
 
-        <a href="https://wa.me/524423536769" target="_blank" rel="noopener" class="link-btn appointment">
+        <a href="#" target="_blank" rel="noopener" class="link-btn location reveal" style="--d:560ms" data-link="maps">
           <span class="btn-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </span>
-          <span class="btn-label">Agendar Cita</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://www.rcr-barbershop.com/" target="_blank" rel="noopener" class="link-btn website">
-          <span class="btn-icon">
-            <i class="fas fa-globe"></i>
-          </span>
-          <span class="btn-label">Sitio Web</span>
-          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-        </a>
-
-        <a href="https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&sa=X&ved=2ahUKEwjB_7K-5ZaTAxWFC0QIHVKZN8sQ4kB6BAgMEAA&hl=es" target="_blank" rel="noopener" class="link-btn location">
-          <span class="btn-icon">
-            <img src="../images/location-pin.PNG" alt="" class="btn-img-icon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <img src="Images/SinFondo_Location_Pin_RCR.png" alt="" class="btn-img-icon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
             <i class="fas fa-map-marker-alt" style="display:none;"></i>
           </span>
-          <span class="btn-label">Ubicación</span>
+          <span class="btn-body">
+            <span class="btn-label">Ubicación</span>
+            <span class="btn-meta">Cómo llegar en Google Maps</span>
+          </span>
           <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
         </a>
 
-      </main>
+      </section>
 
-      <section class="services-section">
-        <h2 class="services-title">
+      <!-- ───────────── PRECIOS ───────────── -->
+      <section class="prices-section reveal" style="--d:600ms" id="pricesSection">
+        <h2 class="section-title">
           <span class="gold-line"></span>
-          Servicios
+          Servicios y Precios
           <span class="gold-line"></span>
         </h2>
-        <div class="services-grid">
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M6 9l6-6 6 6M6 15l6 6 6-6"/>
-            </svg>
-            Corte de Cabello
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2C7 2 3 6 3 10s4 8 9 8 9-4 9-8-4-8-9-8z"/>
-              <path d="M8 14s1 2 4 2 4-2 4-2"/>
-            </svg>
-            Barba
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            Fade
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
-            </svg>
-            Afeitado
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M7 4l4 4-4 4M3 12h18M13 4l4 4-4 4"/>
-            </svg>
-            Perfilado
-          </div>
-          <div class="service-item">
-            <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
-              <path d="M12 8v4l3 3"/>
-            </svg>
-            Tratamientos Capilares
-          </div>
+        <div class="prices-list" id="pricesList">
+          <!-- Rendered by JS -->
+        </div>
+        <p class="prices-note">Los precios pueden variar según el servicio. Consulta por WhatsApp para detalles.</p>
+      </section>
+
+      <!-- ───────────── GALERÍA ───────────── -->
+      <section class="gallery-section reveal" style="--d:640ms" id="gallerySection" hidden>
+        <h2 class="section-title">
+          <span class="gold-line"></span>
+          Galería
+          <span class="gold-line"></span>
+        </h2>
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Rendered by JS -->
         </div>
       </section>
 
-      <section class="review-section">
-        <a href="https://forms.gle/M6wTSV7KCRXuBDui7" target="_blank" rel="noopener" class="review-banner">
-          <img src="../images/review-banner.JPG" alt="Déjanos tu opinión - Haz clic aquí" class="review-banner-img" onerror="this.style.display='none'; this.closest('.review-banner').classList.add('review-fallback');" />
+      <!-- ───────────── REVIEW ───────────── -->
+      <section class="review-section reveal" style="--d:680ms">
+        <a href="#" target="_blank" rel="noopener" class="review-banner" data-link="reviewForm">
+          <img src="Images/Banner_GForm_2026.png" alt="Déjanos tu opinión - Haz clic aquí" class="review-banner-img" onerror="this.style.display='none'; this.closest('.review-banner').classList.add('review-fallback');" />
           <div class="review-fallback-content">
             <div class="review-logo-wrap">
-              <img src="../images/logo.PNG" alt="RCR" class="review-logo" />
+              <img src="Images/Logo_RCR_2025.PNG" alt="RCR" class="review-logo" />
             </div>
             <div class="review-text">
               <p class="review-title">Déjanos tu opinión</p>
-              <p class="review-subtitle">Haz clic aquí</p>
+              <p class="review-subtitle">Responde una breve encuesta</p>
             </div>
           </div>
+          <span class="banner-shine" aria-hidden="true"></span>
         </a>
       </section>
 
-      <footer class="hours-section">
+      <!-- ───────────── HORARIOS ───────────── -->
+      <section class="hours-section reveal" style="--d:740ms">
         <div class="barber-pole-wrap">
-          <img src="../images/barber-pole.PNG" alt="" class="barber-pole-img" onerror="this.style.display='none';" />
+          <img src="Images/Poste barberia.png" alt="" class="barber-pole-img" onerror="this.style.display='none';" />
         </div>
-        <div class="hours-info">
-          <p class="hours-line">
-            <i class="far fa-clock hours-icon"></i>
-            Lunes a Sábado: <strong>10 am – 8 pm</strong>
-          </p>
-          <p class="hours-line">
-            <i class="far fa-clock hours-icon"></i>
-            Domingos: <strong>11 am – 4 pm</strong>
-          </p>
+        <h2 class="section-title small">
+          <span class="gold-line"></span>
+          Horarios
+          <span class="gold-line"></span>
+        </h2>
+        <div class="hours-grid" id="hoursGrid">
+          <!-- Rendered by JS -->
         </div>
-        <p class="footer-copy">© 2023 RCR Barber Shop · Est. 2023</p>
-        <p class="footer-copy" style="margin-top:8px;opacity:0.55;">
-          <a href="../" style="color:inherit;text-decoration:none;">Mi Tarjeta Pro</a> · by mimarca
+        <p class="footer-copy">
+          © <span data-bind="established">2023</span> <span data-bind="businessName">RCR Barber Shop</span> · <span data-bind="location">Querétaro, México</span>
         </p>
-      </footer>
+      </section>
 
-    </div>
+    </article>
+
+    <a href="../" class="gaban-credit reveal" style="--d:820ms" aria-label="Diseñado por mimarca · Mi Tarjeta Pro">
+      <img src="Images/logo-mimarca.png" alt="mimarca" class="gaban-logo" />
+      <span class="gaban-text">Diseñado por <strong>mimarca</strong> · Mi Tarjeta Pro</span>
+    </a>
+
+  </main>
+
+  <!-- Lightbox for gallery -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">
+      <i class="fas fa-times"></i>
+    </button>
+    <button class="lightbox-prev" id="lightboxPrev" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+    <button class="lightbox-next" id="lightboxNext" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
+    <img class="lightbox-img" id="lightboxImg" alt="" />
   </div>
 
-  <!-- Plantilla de link para la autoedición desde mi-cuenta ("Tus links"):
-       js/wire-card.js clona esto (mismo markup y CSS de esta página) solo
-       si el cliente ya editó sus links. Sin edición, el HTML de arriba se
-       queda tal cual. -->
-  <template data-mitp-link-template>
-    <a target="_blank" rel="noopener" class="link-btn">
-      <span class="btn-icon" data-mitp="icon"><i class="fas fa-globe"></i></span>
-      <span class="btn-label" data-mitp="label"></span>
-      <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
-    </a>
-  </template>
-  <script src="../js/wire-card.js" defer></script>
+  <script type="module">
+    import { subscribeData } from "./data-store.js";
+
+    const $  = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function fmtTime(hhmm) {
+      if (!hhmm) return "";
+      const [h, m] = hhmm.split(":").map(Number);
+      const period = h >= 12 ? "pm" : "am";
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+    }
+    function fmtPrice(p) {
+      if (p == null || p === "") return "";
+      const n = Number(p);
+      if (Number.isNaN(n)) return String(p);
+      return `$${n.toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
+    }
+    function buildWa(phone, msg) {
+      const num = String(phone || "").replace(/[^\d]/g, "");
+      if (!num) return "#";
+      const t = msg ? `?text=${encodeURIComponent(msg)}` : "";
+      return `https://wa.me/${num}${t}`;
+    }
+
+    function render(data) {
+      const { business, links, hours, services, gallery } = data;
+
+      const bindings = {
+        tagline:         business.tagline,
+        rating:          business.rating != null ? Number(business.rating).toFixed(1) : "",
+        established:     business.established,
+        businessName:    business.name,
+        location:        business.location,
+        instagramHandle: links.instagramHandle,
+        websiteLabel:    links.websiteLabel,
+      };
+      Object.entries(bindings).forEach(([key, val]) => {
+        $$(`[data-bind="${key}"]`).forEach(el => {
+          if (val != null && val !== "") el.textContent = val;
+        });
+      });
+
+      const waBooking = links._bookingCtaUrl
+        || buildWa(links.whatsapp, links.whatsappBookingMessage);
+      const linkMap = {
+        bookingCta:  waBooking,
+        instagram:   links.instagram,
+        facebook:    links.facebook,
+        website:     links.website,
+        maps:        links.maps,
+        reviewForm:  links.reviewForm,
+      };
+      Object.entries(linkMap).forEach(([key, href]) => {
+        $$(`[data-link="${key}"]`).forEach(el => {
+          if (href) el.setAttribute("href", href);
+        });
+      });
+
+      // Links extra del portal (TikTok, etc.) que no tienen slot fijo en el kit.
+      appendExtraLinks(links._portalLinks);
+
+      const list = $("#pricesList");
+      list.innerHTML = "";
+      const activeServices = (services || [])
+        .filter(s => s && s.active !== false)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      if (activeServices.length === 0) {
+        list.innerHTML = `<p class="prices-empty">Próximamente.</p>`;
+      } else {
+        activeServices.forEach(s => {
+          const item = document.createElement("div");
+          item.className = "price-item";
+          item.innerHTML = `
+            <div class="price-main">
+              <h3 class="price-name">${escapeHtml(s.name || "")}</h3>
+              ${s.description ? `<p class="price-desc">${escapeHtml(s.description)}</p>` : ""}
+              ${s.note        ? `<p class="price-note">${escapeHtml(s.note)}</p>` : ""}
+            </div>
+            <div class="price-tag">${escapeHtml(fmtPrice(s.price))}</div>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      const gallerySection = $("#gallerySection");
+      const grid = $("#galleryGrid");
+      const sortedGallery = (gallery || [])
+        .filter(g => g && g.url)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      if (sortedGallery.length === 0) {
+        gallerySection.hidden = true;
+      } else {
+        gallerySection.hidden = false;
+        grid.innerHTML = "";
+        sortedGallery.forEach((g, i) => {
+          const cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = "gallery-cell";
+          cell.dataset.index = i;
+          cell.innerHTML = `<img src="${escapeAttr(g.url)}" alt="${escapeAttr(g.alt || "Galería RCR")}" loading="lazy" />`;
+          grid.appendChild(cell);
+        });
+        setupLightbox(sortedGallery);
+      }
+
+      renderHours(hours);
+      updateStatus(hours);
+
+      requestAnimationFrame(() => {
+        $$(".reveal").forEach(el => el.classList.add("in"));
+      });
+    }
+
+    function renderHours(hours) {
+      const grid = $("#hoursGrid");
+      grid.innerHTML = "";
+      const weekdayHours = [1,2,3,4,5,6].map(d => hours[d]);
+      const allSame = weekdayHours.every(h => h && JSON.stringify(h) === JSON.stringify(weekdayHours[0]));
+
+      const rows = [];
+      if (allSame) {
+        rows.push(["Lunes – Sábado", hours[1]]);
+        rows.push(["Domingo",        hours[0]]);
+      } else {
+        const names = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+        for (let d = 1; d <= 6; d++) rows.push([names[d], hours[d]]);
+        rows.push([names[0], hours[0]]);
+      }
+
+      rows.forEach(([label, h]) => {
+        const row = document.createElement("div");
+        row.className = "hours-row";
+        const time = !h || h.closed
+          ? `<span class="hours-closed">Cerrado</span>`
+          : `${fmtTime(h.open)} – ${fmtTime(h.close)}`;
+        row.innerHTML = `
+          <span class="hours-day">${escapeHtml(label)}</span>
+          <span class="hours-time">${time}</span>
+        `;
+        grid.appendChild(row);
+      });
+    }
+
+    function updateStatus(hours) {
+      const pill = $("#statusPill");
+      if (!pill) return;
+      const text = pill.querySelector(".status-text");
+
+      const fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Mexico_City",
+        weekday: "short", hour: "numeric", minute: "numeric", hour12: false,
+      });
+      const parts = fmt.formatToParts(new Date());
+      const dayMap = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
+      const day = dayMap[parts.find(p => p.type === "weekday").value];
+      const hour = parseInt(parts.find(p => p.type === "hour").value, 10);
+      const minute = parseInt(parts.find(p => p.type === "minute").value, 10);
+      const decimal = hour + minute / 60;
+
+      const today = hours[day];
+      const decimalize = (s) => {
+        if (!s) return null;
+        const [h, m] = s.split(":").map(Number);
+        return h + m / 60;
+      };
+
+      const isOpen = today && !today.closed
+        && decimal >= decimalize(today.open)
+        && decimal <  decimalize(today.close);
+
+      if (isOpen) {
+        pill.classList.add("is-open");
+        pill.classList.remove("is-closed");
+        text.textContent = `Abierto · cierra a las ${fmtTime(today.close)}`;
+      } else {
+        pill.classList.add("is-closed");
+        pill.classList.remove("is-open");
+        let next = null, addDays = 0;
+        for (let i = 0; i < 8; i++) {
+          const idx = (day + i) % 7;
+          const slot = hours[idx];
+          if (!slot || slot.closed) continue;
+          const open = decimalize(slot.open);
+          if (i === 0 && decimal < open) { next = slot; addDays = 0; break; }
+          if (i > 0) { next = slot; addDays = i; break; }
+        }
+        const dayNames = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+        if (next) {
+          const when = addDays === 0 ? "hoy" : addDays === 1 ? "mañana" : `el ${dayNames[(day + addDays) % 7]}`;
+          text.textContent = `Cerrado · abre ${when} a las ${fmtTime(next.open)}`;
+        } else {
+          text.textContent = "Cerrado";
+        }
+      }
+    }
+
+    let lbItems = [];
+    let lbIdx = 0;
+    function setupLightbox(items) {
+      lbItems = items;
+      const grid = $("#galleryGrid");
+      const lb = $("#lightbox");
+      const img = $("#lightboxImg");
+      grid.onclick = (e) => {
+        const cell = e.target.closest(".gallery-cell");
+        if (!cell) return;
+        lbIdx = parseInt(cell.dataset.index, 10);
+        showLb();
+      };
+      $("#lightboxClose").onclick = hideLb;
+      $("#lightboxPrev").onclick  = () => { lbIdx = (lbIdx - 1 + lbItems.length) % lbItems.length; updateLb(); };
+      $("#lightboxNext").onclick  = () => { lbIdx = (lbIdx + 1) % lbItems.length; updateLb(); };
+      lb.onclick = (e) => { if (e.target === lb) hideLb(); };
+      document.addEventListener("keydown", (e) => {
+        if (lb.hidden) return;
+        if (e.key === "Escape") hideLb();
+        if (e.key === "ArrowLeft")  $("#lightboxPrev").click();
+        if (e.key === "ArrowRight") $("#lightboxNext").click();
+      });
+      function showLb() { lb.hidden = false; document.body.style.overflow = "hidden"; updateLb(); }
+      function hideLb() { lb.hidden = true; document.body.style.overflow = ""; }
+      function updateLb() {
+        const it = lbItems[lbIdx];
+        img.src = it.url;
+        img.alt = it.alt || "";
+      }
+    }
+
+    const KNOWN_LINK_STYLES = new Set([
+      "instagram", "facebook", "website", "location", "appointment", "whatsapp",
+    ]);
+    const EXTRA_STYLE_ICON = {
+      tiktok: { cls: "website", icon: "fab fa-tiktok" },
+      youtube: { cls: "website", icon: "fab fa-youtube" },
+      default: { cls: "website", icon: "fas fa-link" },
+    };
+
+    function appendExtraLinks(portalLinks) {
+      const section = document.querySelector("[data-mitp-links]");
+      if (!section) return;
+      section.querySelectorAll("[data-mitp-extra]").forEach((el) => el.remove());
+      if (!Array.isArray(portalLinks)) return;
+
+      portalLinks.forEach((link) => {
+        if (!link || !link.url || !link.label) return;
+        const style = String(link.style || "").trim().toLowerCase();
+        if (KNOWN_LINK_STYLES.has(style)) return;
+
+        const look = EXTRA_STYLE_ICON[style] || EXTRA_STYLE_ICON.default;
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.className = `link-btn ${look.cls} reveal in`;
+        a.dataset.mitpExtra = "1";
+        a.innerHTML = `
+          <span class="btn-icon"><i class="${look.icon}"></i></span>
+          <span class="btn-body">
+            <span class="btn-label">${escapeHtml(link.label)}</span>
+            ${link.subtitle ? `<span class="btn-meta">${escapeHtml(link.subtitle)}</span>` : ""}
+          </span>
+          <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
+        `;
+        section.appendChild(a);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+    function escapeAttr(s) { return escapeHtml(s); }
+
+    let lastData = null;
+    let firstRender = true;
+    subscribeData((data) => {
+      lastData = data;
+      render(data);
+      if (firstRender) {
+        firstRender = false;
+        const card = $("#card");
+        if (card && !matchMedia("(pointer: coarse)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          const hero = card.querySelector(".hero");
+          hero.addEventListener("mousemove", (e) => {
+            const r = hero.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            hero.style.setProperty("--tx", (x * 6).toFixed(2) + "px");
+            hero.style.setProperty("--ty", (y * 6).toFixed(2) + "px");
+          });
+          hero.addEventListener("mouseleave", () => {
+            hero.style.setProperty("--tx", "0px");
+            hero.style.setProperty("--ty", "0px");
+          });
+        }
+        setInterval(() => {
+          if (lastData) updateStatus(lastData.hours);
+        }, 60 * 1000);
+      }
+    });
+  </script>
 </body>
 </html>

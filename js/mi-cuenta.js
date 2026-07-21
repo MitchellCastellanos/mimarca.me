@@ -235,6 +235,32 @@
     `;
   }
 
+  function servicesEditorBlockHtml(data) {
+    if (data.orderStage !== 'published') return '';
+    if (!data.canEditServices && !(Array.isArray(data.services) && data.services.length)) return '';
+    const quota = Number(data.servicesQuota) || 0;
+    if (quota <= 0 && !(data.services && data.services.length)) return '';
+    return `
+      <div class="col-md-12">
+        <div class="card mc-card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+              <h2 class="h6 fw-bold text-uppercase mb-0"><i class="bi bi-cash-coin me-1"></i>Tus precios</h2>
+              <span class="badge text-bg-light border" id="mcServicesCounter"></span>
+            </div>
+            <p class="small text-muted mb-3">Actualiza nombres, descripciones y precios de tu menú — se reflejan al instante en tu tarjeta.</p>
+            <div id="mcServicesRows"></div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <button type="button" id="mcServicesAddBtn" class="btn btn-outline-dark btn-sm"><i class="bi bi-plus-lg me-1"></i> Agregar servicio</button>
+              <button type="button" id="mcServicesSaveBtn" class="btn btn-dark btn-sm"><i class="bi bi-check-lg me-1"></i> Guardar precios</button>
+            </div>
+            <div id="mcServicesNote" class="form-text small mt-2"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function linksRowHtml(link, i) {
     return `
       <div class="row g-2 align-items-center mb-2 mc-links-row" data-idx="${i}">
@@ -335,6 +361,146 @@
     });
   }
 
+  function servicesRowHtml(svc, i) {
+    const priceVal = svc.price == null || svc.price === '' ? '' : String(svc.price).replace(/[^0-9.]/g, '');
+    const desc = svc.description || svc.desc || '';
+    return `
+      <div class="border rounded p-2 mb-2 mc-services-row" data-idx="${i}">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-5">
+            <input type="text" class="form-control form-control-sm mc-svc-name" placeholder="Servicio" value="${escapeHtml(svc.name || '')}">
+          </div>
+          <div class="col-md-3">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">$</span>
+              <input type="number" min="0" step="1" class="form-control mc-svc-price" placeholder="0" value="${escapeHtml(priceVal)}">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <input type="text" class="form-control form-control-sm mc-svc-desc" placeholder="Descripción (opcional)" value="${escapeHtml(desc)}">
+          </div>
+          <div class="col-md-1 text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm mc-svc-remove" title="Quitar"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireServicesEditor(data) {
+    const rowsEl = document.getElementById('mcServicesRows');
+    if (!rowsEl) return;
+
+    let servicesState = (Array.isArray(data.services) ? data.services : []).map((s, i) => ({
+      id: s.id || `svc-${i + 1}`,
+      name: s.name || '',
+      description: s.description || s.desc || '',
+      price: s.price,
+      note: s.note || '',
+      order: s.order != null ? s.order : i,
+      active: s.active !== false,
+    }));
+    const quota = Number(data.servicesQuota) || Math.max(servicesState.length, 8);
+    const counterEl = document.getElementById('mcServicesCounter');
+    const addBtn = document.getElementById('mcServicesAddBtn');
+    const saveBtn = document.getElementById('mcServicesSaveBtn');
+    const note = document.getElementById('mcServicesNote');
+
+    function renderRows() {
+      rowsEl.innerHTML = servicesState.length
+        ? servicesState.map(servicesRowHtml).join('')
+        : '<p class="small text-muted fst-italic mb-2">Todavía no tienes servicios — agrega el primero.</p>';
+      if (counterEl) {
+        counterEl.textContent = `${servicesState.length}/${quota} usados`;
+        counterEl.className = servicesState.length >= quota ? 'badge text-bg-warning' : 'badge text-bg-light border';
+      }
+
+      rowsEl.querySelectorAll('.mc-services-row').forEach((row) => {
+        const idx = Number(row.dataset.idx);
+        row.querySelector('.mc-svc-name').addEventListener('input', (e) => { servicesState[idx].name = e.target.value; });
+        row.querySelector('.mc-svc-price').addEventListener('input', (e) => {
+          const v = e.target.value;
+          servicesState[idx].price = v === '' ? null : Number(v);
+        });
+        row.querySelector('.mc-svc-desc').addEventListener('input', (e) => { servicesState[idx].description = e.target.value; });
+        row.querySelector('.mc-svc-remove').addEventListener('click', () => {
+          servicesState.splice(idx, 1);
+          renderRows();
+        });
+      });
+    }
+    renderRows();
+
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        if (servicesState.length >= quota) {
+          const pkgLabel = PACKAGE_LABELS[data.package] || 'tu paquete actual';
+          const waText = encodeURIComponent(`Hola, ya usé mis ${quota} servicios de ${data.slug} y quiero subir de paquete.`);
+          note.className = 'form-text small mt-2 text-warning';
+          note.innerHTML = `Ya usaste los ${quota} servicios de <strong>${escapeHtml(pkgLabel)}</strong>. Para agregar más, <a href="https://wa.me/15142580648?text=${waText}" target="_blank" rel="noopener">sube de paquete</a>.`;
+          return;
+        }
+        servicesState.push({
+          id: `svc-${Date.now()}`,
+          name: '',
+          description: '',
+          price: null,
+          note: '',
+          order: servicesState.length,
+          active: true,
+        });
+        note.textContent = '';
+        renderRows();
+      });
+    }
+
+    if (!saveBtn) return;
+    saveBtn.addEventListener('click', async () => {
+      const cleaned = servicesState.map((s, i) => ({
+        ...s,
+        name: (s.name || '').trim(),
+        description: (s.description || '').trim(),
+        order: i,
+      }));
+      if (cleaned.some((s) => !s.name)) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'Cada servicio necesita un nombre.';
+        return;
+      }
+
+      const apiBase = portalApiBase();
+      if (!apiBase) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'El guardado automático no está disponible todavía. Escríbenos por WhatsApp mientras tanto.';
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando…';
+      note.className = 'form-text small mt-2';
+      note.textContent = '';
+
+      try {
+        const res = await fetch(`${apiBase}/card-services/${encodeURIComponent(data.slug)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, services: cleaned }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error || 'no se pudo guardar');
+        servicesState = body.services || cleaned;
+        renderRows();
+        note.className = 'form-text small mt-2 text-success';
+        note.textContent = '¡Listo! Tu tarjeta ya muestra los precios actualizados.';
+      } catch (err) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = err.message && err.message !== 'no se pudo guardar' ? err.message : 'No se pudo guardar. Intenta de nuevo.';
+      }
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Guardar precios';
+    });
+  }
+
   // ---------- referidos ----------
   function referralBlockHtml(data, refUrl) {
     const code = data.referralCode ? String(data.referralCode) : '';
@@ -428,6 +594,8 @@
 
                 ${linksEditorBlockHtml(data)}
 
+                ${servicesEditorBlockHtml(data)}
+
                 <div class="col-md-12">
                   <div class="card mc-card border-0 shadow-sm">
                     <div class="card-body p-4">
@@ -475,7 +643,7 @@
                   <div class="card mc-card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#fff8e1 0%,#fff 100%);border:1px solid #f0d98a !important;">
                     <div class="card-body p-4">
                       <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-pencil-square me-1"></i>Pedir cambios</h2>
-                      <p class="small text-muted mb-3">Cambios de texto, colores o diseño por solo <strong>$25 MXN</strong> por orden. (Agregar, quitar o editar links ya es gratis arriba, en "Tus links".) <a href="../index.html#politica">Ver qué entra</a>.</p>
+                      <p class="small text-muted mb-3">Cambios de texto, colores o diseño por solo <strong>$25 MXN</strong> por orden. (Links y precios ya los editas gratis arriba.) <a href="../index.html#politica">Ver qué entra</a>.</p>
                       <a href="${escapeHtml(changeUrl)}" target="_blank" rel="noopener" class="btn btn-warning w-100 mb-2">
                         <i class="bi bi-credit-card me-1"></i> Pagar $25 MXN
                       </a>
@@ -523,6 +691,7 @@
 
   function wireDashboardEvents(data, { publicUrl, refUrl }) {
     wireLinksEditor(data);
+    wireServicesEditor(data);
 
     const btn = document.getElementById('mcCopyBtn');
     const input = document.getElementById('mcLinkInput');

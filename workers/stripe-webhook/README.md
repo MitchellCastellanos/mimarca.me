@@ -160,21 +160,36 @@ mientras no se pase del cupo de su paquete:
   self-serve, sin trabajo humano de por medio para cambios dentro del
   cupo).
 
-### Tarjetas hechas a mano (`js/wire-card.js`)
+### Tarjetas hechas a mano (piloto: `/rcr-barbershop/`)
 
-Para páginas artesanales (no generadas por `js/negocio.js`, ej.
-`/rcr-barbershop/`) que igual quieren dar acceso a `mi-cuenta` y a la
-autoedición de links: no se convierten al motor JSON (se perdería el
-diseño único), se "cablean" con `js/wire-card.js`. La página declara
-`<meta name="mitp-slug">`, marca su contenedor de links con
-`data-mitp-links` y provee un `<template data-mitp-link-template>` con
-SU propio markup/CSS. El script pide `GET /card-links/:slug` y solo
-reemplaza el contenido si el cliente ya editó algo — sin editar nunca,
-el HTML se queda tal cual se diseñó. Necesita, además del HTML marcado,
-un JSON "sombra" en `negocio/_data/<slug>.json` (no se usa para
-renderizar la página pública — solo alimenta `/session` para que el
-panel de `mi-cuenta` funcione: stepper, links iniciales,
-`changeRequestUrl`, etc.). Ejemplo de referencia: `rcr-barbershop/`.
+Páginas artesanales (no generadas por `js/negocio.js`) que igual dan
+acceso a `mi-cuenta`. No se convierten al motor JSON.
+
+**RCR (kit premium)** usa `data.default.json` + `data-store.js`: carga el
+contenido local y mezcla overrides del Worker (`GET /card-links/:slug`,
+`GET /card-services/:slug`) sobre los slots del diseño (CTA, Instagram,
+Facebook, web, Maps, menú de precios). Sin override, la tarjeta se ve
+exactamente como el kit. JSON sombra en `negocio/_data/<slug>.json` solo
+alimenta `/session` (panel).
+
+**Otras artesanales simples** pueden seguir el patrón de
+`js/wire-card.js` (`data-mitp-links` + `<template data-mitp-link-template>`).
+
+### Precios autoeditados (`/card-services/:slug`)
+
+Misma idea que links, para menús de servicios (piloto premium / handmade):
+
+| Paquete | Cupo de servicios |
+|---------|-------------------|
+| Lanzamiento | 0 (sin editor) |
+| Personalizado | 8 |
+| Premium | 20 |
+
+- `GET /card-services/:slug` — público; 404 si nunca editó
+- `PUT /card-services/:slug` — `{token,services}` autenticado
+- KV: `services:<slug>` → `{services, updatedAt}`
+- Panel: bloque "Tus precios" en `mi-cuenta` cuando el cupo > 0 y la
+  tarjeta es handmade / premium / ya trae servicios
 
 ## Deploy
 

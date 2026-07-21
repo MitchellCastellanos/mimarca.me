@@ -1,0 +1,46 @@
+{
+  "business": {
+    "name": "RCR Barber Shop",
+    "tagline": "Corte, barba y estilo para caballeros",
+    "established": 2023,
+    "location": "Querétaro, México",
+    "rating": 5.0
+  },
+  "links": {
+    "whatsapp": "+524423536769",
+    "whatsappBookingMessage": "Hola RCR, quiero agendar una cita",
+    "whatsappGenericMessage": "Hola RCR Barber Shop",
+    "instagram": "https://www.instagram.com/rcr_barbershop",
+    "instagramHandle": "@rcr_barbershop",
+    "facebook": "https://www.facebook.com/rcr.carlos.2025",
+    "website": "https://www.rcr-barbershop.com/",
+    "websiteLabel": "rcr-barbershop.com",
+    "maps": "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&sa=X&ved=2ahUKEwjB_7K-5ZaTAxWFC0QIHVKZN8sQ4kB6BAgMEAA&hl=es",
+    "reviewForm": "https://forms.gle/M6wTSV7KCRXuBDui7"
+  },
+  "hours": {
+    "1": { "open": "11:00", "close": "20:00", "closed": false },
+    "2": { "open": "11:00", "close": "20:00", "closed": false },
+    "3": { "open": "11:00", "close": "20:00", "closed": false },
+    "4": { "open": "11:00", "close": "20:30", "closed": false },
+    "5": { "open": "11:00", "close": "20:00", "closed": false },
+    "6": { "open": "11:00", "close": "18:00", "closed": false },
+    "0": { "open": "11:00", "close": "18:00", "closed": false }
+  },
+  "services": [
+    { "id": "corte-caballero",  "name": "Corte caballero",     "description": "Corte personalizado a tijera o máquina",     "price": 150, "note": "", "order": 0, "active": true },
+    { "id": "corte-nino",       "name": "Corte niño",           "description": "Corte para los más pequeños",                "price": 130, "note": "", "order": 1, "active": true },
+    { "id": "barba",            "name": "Barba",                "description": "Perfilado y arreglo de barba con toalla",    "price": 110, "note": "", "order": 2, "active": true },
+    { "id": "barba-premium",    "name": "Barba premium",        "description": "Barba completa con tratamiento y acabado",   "price": 160, "note": "", "order": 3, "active": true },
+    { "id": "fade",             "name": "Fade",                 "description": "Degradado limpio y preciso",                  "price": 180, "note": "", "order": 4, "active": true },
+    { "id": "afeitado",         "name": "Afeitado clásico",     "description": "Afeitado con navaja y toalla caliente",       "price": 150, "note": "", "order": 5, "active": true },
+    { "id": "perfilado",        "name": "Perfilado",            "description": "Perfilado de líneas y detalle",               "price": 80,  "note": "", "order": 6, "active": true },
+    { "id": "tratamiento",      "name": "Tratamiento capilar",  "description": "Hidratación y cuidado profundo del cabello", "price": 250, "note": "", "order": 7, "active": true }
+  ],
+  "gallery": [
+    { "id": "g1", "url": "Images/PHOTO-2026-03-08-14-03-09 1.jpg", "alt": "Estilo 1", "order": 0 },
+    { "id": "g2", "url": "Images/PHOTO-2026-03-08-14-03-09 2.jpg", "alt": "Estilo 2", "order": 1 },
+    { "id": "g3", "url": "Images/PHOTO-2026-03-08-14-03-09 3.jpg", "alt": "Estilo 3", "order": 2 },
+    { "id": "g4", "url": "Images/PHOTO-2026-03-08-14-03-09 4.jpg", "alt": "Estilo 4", "order": 3 }
+  ]
+}

@@ -18,6 +18,8 @@
  *   GET  /card-links/:slug      Links autoeditados del cliente (público, sin auth)
  *   PUT  /card-links/:slug      {token,links} -> el cliente edita sus links dentro de su
  *                               cupo de tier (sin costo, sin revisión humana) — ver portal.js
+ *   GET  /card-services/:slug   Servicios/precios autoeditados (público)
+ *   PUT  /card-services/:slug   {token,services} -> el cliente edita precios (premium / handmade)
  *
  *   POST /account/register        {email,password} -> crea cuenta + sesión
  *   POST /account/login           {email,password} -> sesión
@@ -70,6 +72,10 @@ import {
   validateLinks,
   getLinks,
   setLinks,
+  resolveServicesQuota,
+  validateServices,
+  getServices,
+  setServices,
 } from "./portal.js";
 import {
   normalizeEmail,
@@ -126,11 +132,27 @@ export default {
         return jsonResponse({ error: "internal error" }, 500);
       }
     }
+    if (request.method === "GET" && url.pathname.startsWith("/card-services/")) {
+      try {
+        return await handleGetCardServices(env, url.pathname.slice("/card-services/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
 
     // PUT: ediciones autoservicio autenticadas (token por tarjeta o sesión de cuenta).
     if (request.method === "PUT" && url.pathname.startsWith("/card-links/")) {
       try {
         return await handlePutCardLinks(request, env, url.pathname.slice("/card-links/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
+    if (request.method === "PUT" && url.pathname.startsWith("/card-services/")) {
+      try {
+        return await handlePutCardServices(request, env, url.pathname.slice("/card-services/".length));
       } catch (err) {
         console.error(err);
         return jsonResponse({ error: "internal error" }, 500);
@@ -357,16 +379,22 @@ async function handleSession(request, env) {
   const secrets = (await getSecrets(env, slug)) || {};
   const linksOverride = await getLinks(env, slug);
   const links = linksOverride?.links || data.links || [];
+  const servicesOverride = await getServices(env, slug);
+  const services = servicesOverride?.services || data.services || [];
+  const servicesQuota = resolveServicesQuota(secrets.package, services.length);
 
   return jsonResponse({
     ok: true,
     data: {
       ...stripSecrets(data),
       links,
+      services,
       referralCode: data.referralCode || "",
       orderStage: data.orderStage || "",
       package: secrets.package || "",
       linksQuota: resolveLinksQuota(secrets.package, links.length),
+      servicesQuota,
+      canEditServices: servicesQuota > 0 && (data.theme === "handmade" || services.length > 0 || secrets.package === "premium"),
     },
   });
 }
@@ -414,6 +442,51 @@ async function handlePutCardLinks(request, env, slugParam) {
 
   await setLinks(env, slug, links);
   return jsonResponse({ ok: true, links, quota });
+}
+
+// ============================================================
+// GET  /card-services/:slug — precios autoeditados (público)
+// PUT  /card-services/:slug — {token,services} el cliente edita
+// su menú de precios (premium / handmade). Misma idea que links.
+// ============================================================
+async function handleGetCardServices(env, slugParam) {
+  const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  if (!slug || !env.PORTAL_KV) return jsonResponse({ error: "not found" }, 404);
+  const record = await getServices(env, slug);
+  if (!record) return jsonResponse({ error: "not found" }, 404);
+  return jsonResponse({ ok: true, services: record.services });
+}
+
+async function handlePutCardServices(request, env, slugParam) {
+  const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const body = await safeJson(request);
+  const token = String(body?.token || "").trim();
+  if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
+
+  const data = await loadClient(env, slug);
+  if (!data || !data.ownerToken || data.ownerToken !== token) {
+    return jsonResponse({ error: "unauthorized" }, 403);
+  }
+  if (data.orderStage !== "published") {
+    return jsonResponse({ error: "tu tarjeta todavía no está publicada" }, 409);
+  }
+
+  const secrets = (await getSecrets(env, slug)) || {};
+  const currentCount = Array.isArray(data.services) ? data.services.length : 0;
+  const quota = resolveServicesQuota(secrets.package, currentCount);
+  if (quota <= 0) {
+    return jsonResponse({ error: "tu paquete no incluye edición de precios", quota }, 403);
+  }
+
+  let services;
+  try {
+    services = validateServices(body?.services, quota);
+  } catch (err) {
+    return jsonResponse({ error: err.message, quota }, 422);
+  }
+
+  await setServices(env, slug, services);
+  return jsonResponse({ ok: true, services, quota });
 }
 
 // ============================================================

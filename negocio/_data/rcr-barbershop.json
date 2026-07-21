@@ -1,5 +1,5 @@
 {
-  "$schema_notes": "Expediente de tarjeta HECHA A MANO (no la renderiza js/negocio.js — la página real es /rcr-barbershop/index.html, artesanal). Este JSON existe para que el Worker y mi-cuenta funcionen: /session lo lee para el panel, y el editor 'Tus links' guarda el override en KV (links:rcr-barbershop) que js/wire-card.js aplica sobre el HTML artesanal. Los links de aquí son el estado inicial (los mismos hardcodeados en el HTML). OJO: 'links[].style' aquí son las clases CSS reales de rcr-barbershop/style.css (whatsapp/instagram/facebook/appointment/website/location), NO la convención ig/fb/web/map del motor — así wire-card.js pinta el color/icono correcto si el cliente guarda sin tocar un link.",
+  "$schema_notes": "Expediente de tarjeta HECHA A MANO (no la renderiza js/negocio.js — la página real es /rcr-barbershop/, kit artesanal). Este JSON alimenta /session para mi-cuenta: 'Tus links' y 'Tus precios'. Los overrides viven en KV (links:rcr-barbershop / services:rcr-barbershop) y data-store.js los aplica sobre data.default.json sin tocar el markup del kit. links[].style = clases del kit (instagram/facebook/website/location/appointment).",
   "slug": "rcr-barbershop",
   "theme": "handmade",
   "language": "es-MX",
@@ -9,61 +9,67 @@
     "verified": true,
     "tagline": "Corte, barba y estilo para caballeros",
     "established": 2023,
-    "logoUrl": "/images/logo.PNG",
-    "city": "Querétaro, México"
+    "logoUrl": "/rcr-barbershop/Images/Logo_RCR_2025.PNG",
+    "city": "Querétaro, México",
+    "rating": 5.0
   },
   "orderStage": "published",
   "primaryCta": {
-    "label": "WhatsApp",
-    "subtitle": "Agenda tu cita",
-    "icon": "whatsapp",
-    "url": "https://wa.me/524423536769"
+    "label": "Agendar Cita",
+    "subtitle": "Respuesta en minutos por WhatsApp",
+    "icon": "calendar2-check",
+    "url": "https://wa.me/524423536769?text=Hola%20RCR%2C%20quiero%20agendar%20una%20cita"
   },
   "links": [
     {
-      "label": "WhatsApp",
-      "subtitle": "",
-      "icon": "whatsapp",
-      "style": "whatsapp",
-      "url": "https://wa.me/524423536769"
+      "label": "Agendar Cita",
+      "subtitle": "Respuesta en minutos por WhatsApp",
+      "icon": "calendar2-check",
+      "style": "appointment",
+      "url": "https://wa.me/524423536769?text=Hola%20RCR%2C%20quiero%20agendar%20una%20cita"
     },
     {
       "label": "Instagram",
-      "subtitle": "",
+      "subtitle": "@rcr_barbershop",
       "icon": "instagram",
       "style": "instagram",
       "url": "https://www.instagram.com/rcr_barbershop"
     },
     {
       "label": "Facebook",
-      "subtitle": "",
+      "subtitle": "Síguenos en Facebook",
       "icon": "facebook",
       "style": "facebook",
       "url": "https://www.facebook.com/rcr.carlos.2025"
     },
     {
-      "label": "Agendar Cita",
-      "subtitle": "",
-      "icon": "calendar2-check",
-      "style": "appointment",
-      "url": "https://wa.me/524423536769"
-    },
-    {
       "label": "Sitio Web",
-      "subtitle": "",
+      "subtitle": "rcr-barbershop.com",
       "icon": "globe2",
       "style": "website",
       "url": "https://www.rcr-barbershop.com/"
     },
     {
       "label": "Ubicación",
-      "subtitle": "",
+      "subtitle": "Cómo llegar en Google Maps",
       "icon": "geo-alt-fill",
       "style": "location",
       "url": "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&sa=X&ved=2ahUKEwjB_7K-5ZaTAxWFC0QIHVKZN8sQ4kB6BAgMEAA&hl=es"
     }
   ],
+  "services": [
+    { "id": "corte-caballero", "name": "Corte caballero", "description": "Corte personalizado a tijera o máquina", "price": 150, "note": "", "order": 0, "active": true },
+    { "id": "corte-nino", "name": "Corte niño", "description": "Corte para los más pequeños", "price": 130, "note": "", "order": 1, "active": true },
+    { "id": "barba", "name": "Barba", "description": "Perfilado y arreglo de barba con toalla", "price": 110, "note": "", "order": 2, "active": true },
+    { "id": "barba-premium", "name": "Barba premium", "description": "Barba completa con tratamiento y acabado", "price": 160, "note": "", "order": 3, "active": true },
+    { "id": "fade", "name": "Fade", "description": "Degradado limpio y preciso", "price": 180, "note": "", "order": 4, "active": true },
+    { "id": "afeitado", "name": "Afeitado clásico", "description": "Afeitado con navaja y toalla caliente", "price": 150, "note": "", "order": 5, "active": true },
+    { "id": "perfilado", "name": "Perfilado", "description": "Perfilado de líneas y detalle", "price": 80, "note": "", "order": 6, "active": true },
+    { "id": "tratamiento", "name": "Tratamiento capilar", "description": "Hidratación y cuidado profundo del cabello", "price": 250, "note": "", "order": 7, "active": true }
+  ],
+  "servicesTitle": "Servicios y Precios",
+  "servicesDisclaimer": "Los precios pueden variar según el servicio. Consulta por WhatsApp para detalles.",
   "brandCardCopy": "Corte, barba y estilo para caballeros.",
-  "copyright": "© 2023 RCR Barber Shop · Est. 2023",
+  "copyright": "© 2023 RCR Barber Shop · Querétaro, México",
   "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03"
 }

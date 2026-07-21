@@ -14,6 +14,10 @@ import {
   validateLinks,
   getLinks,
   setLinks,
+  resolveServicesQuota,
+  validateServices,
+  getServices,
+  setServices,
 } from "../src/portal.js";
 
 function fakeKvEnv() {
@@ -214,5 +218,49 @@ describe("getLinks / setLinks", () => {
     const record = await getLinks(env, "lulu");
     assert.equal(record.links.length, 1);
     assert.equal(record.links[0].label, "IG");
+  });
+});
+
+describe("resolveServicesQuota", () => {
+  it("usa el cupo del paquete conocido", () => {
+    assert.equal(resolveServicesQuota("premium"), 20);
+    assert.equal(resolveServicesQuota("personalizado"), 8);
+    assert.equal(resolveServicesQuota("lanzamiento"), 0);
+  });
+});
+
+describe("validateServices", () => {
+  it("acepta servicios con precio numérico o string", () => {
+    const out = validateServices(
+      [
+        { name: "Fade", description: "Degradado", price: 180 },
+        { name: "Barba", desc: "Perfilado", price: "$110" },
+      ],
+      8
+    );
+    assert.equal(out.length, 2);
+    assert.equal(out[0].price, 180);
+    assert.equal(out[1].price, 110);
+    assert.equal(out[1].description, "Perfilado");
+  });
+
+  it("rechaza si se pasa del cupo o el paquete no incluye precios", () => {
+    assert.throws(() => validateServices([{ name: "A", price: 1 }], 0));
+    assert.throws(() => validateServices([{ name: "A", price: 1 }, { name: "B", price: 2 }], 1));
+  });
+
+  it("rechaza servicios sin nombre", () => {
+    assert.throws(() => validateServices([{ name: "", price: 10 }], 5));
+  });
+});
+
+describe("getServices / setServices", () => {
+  it("guarda y regresa el override de servicios", async () => {
+    const env = fakeKvEnv();
+    assert.equal(await getServices(env, "rcr-barbershop"), null);
+    await setServices(env, "rcr-barbershop", [{ id: "fade", name: "Fade", price: 180, order: 0, active: true }]);
+    const record = await getServices(env, "rcr-barbershop");
+    assert.equal(record.services.length, 1);
+    assert.equal(record.services[0].name, "Fade");
   });
 });
