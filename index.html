@@ -589,6 +589,11 @@
             <div class="row g-3 mb-4">
               <div class="col-md-6"><label for="orderBusinessName" class="form-label fw-semibold small">Nombre del negocio</label><input id="orderBusinessName" class="form-control" type="text" maxlength="60" placeholder="Ej. Taquería La Bendita" required></div>
               <div class="col-md-6"><label for="orderEmail" class="form-label fw-semibold small">Correo para tu pedido</label><input id="orderEmail" class="form-control" type="email" placeholder="tucorreo@ejemplo.com" required></div>
+              <div class="col-md-6">
+                <label for="orderReferralCode" class="form-label fw-semibold small">Código de referido <span class="text-muted fw-normal">(opcional)</span></label>
+                <div class="input-group"><input id="orderReferralCode" class="form-control text-uppercase" type="text" maxlength="16" autocomplete="off" placeholder="Ej. ABC12XY"><button id="orderReferralApply" class="btn btn-outline-dark" type="button">Aplicar</button></div>
+                <div id="orderReferralNote" class="form-text">¿Te compartieron un link? El código ya aparece aquí.</div>
+              </div>
             </div>
             <fieldset class="mb-4">
               <legend class="h6 fw-bold mb-1">Links que quieres publicar</legend>

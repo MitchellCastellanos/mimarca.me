@@ -55,6 +55,38 @@ export async function lookupReferral(env, code) {
   return env.PORTAL_KV.get(`ref:${normalized}`, { type: "json" });
 }
 
+export const REFERRAL_DISCOUNT_PERCENT = 10;
+export const REFERRAL_REWARD_PERCENT = 10;
+
+/** Resumen privado para el panel del referidor. Montos en la unidad mínima de la moneda. */
+export async function getReferralSummary(env, slug) {
+  const rows = env.PORTAL_KV
+    ? ((await env.PORTAL_KV.get(`redeems:${slug}`, { type: "json" })) || [])
+    : [];
+  const referrals = rows.map((row) => ({
+    at: row.at,
+    buyerName: row.buyerName || "Nuevo cliente",
+    buyerEmailMasked: maskEmail(row.buyerEmail),
+    amountPaid: Number(row.amountPaid || 0),
+    rewardAmount: Number(row.rewardAmount || 0),
+    currency: String(row.currency || "mxn").toLowerCase(),
+    status: row.status || "confirmed",
+  }));
+  return {
+    count: referrals.length,
+    rewardAmount: referrals.reduce((sum, row) => sum + row.rewardAmount, 0),
+    currency: referrals[0]?.currency || "mxn",
+    referrals: referrals.slice(-20).reverse(),
+    rewardPercent: REFERRAL_REWARD_PERCENT,
+  };
+}
+
+function maskEmail(email) {
+  const [local, domain] = String(email || "").split("@");
+  if (!local || !domain) return "";
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
 /**
  * client_reference_id combina el código de referido y el draftId del
  * borrador (ver js/ref-capture.js): "r.<CODE>_d.<draftId>", cualquiera de
@@ -88,6 +120,11 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
   const code = String(parsedRef || "").trim().toUpperCase();
   if (!code || !env.PORTAL_KV) return null;
 
+  // Solo genera reward si Stripe confirmó un descuento real. Esto evita
+  // acreditar referencias manipulando client_reference_id a mano.
+  const discountAmount = Number(session.total_details?.amount_discount || 0);
+  if (discountAmount <= 0) return null;
+
   const ref = await lookupReferral(env, code);
   if (!ref?.slug) return null;
 
@@ -101,6 +138,10 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
     referrerSlug: ref.slug,
     buyerEmail,
     buyerName,
+    amountPaid: Number(session.amount_total || 0),
+    discountAmount,
+    rewardAmount: Math.round(Number(session.amount_total || 0) * REFERRAL_REWARD_PERCENT / 100),
+    currency: String(session.currency || "mxn").toLowerCase(),
     sessionId: session.id,
     at: Date.now(),
   };
@@ -108,7 +149,18 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
 
   const listKey = `redeems:${ref.slug}`;
   const prev = (await env.PORTAL_KV.get(listKey, { type: "json" })) || [];
-  prev.push({ sessionId: session.id, code, buyerEmail, at: record.at });
+  prev.push({
+    sessionId: session.id,
+    code,
+    buyerEmail,
+    buyerName,
+    amountPaid: record.amountPaid,
+    discountAmount: record.discountAmount,
+    rewardAmount: record.rewardAmount,
+    currency: record.currency,
+    status: "confirmed",
+    at: record.at,
+  });
   await env.PORTAL_KV.put(listKey, JSON.stringify(prev.slice(-100)));
 
   const secrets = await getSecrets(env, ref.slug);
@@ -120,6 +172,7 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
         business_name: ref.slug,
         buyer_name: buyerName || "Un nuevo cliente",
         referral_code: code,
+        reward_amount: new Intl.NumberFormat("es-MX", { style: "currency", currency: record.currency.toUpperCase() }).format(record.rewardAmount / 100),
         support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
       }),
     });

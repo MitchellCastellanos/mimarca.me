@@ -60,6 +60,9 @@ import {
   getSecrets,
   rateLimitAccess,
   rateLimitBucket,
+  lookupReferral,
+  getReferralSummary,
+  REFERRAL_DISCOUNT_PERCENT,
   recordReferralRedemption,
   parseClientReferenceId,
   saveDraft,
@@ -180,6 +183,9 @@ export default {
       }
       if (url.pathname === "/session") {
         return await handleSession(request, env);
+      }
+      if (url.pathname === "/referral/validate") {
+        return await handleReferralValidate(request, env);
       }
       if (url.pathname === "/draft") {
         return await handleSaveDraft(request, env);
@@ -414,6 +420,7 @@ async function handleSession(request, env) {
   const servicesOverride = await getServices(env, slug);
   const services = servicesOverride?.services || data.services || [];
   const servicesQuota = resolveServicesQuota(secrets.package, services.length);
+  const referralSummary = await getReferralSummary(env, slug);
 
   return jsonResponse({
     ok: true,
@@ -422,12 +429,50 @@ async function handleSession(request, env) {
       links,
       services,
       referralCode: data.referralCode || "",
+      referralSummary,
       orderStage: data.orderStage || "",
       package: secrets.package || "",
       linksQuota: resolveLinksQuota(secrets.package, links.length),
       servicesQuota,
       canEditServices: servicesQuota > 0 && (data.theme === "handmade" || services.length > 0 || secrets.package === "premium"),
     },
+  });
+}
+
+// ============================================================
+// POST /referral/validate — valida antes de abrir Stripe y devuelve el
+// promo code común que Stripe muestra prellenado. La atribución conserva
+// el código único del referidor dentro de client_reference_id.
+// ============================================================
+async function handleReferralValidate(request, env) {
+  const body = await safeJson(request);
+  const code = String(body?.code || "").trim().toUpperCase();
+  const email = normalizeEmail(body?.email || "");
+  if (!code || !email || !isValidEmail(email)) {
+    return jsonResponse({ valid: false, error: "Escribe un código y correo válidos." }, 422);
+  }
+
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  const rl = await rateLimitBucket(env, `rl:referral:${ip}`, 30, 3600);
+  if (!rl.allowed) return jsonResponse({ valid: false, error: "Demasiados intentos. Intenta más tarde." }, 429);
+
+  const ref = await lookupReferral(env, code);
+  if (!ref?.slug) return jsonResponse({ valid: false, error: "Ese código no existe." }, 404);
+
+  const referrerSecrets = await getSecrets(env, ref.slug);
+  if (normalizeEmail(referrerSecrets?.ownerEmail || "") === email) {
+    return jsonResponse({ valid: false, error: "Tu propio código no aplica a tu compra." }, 409);
+  }
+  const previousOrders = await listOrdersForAccount(env, email);
+  if (previousOrders.length > 0) {
+    return jsonResponse({ valid: false, error: "El 10% es exclusivo para clientes nuevos." }, 409);
+  }
+
+  return jsonResponse({
+    valid: true,
+    code,
+    discountPercent: REFERRAL_DISCOUNT_PERCENT,
+    promotionCode: env.REFERRAL_PROMO_CODE || "NUEVO10",
   });
 }
 

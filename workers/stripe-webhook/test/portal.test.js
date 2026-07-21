@@ -4,6 +4,8 @@ import {
   stripSecrets,
   rateLimitAccess,
   lookupReferral,
+  getReferralSummary,
+  recordReferralRedemption,
   parseClientReferenceId,
   saveDraft,
   getDraft,
@@ -85,6 +87,56 @@ describe("lookupReferral", () => {
     const hit = await lookupReferral(env, "rcr7k2a");
     assert.equal(hit.slug, "lulu");
     assert.equal(await lookupReferral(env, "bad!"), null);
+  });
+});
+
+describe("referral rewards", () => {
+  it("registra 10% del pago y arma el resumen privado", async () => {
+    const env = fakeKvEnv();
+    await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
+    await env.PORTAL_KV.put("secrets:lulu", JSON.stringify({ ownerEmail: "duena@lulu.mx" }));
+    const emails = [];
+    const record = await recordReferralRedemption(
+      env,
+      {
+        id: "cs_123",
+        client_reference_id: "r.ABC12_d.draft-1",
+        amount_total: 22410,
+        total_details: { amount_discount: 2490 },
+        currency: "mxn",
+        customer_details: { name: "Ana", email: "ana@example.com" },
+      },
+      async (message) => emails.push(message),
+      (vars) => JSON.stringify(vars)
+    );
+    assert.equal(record.rewardAmount, 2241);
+    assert.equal(emails.length, 1);
+
+    const summary = await getReferralSummary(env, "lulu");
+    assert.equal(summary.count, 1);
+    assert.equal(summary.rewardAmount, 2241);
+    assert.equal(summary.referrals[0].buyerEmailMasked, "a***@example.com");
+  });
+
+  it("es idempotente por Checkout Session", async () => {
+    const env = fakeKvEnv();
+    await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
+    const session = { id: "cs_same", client_reference_id: "r.ABC12", amount_total: 10000, total_details: { amount_discount: 1000 }, currency: "mxn", customer_details: {} };
+    await recordReferralRedemption(env, session);
+    const again = await recordReferralRedemption(env, session);
+    assert.equal(again.already, true);
+    assert.equal((await getReferralSummary(env, "lulu")).count, 1);
+  });
+
+  it("no acredita reward si Stripe no aplicó descuento", async () => {
+    const env = fakeKvEnv();
+    await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
+    const result = await recordReferralRedemption(env, {
+      id: "cs_no_discount", client_reference_id: "r.ABC12", amount_total: 10000,
+      total_details: { amount_discount: 0 }, currency: "mxn", customer_details: {},
+    });
+    assert.equal(result, null);
+    assert.equal((await getReferralSummary(env, "lulu")).count, 0);
   });
 });
 

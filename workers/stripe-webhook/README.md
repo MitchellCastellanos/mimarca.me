@@ -225,9 +225,23 @@ Namespace id (ver `wrangler.toml`): `5936a9510e2d4b4e88c7bd6ba720763d`.
 ### Referidos
 
 1. El cliente comparte `https://mimarca.me/?ref=CODIGO` desde mi-cuenta.
-2. `js/ref-capture.js` guarda el código y lo añade a los Payment Links como
-   `client_reference_id`.
-3. El webhook registra la redención y manda `emails/referral-reward.html`.
+2. El formulario muestra el código prellenado, llama `POST /referral/validate`
+   y confirma que existe, no es autorreferido y el correo no tiene compras previas.
+3. Al abrir Stripe se manda el código único en `client_reference_id` para la
+   atribución y `prefilled_promo_code=NUEVO10` para aplicar 10%.
+4. El webhook registra la redención, suma 10% del monto pagado como crédito
+   del referidor y manda `emails/referral-reward.html`.
+
+Configuración necesaria en Stripe (una sola vez): crear el cupón de 10% y
+el promotion code `NUEVO10`, restringido a primera compra, y habilitar códigos
+promocionales en los tres Payment Links. El valor puede cambiarse con
+`REFERRAL_PROMO_CODE` en `wrangler.toml`. Para que la restricción de primera
+compra sea efectiva, los Payment Links deben crear Customer en lugar de dejar
+la compra únicamente como guest.
+
+Política recomendada: el crédito vence en 12 meses, no es canjeable por efectivo
+y cubre como máximo 50% de una compra futura. KV mantiene hasta 100 redenciones
+por cliente y el panel muestra las 20 más recientes.
 
 ## Pruebas
 

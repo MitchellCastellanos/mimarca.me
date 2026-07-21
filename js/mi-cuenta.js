@@ -525,15 +525,24 @@
   // ---------- referidos ----------
   function referralBlockHtml(data, refUrl) {
     const code = data.referralCode ? String(data.referralCode) : '';
+    const summary = data.referralSummary || { count: 0, rewardAmount: 0, currency: 'mxn', referrals: [] };
+    const money = (cents, currency) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: String(currency || 'mxn').toUpperCase() }).format(Number(cents || 0) / 100);
     const codeLine = code
       ? `<p class="small mb-2">Tu código: <strong>${escapeHtml(code)}</strong></p>`
       : '';
+    const rows = (summary.referrals || []).map((item) => `
+      <tr><td>${new Date(item.at).toLocaleDateString('es-MX')}</td><td>${escapeHtml(item.buyerName || item.buyerEmailMasked || 'Nuevo cliente')}</td><td class="text-end fw-semibold text-success">+${money(item.rewardAmount, item.currency)}</td></tr>
+    `).join('');
     return `
       <div class="col-md-12">
         <div class="card mc-card border-0 shadow-sm">
           <div class="card-body p-4">
             <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-gift me-1"></i>Comparte y gana</h2>
-            <p class="small text-muted mb-3">Comparte tu link. Cuando alguien compre con él, te avisamos por correo y te damos un cambio gratis en tu próxima orden.</p>
+            <p class="small text-muted mb-3">Tu invitado recibe <strong>10% de descuento</strong> y tú acumulas <strong>10% de su compra en crédito</strong> para cambios o un upgrade.</p>
+            <div class="row g-2 mb-3">
+              <div class="col-6"><div class="rounded-3 bg-light p-3"><div class="small text-muted">Referidos</div><div class="h3 mb-0 fw-bold">${Number(summary.count || 0)}</div></div></div>
+              <div class="col-6"><div class="rounded-3 bg-warning-subtle p-3"><div class="small text-muted">Crédito acumulado</div><div class="h3 mb-0 fw-bold">${money(summary.rewardAmount, summary.currency)}</div></div></div>
+            </div>
             ${codeLine}
             <div class="input-group mb-2">
               <input id="mcRefInput" type="text" class="form-control" readonly value="${escapeHtml(refUrl)}">
@@ -542,6 +551,8 @@
             <button type="button" id="mcRefWaBtn" class="btn btn-success btn-sm">
               <i class="bi bi-whatsapp me-1"></i> Compartir con un negocio amigo
             </button>
+            ${rows ? `<div class="table-responsive mt-3"><table class="table table-sm align-middle mb-0"><thead><tr><th>Fecha</th><th>Referido</th><th class="text-end">Reward</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="small text-muted mt-3 mb-0">Tu primer reward aparecerá aquí cuando alguien complete su pago.</p>'}
+            <p class="small text-muted mt-3 mb-0">El crédito vence en 12 meses y puede cubrir hasta 50% de una compra futura. Así sigue siendo valioso sin convertirse en efectivo ni generar costos de transferencia.</p>
           </div>
         </div>
       </div>

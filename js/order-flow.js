@@ -10,12 +10,55 @@
   const order = ["lanzamiento", "personalizado", "premium"];
   let manualTier = null;
   let selectedTier = "lanzamiento";
+  let validatedReferral = null;
 
   const checked = (root) => Array.from(document.querySelectorAll(`${root} input:checked`)).map((el) => el.value);
   const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
 
   function apiBase() {
     return (document.querySelector('meta[name="mitp-portal-api"]')?.content || "").replace(/\/$/, "");
+  }
+
+  function referralCode() {
+    return ($("orderReferralCode")?.value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+  }
+
+  function setReferralNote(message, kind) {
+    const note = $("orderReferralNote");
+    note.className = `form-text ${kind === "ok" ? "text-success" : kind === "error" ? "text-danger" : ""}`;
+    note.textContent = message;
+  }
+
+  async function validateReferral() {
+    const code = referralCode();
+    const email = $("orderEmail").value.trim();
+    $("orderReferralCode").value = code;
+    if (!code) {
+      validatedReferral = null;
+      setReferralNote("Código opcional. Si llegaste por un link, aparece prellenado.");
+      return null;
+    }
+    if (!email || !$("orderEmail").checkValidity()) {
+      validatedReferral = null;
+      setReferralNote("Primero escribe un correo válido para comprobar que eres cliente nuevo.", "error");
+      throw new Error("referral");
+    }
+    setReferralNote("Comprobando código…");
+    const response = await fetch(`${apiBase()}/referral/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, email }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.valid) {
+      validatedReferral = null;
+      setReferralNote(result.error || "No pudimos validar ese código.", "error");
+      throw new Error("referral");
+    }
+    validatedReferral = result;
+    sessionStorage.setItem("mitp_ref", result.code);
+    setReferralNote(`¡Código aplicado! Tendrás ${result.discountPercent}% de descuento en Stripe.`, "ok");
+    return result;
   }
 
   function minimumTier() {
@@ -107,6 +150,11 @@
   }
 
   document.querySelectorAll("#orderLinks input, #orderFeatures input").forEach((input) => input.addEventListener("change", update));
+  const storedReferral = (() => { try { return sessionStorage.getItem("mitp_ref") || ""; } catch (_) { return ""; } })();
+  if (storedReferral) $("orderReferralCode").value = storedReferral;
+  $("orderReferralApply").addEventListener("click", () => validateReferral().catch(() => {}));
+  $("orderReferralCode").addEventListener("input", () => { validatedReferral = null; });
+  $("orderEmail").addEventListener("input", () => { validatedReferral = null; });
 
   $("orderReviewBtn").onclick = () => {
     syncMockup();
@@ -138,15 +186,20 @@
     button.classList.add("disabled");
     button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando pedido…';
     try {
+      const currentCode = referralCode();
+      if (currentCode && (!validatedReferral || validatedReferral.code !== currentCode)) await validateReferral();
       const draftId = await saveDraft();
-      const ref = sessionStorage.getItem("mitp_ref") || "";
+      const ref = validatedReferral?.code || "";
       const checkout = new URL(tiers[selectedTier].checkout);
       checkout.searchParams.set("client_reference_id", [ref && `r.${ref}`, `d.${draftId}`].filter(Boolean).join("_"));
       checkout.searchParams.set("prefilled_email", $("orderEmail").value.trim());
+      if (validatedReferral?.promotionCode) checkout.searchParams.set("prefilled_promo_code", validatedReferral.promotionCode);
       window.open(checkout.toString(), "_blank", "noopener");
-    } catch (_) {
+    } catch (err) {
       $("orderFormNote").className = "small mt-2 text-center text-danger";
-      $("orderFormNote").textContent = "No pudimos guardar el pedido. Intenta otra vez; todavía no se hizo ningún cobro.";
+      $("orderFormNote").textContent = err.message === "referral"
+        ? "Revisa el código de referido antes de continuar. Todavía no se hizo ningún cobro."
+        : "No pudimos guardar el pedido. Intenta otra vez; todavía no se hizo ningún cobro.";
     } finally {
       button.classList.remove("disabled");
       button.innerHTML = 'Confirmar y pagar en Stripe <i class="bi bi-lock ms-1"></i>';
