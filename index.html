@@ -283,6 +283,50 @@
   </div>
 </section>
 
+<!-- LIVE MEMBER CARDS -->
+<section class="section mt-live-showcase" id="miembros">
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5 reveal-left">
+        <div class="text-uppercase small fw-semibold text-warning mb-2">Negocios reales · Tarjetas en vivo</div>
+        <h2 class="fw-bold mb-3">Checa las tarjetas de <span class="text-warning">algunos de nuestros miembros</span></h2>
+        <p class="text-white-50 mb-4">Cada una fue diseñada a la medida de su marca. Muévelas, descubre negocios reales y entra a conocer sus tarjetas tal como las ven sus clientes.</p>
+        <div class="mt-live-details" aria-live="polite">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="mt-live-dot" aria-hidden="true"></span><span class="text-uppercase small fw-semibold">En vivo</span>
+            <span class="text-white-50 small" id="mtLiveCount">01 / 01</span>
+          </div>
+          <h3 class="h4 fw-bold mb-1" id="mtLiveName">RCR Barber Shop</h3>
+          <div class="text-warning small fw-semibold mb-2" id="mtLiveMeta">Barbería · Querétaro</div>
+          <p class="text-white-50 mb-3" id="mtLiveTagline">Corte, barba y estilo para caballeros.</p>
+          <div class="d-flex flex-wrap gap-2 mb-4" id="mtLiveFeatures">
+            <span class="badge rounded-pill text-bg-light">Agenda</span><span class="badge rounded-pill text-bg-light">Servicios</span><span class="badge rounded-pill text-bg-light">Galería</span>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-warning" id="mtLiveLink" href="./rcr-barbershop/" target="_blank" rel="noopener">Explorar tarjeta <i class="bi bi-arrow-up-right ms-1"></i></a>
+            <button class="btn btn-outline-light" id="mtLiveRandom" type="button"><i class="bi bi-shuffle me-1"></i> Sorpréndeme con otra</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7 reveal-right">
+        <div class="mt-live-stage" id="mtLiveStage">
+          <div class="mt-live-orbit mt-live-orbit--one" aria-hidden="true"></div><div class="mt-live-orbit mt-live-orbit--two" aria-hidden="true"></div>
+          <button class="mt-live-nav mt-live-nav--prev" id="mtLivePrev" type="button" aria-label="Ver tarjeta anterior"><i class="bi bi-arrow-left"></i></button>
+          <div class="mt-live-phone">
+            <div class="mt-live-speaker" aria-hidden="true"></div>
+            <div class="mt-live-screen">
+              <iframe id="mtLiveFrame" src="./rcr-barbershop/" title="Vista previa de la tarjeta de RCR Barber Shop" loading="lazy" tabindex="-1"></iframe>
+              <a class="mt-live-screen-link" id="mtLiveScreenLink" href="./rcr-barbershop/" target="_blank" rel="noopener" aria-label="Abrir la tarjeta de RCR Barber Shop"></a>
+            </div>
+          </div>
+          <button class="mt-live-nav mt-live-nav--next" id="mtLiveNext" type="button" aria-label="Ver tarjeta siguiente"><i class="bi bi-arrow-right"></i></button>
+          <div class="mt-live-swipe text-white-50 small"><i class="bi bi-arrow-left-right me-1"></i> Desliza para descubrir</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- MOCKUPS GALLERY -->
 <section class="section">
   <div class="container">
@@ -959,6 +1003,7 @@
 <div id="site-footer"></div>
 
 <script src="./js/components.js"></script>
+<script src="./js/live-showcase.js"></script>
 <script src="./js/scroll-reveal.js"></script>
 <script src="./js/mi-tarjeta.js"></script>
 <script src="./js/ref-capture.js"></script>

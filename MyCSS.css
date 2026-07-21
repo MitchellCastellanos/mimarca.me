@@ -1073,3 +1073,22 @@ MI CUENTA (client dashboard)
   color:#fff !important;
   border-color:#198754 !important;
 }
+
+/* Live member cards */
+.mt-live-showcase{position:relative;overflow:hidden;color:#fff;background:radial-gradient(circle at 78% 42%,rgba(255,193,7,.22),transparent 28rem),radial-gradient(circle at 12% 110%,rgba(255,255,255,.08),transparent 24rem),#111}
+.mt-live-showcase::before{content:"";position:absolute;inset:0;opacity:.2;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to right,transparent,#000 55%)}
+.mt-live-dot{width:.55rem;height:.55rem;border-radius:50%;background:#55d98b;box-shadow:0 0 0 .3rem rgba(85,217,139,.12),0 0 1.2rem rgba(85,217,139,.65)}
+.mt-live-stage{position:relative;display:grid;place-items:center;min-height:610px;isolation:isolate}
+.mt-live-orbit{position:absolute;z-index:-1;border:1px solid rgba(255,255,255,.14);border-radius:50%}
+.mt-live-orbit--one{width:520px;height:520px}.mt-live-orbit--two{width:410px;height:410px;border-color:rgba(255,193,7,.24)}
+.mt-live-phone{position:relative;width:294px;height:590px;padding:12px;border:1px solid rgba(255,255,255,.3);border-radius:2.8rem;background:linear-gradient(145deg,#393939,#080808 35%,#222);box-shadow:0 2.5rem 5rem rgba(0,0,0,.55),inset 0 0 0 2px #090909;transform:rotate(2deg);transition:transform .35s ease,opacity .2s ease}
+.mt-live-phone.is-changing{transform:rotate(-2deg) scale(.96);opacity:.45}
+.mt-live-speaker{position:absolute;z-index:3;top:20px;left:50%;width:76px;height:19px;border-radius:999px;background:#050505;transform:translateX(-50%)}
+.mt-live-screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:2.15rem;background:#fff}
+.mt-live-screen iframe{width:390px;height:780px;border:0;pointer-events:none;transform:scale(.6923);transform-origin:top left}
+.mt-live-screen-link{position:absolute;inset:0;z-index:2}.mt-live-screen-link:focus-visible{outline:4px solid #ffc107;outline-offset:-6px}
+.mt-live-nav{position:absolute;z-index:3;top:50%;display:grid;place-items:center;width:3rem;height:3rem;border:1px solid rgba(255,255,255,.35);border-radius:50%;color:#fff;background:rgba(17,17,17,.76);backdrop-filter:blur(8px);transition:background .2s ease,color .2s ease,transform .2s ease}
+.mt-live-nav:hover{color:#111;background:#ffc107;transform:scale(1.08)}.mt-live-nav--prev{left:5%}.mt-live-nav--next{right:5%}.mt-live-swipe{position:absolute;bottom:-1rem}
+@media (max-width:991.98px){.mt-live-stage{min-height:630px}.mt-live-showcase::before{mask-image:linear-gradient(to bottom,transparent,#000 50%)}}
+@media (max-width:575.98px){.mt-live-stage{min-height:575px}.mt-live-phone{width:260px;height:522px}.mt-live-screen iframe{transform:scale(.605)}.mt-live-orbit--one{width:390px;height:390px}.mt-live-orbit--two{width:320px;height:320px}.mt-live-nav{width:2.65rem;height:2.65rem}.mt-live-nav--prev{left:0}.mt-live-nav--next{right:0}}
+@media (prefers-reduced-motion:reduce){.mt-live-phone,.mt-live-nav{transition:none}}
