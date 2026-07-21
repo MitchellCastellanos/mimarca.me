@@ -13,6 +13,8 @@
   let validatedReferral = null;
 
   const checked = (root) => Array.from(document.querySelectorAll(`${root} input:checked`)).map((el) => el.value);
+  const wantedFeatures = () => Array.from(document.querySelectorAll("#orderFeatures .mt-feature-want:checked")).map((el) => el.value);
+  const includedFeatures = () => Array.from(document.querySelectorAll("#orderFeatures [data-feature-row].is-included strong")).map((el) => el.textContent.trim());
   const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
 
   function apiBase() {
@@ -64,7 +66,7 @@
   function minimumTier() {
     const count = checked("#orderLinks").length;
     let index = count > 6 ? 2 : count > 3 ? 1 : 0;
-    document.querySelectorAll("#orderFeatures input:checked").forEach((input) => {
+    document.querySelectorAll("#orderFeatures .mt-feature-want:checked").forEach((input) => {
       index = Math.max(index, order.indexOf(input.dataset.minTier || "lanzamiento"));
     });
     return order[index];
@@ -80,6 +82,18 @@
     $("orderTierPrice").textContent = tier.price;
     $("orderTierReason").textContent = `${count} de ${tier.links} links incluidos.`;
     $("orderLinksProgress").style.width = `${Math.min(100, count / tier.links * 100)}%`;
+    const selectedIndex = order.indexOf(selectedTier);
+    document.querySelectorAll("[data-feature-row]").forEach((row) => {
+      const included = selectedIndex >= order.indexOf(row.dataset.minTier);
+      row.classList.toggle("is-included", included);
+      row.querySelector(".mt-feature-included").checked = included;
+    });
+    document.querySelectorAll("[data-tier-choice]").forEach((button) => {
+      const active = button.dataset.tierChoice === selectedTier;
+      button.classList.toggle("btn-dark", active);
+      button.classList.toggle("btn-outline-dark", !active);
+      button.setAttribute("aria-pressed", String(active));
+    });
     const next = order[order.indexOf(selectedTier) + 1];
     const hint = $("orderUpgradeHint");
     if (next) {
@@ -129,7 +143,8 @@
       selectedPackage: selectedTier,
       selectedPackageName: tiers[selectedTier].name,
       requestedLinks: checked("#orderLinks"),
-      requestedFeatures: checked("#orderFeatures"),
+      requestedFeatures: wantedFeatures(),
+      includedFeatures: includedFeatures(),
       linksCount: checked("#orderLinks").length,
     };
   }
@@ -149,7 +164,10 @@
     return result.draftId;
   }
 
-  document.querySelectorAll("#orderLinks input, #orderFeatures input").forEach((input) => input.addEventListener("change", update));
+  document.querySelectorAll("#orderLinks input, #orderFeatures .mt-feature-want").forEach((input) => input.addEventListener("change", update));
+  document.querySelectorAll("[data-tier-choice]").forEach((button) => {
+    button.addEventListener("click", () => { manualTier = button.dataset.tierChoice; update(); });
+  });
   const storedReferral = (() => { try { return sessionStorage.getItem("mitp_ref") || ""; } catch (_) { return ""; } })();
   if (storedReferral) $("orderReferralCode").value = storedReferral;
   $("orderReferralApply").addEventListener("click", () => validateReferral().catch(() => {}));
@@ -168,12 +186,13 @@
     }
     $("orderFormNote").textContent = "";
     const links = checked("#orderLinks");
-    const features = checked("#orderFeatures");
+    const features = wantedFeatures();
     $("orderSummaryBody").innerHTML = `
       <div class="col-md-4"><div class="mt-summary-item"><span>Negocio</span><strong>${escapeHtml(name.value.trim())}</strong></div></div>
       <div class="col-md-4"><div class="mt-summary-item"><span>Paquete</span><strong>${tiers[selectedTier].name} · ${tiers[selectedTier].price}</strong></div></div>
       <div class="col-md-4"><div class="mt-summary-item"><span>Links (${links.length})</span><strong>${escapeHtml(links.join(", ") || "Por definir")}</strong></div></div>
-      <div class="col-12"><div class="mt-summary-item"><span>Funciones</span><strong>${escapeHtml(features.join(", ") || "Diseño estándar del paquete")}</strong></div></div>`;
+      <div class="col-12"><div class="mt-summary-item"><span>Incluido en ${tiers[selectedTier].name}</span><strong>${escapeHtml(includedFeatures().join(", "))}</strong></div></div>
+      <div class="col-12"><div class="mt-summary-item"><span>Lo quiero en mi tarjeta</span><strong>${escapeHtml(features.join(", ") || "Aún no seleccionaste funciones opcionales")}</strong></div></div>`;
     $("orderSummary").classList.remove("d-none");
     $("orderSummary").scrollIntoView({ behavior: "smooth", block: "center" });
   };

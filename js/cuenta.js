@@ -268,7 +268,8 @@
           <div class="alert alert-success small mt-3 mb-2">
             <div class="fw-semibold mb-1"><i class="bi bi-check-circle me-1"></i>Pedido oficial recibido · ${escapeHtml(d.selectedPackageName || order.packageName || "Mi Tarjeta Pro")}</div>
             <div><strong>Links (${Number(d.linksCount) || 0}):</strong> ${escapeHtml((d.requestedLinks || []).join(", ") || "Por definir")}</div>
-            <div><strong>Funciones:</strong> ${escapeHtml((d.requestedFeatures || []).join(", ") || "Diseño estándar del paquete")}</div>
+            <div><strong>Incluido:</strong> ${escapeHtml((d.includedFeatures || []).join(", ") || d.selectedPackageName || "Paquete seleccionado")}</div>
+            <div><strong>El cliente pidió:</strong> ${escapeHtml((d.requestedFeatures || []).join(", ") || "Sin funciones opcionales marcadas")}</div>
           </div>` : ""}
         <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
           <button type="button" class="btn btn-dark btn-sm mc-draft-save">

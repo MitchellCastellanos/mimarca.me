@@ -901,11 +901,32 @@ MI CUENTA (client dashboard)
 .mt-feature-check{display:flex;align-items:center;gap:.5rem;min-height:46px;padding:.7rem .8rem;border:1px solid #dee2e6;border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
 .mt-feature-check:has(input:checked){border-color:#c9a227;background:#fff8df;box-shadow:0 0 0 2px rgba(201,162,39,.15)}
 .mt-feature-check input{accent-color:#111}
+.mt-feature-matrix{border:1px solid #dee2e6;border-radius:14px;overflow:visible;background:#fff}
+.mt-feature-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;align-items:center;border-top:1px solid #e9ecef;min-height:54px}
+.mt-feature-row:first-child{border-top:0}
+.mt-feature-row>div{padding:.7rem .8rem}
+.mt-feature-row>div:nth-child(2),.mt-feature-row>div:nth-child(3){text-align:center}
+.mt-feature-head{min-height:40px;background:#f8f9fa;border-radius:14px 14px 0 0;color:#6c757d;font-size:.72rem;font-weight:700;text-transform:uppercase}
+.mt-feature-row.is-included{background:#fffdf3}
+.mt-feature-row input[type="checkbox"]{width:1.15rem;height:1.15rem;accent-color:#111}
+.mt-feature-included:disabled{opacity:1;filter:none}
+.mt-help{position:relative;display:inline-grid;place-items:center;width:20px;height:20px;margin-left:.4rem;padding:0;border:1px solid #adb5bd;border-radius:50%;background:#fff;color:#495057;font-size:.72rem;font-weight:800;line-height:1;cursor:help}
+.mt-help::after{content:attr(data-help);position:absolute;z-index:30;left:50%;bottom:calc(100% + 10px);width:240px;padding:.65rem .75rem;border-radius:9px;background:#111;color:#fff;font-size:.75rem;font-weight:400;line-height:1.35;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.22);opacity:0;visibility:hidden;transform:translate(-50%,4px);transition:.15s ease;pointer-events:none}
+.mt-help:hover::after,.mt-help:focus-visible::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .mt-order-recommendation{border-radius:18px;background:#f8f9fa;border:1px solid #e9ecef}
 .mt-order-recommendation .progress{height:10px}
 .mt-order-summary{scroll-margin-top:100px}
 .mt-summary-item{display:flex;flex-direction:column;gap:.25rem;height:100%;padding:1rem;border-radius:12px;background:#f8f9fa;border:1px solid #e9ecef}
 .mt-summary-item span{color:#6c757d;font-size:.75rem;text-transform:uppercase;font-weight:700}
+
+@media(max-width:575.98px){
+  .mt-feature-row{grid-template-columns:minmax(0,1fr) 62px 62px}
+  .mt-feature-row>div{padding:.65rem .45rem}
+  .mt-feature-head{font-size:.64rem}
+  .mt-help::after{left:auto;right:-60px;transform:translateY(4px);width:210px}
+  .mt-help:hover::after,.mt-help:focus-visible::after{transform:translateY(0)}
+  #orderTierPicker{display:grid;grid-template-columns:1fr}
+}
 
 .mc-shell{
   background:#fafafa;
