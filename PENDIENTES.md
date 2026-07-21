@@ -36,10 +36,13 @@ Worker: `https://mimarca-stripe-webhook.mimarca.workers.dev`
 5. **Fase 2 del portal** (autoedición limitada): [ ] diferida a propósito —
    implica mover datos editables a D1/KV y un form validado contra el schema.
    No bloquea el portal actual; abrir cuando haya demanda real de clientes.
-6. **Galería con marca equivocada**: [x] (2026-07-20) — `index.html` usa los
-   SVG de `images/mi-tarjeta/mockups/*.svg` (pie `mimarca.me` / “Diseñado por
-   mimarca”). Los PNG con GABAN quedan en el repo por si se quieren como
-   referencia, pero ya no se muestran.
+6. **Galería con marca equivocada**: [ ] sigue pendiente — se intentó
+   cambiar a los SVG placeholder de `images/mi-tarjeta/mockups/*.svg`, pero
+   son wireframes genéricos (mucho más feos que los mockups reales), así
+   que se revirtió a los `.png` originales. Esos `.png` siguen mostrando
+   `gabansolutions.ca/negocio/...` en el pie de foto — hace falta diseño
+   nuevo (no es un fix de código), o al menos generar mockups nuevos con
+   marca correcta antes de tocar esto de nuevo.
 7. **`site.webmanifest`**: [x] (2026-07-20) — rutas `/images/...` + íconos
    192/512/maskable generados desde `apple-touch-icon.png`.
 
