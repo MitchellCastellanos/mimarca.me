@@ -4,10 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Mi Tarjeta Pro | Tarjetas digitales personalizadas para tu negocio | mimarca</title>
+  <title>Tarjetas digitales para negocios | Mi Tarjeta Pro</title>
 
-  <meta name="description" content="Mi Tarjeta Pro: tarjetas digitales personalizadas para tu negocio en México. Promo de lanzamiento $199 MXN (regular $299). Diseño único, link propio en mimarca.me/tu-marca y QR listo para imprimir.">
-  <meta name="keywords" content="tarjeta digital México, tarjeta de presentación digital, linktree para negocios, smart link México, QR para negocio, tarjeta NFC México, mi tarjeta pro, mimarca">
+  <meta name="description" content="Crea una tarjeta digital personalizada para tu negocio en México: diseño único, link propio y código QR listo para imprimir. Desde $199 MXN.">
   <meta name="author" content="mimarca">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#111111">
@@ -40,6 +39,7 @@
   <meta name="twitter:title" content="Mi Tarjeta Pro | Tarjetas digitales para tu negocio">
   <meta name="twitter:description" content="Tu propio link tipo Linktree, pero diseñado a la medida por humanos. Promo de lanzamiento $199 MXN.">
   <meta name="twitter:image" content="https://mimarca.me/images/og/mimarca-mi-tarjeta-preview.jpg">
+  <meta name="twitter:image:alt" content="Ejemplo de una tarjeta digital Mi Tarjeta Pro para negocios">
 
   <!-- URL base del worker de portal (guardar borrador antes de pagar). Ver
        workers/stripe-webhook/README.md. Mientras diga REPLACE, el builder
@@ -67,12 +67,7 @@
     "areaServed": [
       { "@type": "Country", "name": "Mexico" }
     ],
-    "provider": {
-      "@type": "LocalBusiness",
-      "@id": "https://mimarca.me/#business",
-      "name": "mimarca",
-      "url": "https://mimarca.me/"
-    },
+    "provider": { "@id": "https://mimarca.me/#organization" },
     "description": "Tarjeta digital personalizada con link propio (mimarca.me/tu-marca) y código QR listo para imprimir. Diseño hecho a la medida por un equipo humano, no plantillas genéricas.",
     "offers": [
       {
@@ -95,6 +90,73 @@
         "price": "299",
         "priceCurrency": "MXN",
         "availability": "https://schema.org/InStock"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Schema: marca, sitio y preguntas frecuentes visibles en esta página -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://mimarca.me/#organization",
+        "name": "mimarca",
+        "url": "https://mimarca.me/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://mimarca.me/images/logo-mimarca-sinfondo.png"
+        },
+        "email": "contacto@mimarca.me",
+        "telephone": "+1-514-258-0648"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://mimarca.me/#website",
+        "url": "https://mimarca.me/",
+        "name": "mimarca",
+        "inLanguage": "es-MX",
+        "publisher": { "@id": "https://mimarca.me/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://mimarca.me/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Es lo mismo que Linktree?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Cada tarjeta se diseña desde cero por nuestro equipo humano, con los colores y el estilo de tu marca."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Quién hace mi tarjeta, un robot o un humano?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "El mockup se genera al instante, pero la tarjeta final la diseña una persona del equipo de mimarca."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿En cuánto tiempo entregan la tarjeta digital?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "En 24 horas desde que confirmas el pago y envías la información del negocio."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿El código QR cambia si actualizo la tarjeta?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. El código QR apunta al mismo enlace, incluso cuando cambian el texto, los enlaces o las fotos de la tarjeta."
+            }
+          }
+        ]
       }
     ]
   }
