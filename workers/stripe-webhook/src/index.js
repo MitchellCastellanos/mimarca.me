@@ -14,6 +14,13 @@
  *   POST /notify/published     (admin) avisa al cliente que ya está publicada
  *   POST /notify/change-received (admin) confirma que se recibió su solicitud de cambios
  *
+ *   POST /account/register        {email,password} -> crea cuenta + sesión
+ *   POST /account/login           {email,password} -> sesión
+ *   POST /account/logout          {sessionToken} -> la invalida
+ *   POST /account/request-reset   {email} -> correo con link de reset (siempre {ok:true})
+ *   POST /account/reset-password  {token,password} -> nueva contraseña
+ *   POST /account/me              {sessionToken} -> correo + lista de pedidos (Dashboard)
+ *
  * Secretos (ownerEmail, ownerToken, referralCode) viven en Cloudflare KV
  * (PORTAL_KV). El JSON público en Pages ya no debe incluirlos.
  */
@@ -26,6 +33,7 @@ import changeRequestReceivedTemplate from "../../../emails/change-request-receiv
 import assetUploadedTemplate from "../../../emails/asset-uploaded.html";
 import designApprovedAlertTemplate from "../../../emails/design-approved-alert.html";
 import referralRewardTemplate from "../../../emails/referral-reward.html";
+import passwordResetTemplate from "../../../emails/password-reset.html";
 import {
   buildTemplateVars,
   buildAccessLinkVars,
@@ -34,12 +42,14 @@ import {
   buildAssetUploadedVars,
   buildApprovedAlertVars,
   buildDraftSummaryFields,
+  buildPasswordResetVars,
   renderTemplate,
 } from "./render.js";
 import {
   stripSecrets,
   resolveClient,
   rateLimitAccess,
+  rateLimitBucket,
   recordReferralRedemption,
   parseClientReferenceId,
   saveDraft,
@@ -48,6 +58,20 @@ import {
   getDraftBySession,
   recordPendingOrder,
 } from "./portal.js";
+import {
+  normalizeEmail,
+  isValidEmail,
+  createAccount,
+  verifyLogin,
+  setPassword,
+  createAccountSession,
+  resolveAccountSession,
+  destroyAccountSession,
+  createResetToken,
+  consumeResetToken,
+  getAccount,
+  listOrdersForAccount,
+} from "./account.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -98,6 +122,24 @@ export default {
       }
       if (url.pathname === "/draft") {
         return await handleSaveDraft(request, env);
+      }
+      if (url.pathname === "/account/register") {
+        return await handleAccountRegister(request, env);
+      }
+      if (url.pathname === "/account/login") {
+        return await handleAccountLogin(request, env);
+      }
+      if (url.pathname === "/account/logout") {
+        return await handleAccountLogout(request, env);
+      }
+      if (url.pathname === "/account/request-reset") {
+        return await handleAccountRequestReset(request, env);
+      }
+      if (url.pathname === "/account/reset-password") {
+        return await handleAccountResetPassword(request, env);
+      }
+      if (url.pathname === "/account/me") {
+        return await handleAccountMe(request, env);
       }
       if (url.pathname === "/upload") {
         return await handleUpload(request, env);
@@ -322,6 +364,116 @@ async function handleGetDraftBySession(env, sessionId) {
   const found = await getDraftBySession(env, sessionId);
   if (!found) return jsonResponse({ error: "not found" }, 404);
   return jsonResponse({ ok: true, draftId: found.draftId, email: found.email, data: found.data });
+}
+
+// ============================================================
+// Cuentas — mi-cuenta/cuenta.html (Dashboard, aparte del token por
+// tarjeta que ya existe en /session). Ver src/account.js.
+// ============================================================
+
+function clientIp(request) {
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown"
+  );
+}
+
+async function handleAccountRegister(request, env) {
+  const body = await safeJson(request);
+  const email = normalizeEmail(body?.email);
+  const password = String(body?.password || "");
+
+  if (!env.PORTAL_KV) return jsonResponse({ error: "cuentas no configuradas todavía" }, 503);
+
+  try {
+    const { created } = await createAccount(env, email, password);
+    if (!created) {
+      return jsonResponse({ error: "ya existe una cuenta con ese correo — inicia sesión" }, 409);
+    }
+  } catch (err) {
+    const msg = err.message === "weak password"
+      ? "la contraseña debe tener al menos 8 caracteres"
+      : "correo inválido";
+    return jsonResponse({ error: msg }, 400);
+  }
+
+  const sessionToken = await createAccountSession(env, email);
+  return jsonResponse({ ok: true, sessionToken });
+}
+
+async function handleAccountLogin(request, env) {
+  const body = await safeJson(request);
+  const email = normalizeEmail(body?.email);
+  const password = String(body?.password || "");
+  if (!email || !password) return jsonResponse({ error: "faltan datos" }, 400);
+  if (!env.PORTAL_KV) return jsonResponse({ error: "cuentas no configuradas todavía" }, 503);
+
+  const rl = await rateLimitBucket(env, `rl:login:${clientIp(request)}`, 10, 3600);
+  if (!rl.allowed) return jsonResponse({ error: "demasiados intentos — espera un rato" }, 429);
+
+  const ok = await verifyLogin(env, email, password);
+  if (!ok) return jsonResponse({ error: "correo o contraseña incorrectos" }, 401);
+
+  const sessionToken = await createAccountSession(env, email);
+  return jsonResponse({ ok: true, sessionToken });
+}
+
+async function handleAccountLogout(request, env) {
+  const body = await safeJson(request);
+  await destroyAccountSession(env, String(body?.sessionToken || ""));
+  return jsonResponse({ ok: true });
+}
+
+async function handleAccountRequestReset(request, env) {
+  const body = await safeJson(request);
+  const email = normalizeEmail(body?.email);
+  const GENERIC_OK = jsonResponse({ ok: true });
+
+  if (!email || !isValidEmail(email) || !env.PORTAL_KV) return GENERIC_OK;
+
+  const rl = await rateLimitBucket(env, `rl:reset:${clientIp(request)}`, 5, 3600);
+  if (!rl.allowed) return GENERIC_OK;
+
+  const account = await getAccount(env, email);
+  if (!account) return GENERIC_OK;
+
+  const token = await createResetToken(env, email);
+  await sendEmail(env, {
+    to: email,
+    subject: "Restablece tu contraseña — Mi Tarjeta Pro",
+    html: renderTemplate(passwordResetTemplate, buildPasswordResetVars(token, env)),
+  }).catch((err) => console.error("password-reset email failed:", err));
+
+  return GENERIC_OK;
+}
+
+async function handleAccountResetPassword(request, env) {
+  const body = await safeJson(request);
+  const token = String(body?.token || "");
+  const newPassword = String(body?.password || "");
+  if (!token || !newPassword) return jsonResponse({ error: "faltan datos" }, 400);
+  if (!env.PORTAL_KV) return jsonResponse({ error: "cuentas no configuradas todavía" }, 503);
+
+  const email = await consumeResetToken(env, token);
+  if (!email) return jsonResponse({ error: "link inválido o vencido — pide uno nuevo" }, 400);
+
+  try {
+    await setPassword(env, email, newPassword);
+  } catch {
+    return jsonResponse({ error: "la contraseña debe tener al menos 8 caracteres" }, 400);
+  }
+
+  return jsonResponse({ ok: true });
+}
+
+async function handleAccountMe(request, env) {
+  const body = await safeJson(request);
+  const email = await resolveAccountSession(env, String(body?.sessionToken || ""));
+  if (!email) return jsonResponse({ error: "unauthorized" }, 403);
+
+  const orders = await listOrdersForAccount(env, email);
+  return jsonResponse({ ok: true, email, orders });
 }
 
 // ============================================================

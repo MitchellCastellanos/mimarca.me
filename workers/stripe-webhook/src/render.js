@@ -143,6 +143,16 @@ export function buildApprovedAlertVars(data) {
   };
 }
 
+/** Vars para emails/password-reset.html. */
+export function buildPasswordResetVars(resetToken, env) {
+  const resetUrl = new URL("https://mimarca.me/mi-cuenta/cuenta.html");
+  resetUrl.searchParams.set("reset", resetToken);
+  return {
+    reset_url: resetUrl.toString(),
+    support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
+  };
+}
+
 export function renderTemplate(template, vars) {
   return template.replace(/\{\{\s*([\w]+)\s*\}\}/g, (match, name) =>
     name in vars ? escapeHtml(String(vars[name])) : match

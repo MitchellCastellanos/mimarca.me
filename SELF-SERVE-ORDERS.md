@@ -170,15 +170,35 @@ nombre, tagline, WhatsApp, Instagram, Maps y logo (`buildIntakeData()` en
 2. Al pagar, el webhook usa el borrador para enriquecer la alerta al owner
    (ya no depende de esperar a que llene Tally para ver su logo/links) y
    arma el recap que ve en `gracias.html`.
-3. Queda una entrada en KV `orders:<email>` por cada compra — es la
-   semilla de una futura cuenta multi-negocio (ver punto 5 más abajo),
-   pero **todavía no hay dashboard** que la use.
+3. Queda una entrada en KV `orders:<email>` por cada compra — el Dashboard
+   de cuenta (sección 9) ya la usa para listar los pedidos.
 
-Esto es la Fase A de "cuenta de cliente" que se decidió: en vez de pedir
-login antes de pagar (fricción justo en el peor momento), se captura solo
-el correo como parte del formulario que ya iban a llenar, y la "cuenta" de
-verdad (ver todas sus tarjetas, sus pedidos) se construye después, cuando
-haya demanda real de clientes con más de un negocio — reusando el mismo
-mecanismo de magic link que ya existe en `mi-cuenta`, ahora agregando por
-correo en vez de por slug. Las solicitudes de cambio se quedan como están:
-por tarjeta específica, no a nivel cuenta.
+Esto fue la Fase A de "cuenta de cliente": en vez de pedir login antes de
+pagar (fricción justo en el peor momento), se captura solo el correo como
+parte del formulario que ya iban a llenar. La cuenta de verdad, con
+password (sección 9), se crea después — normalmente cuando el cliente
+quiere ver el estatus de su pedido. Las solicitudes de cambio se quedan
+como están: por tarjeta específica, no a nivel cuenta.
+
+## 9. Cuenta de cliente con contraseña (`mi-cuenta/cuenta.html`)
+
+Aparte del acceso sin password por tarjeta (`mi-cuenta/index.html`, con el
+`ownerToken` de cada slug — eso sigue igual), existe una cuenta de verdad
+para ver el Dashboard de todos los pedidos de un mismo correo:
+
+- Se crea o se inicia sesión con correo + contraseña en
+  `mi-cuenta/cuenta.html`. La contraseña se guarda con PBKDF2-SHA256
+  (nunca en texto plano) — ver `workers/stripe-webhook/src/account.js`.
+- "¿Olvidaste tu contraseña?" manda `emails/password-reset.html` con un
+  link de un solo uso, válido 1 hora.
+- El Dashboard lista los pedidos (`orders:<email>`, la misma semilla de la
+  Fase A). Si no tiene ninguno todavía, muestra el estado vacío con un
+  botón grande "+ Comprar mi primera tarjeta" hacia `index.html#precios`.
+- Cada pedido se ve "En proceso" hasta que el equipo publique la tarjeta
+  y le ponga su `slug` a mano en esa entrada de KV (mismo paso manual que
+  ya existía) — ahí el Dashboard ya muestra "Publicada" con link directo
+  a su panel (`mi-cuenta/index.html?n=<slug>`, que todavía pide su
+  `ownerToken` — no comparte sesión con la cuenta).
+
+Detalle técnico completo: `workers/stripe-webhook/README.md` (sección
+"Cuentas").

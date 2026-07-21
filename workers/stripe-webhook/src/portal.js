@@ -33,14 +33,19 @@ export async function resolveClient(env, slug, publicData) {
   };
 }
 
-export async function rateLimitAccess(env, ip, limit = 5, windowSeconds = 3600) {
-  if (!env.PORTAL_KV || !ip) return { allowed: true };
-  const key = `rl:access:${ip}`;
+/** Contador genérico por bucket (ip, correo, lo que sea) con ventana fija. */
+export async function rateLimitBucket(env, key, limit, windowSeconds) {
+  if (!env.PORTAL_KV || !key) return { allowed: true };
   const raw = await env.PORTAL_KV.get(key);
   const count = Number(raw || 0);
   if (count >= limit) return { allowed: false, count };
   await env.PORTAL_KV.put(key, String(count + 1), { expirationTtl: windowSeconds });
   return { allowed: true, count: count + 1 };
+}
+
+export async function rateLimitAccess(env, ip, limit = 5, windowSeconds = 3600) {
+  if (!ip) return { allowed: true };
+  return rateLimitBucket(env, `rl:access:${ip}`, limit, windowSeconds);
 }
 
 export async function lookupReferral(env, code) {

@@ -19,14 +19,48 @@ Cloudflare Worker que le da backend al sitio estático.
 - `POST /notify/approved` — cliente aprueba diseño.
 - `POST /notify/published` / `POST /notify/change-received` — admin
   (`X-Admin-Secret`). UI: `/admin/`.
+- `POST /account/register` / `POST /account/login` — `{email,password}` →
+  `{sessionToken}`. Ver "Cuentas" abajo.
+- `POST /account/logout` — `{sessionToken}` → la invalida.
+- `POST /account/request-reset` — `{email}` → correo con link de reset
+  (siempre `{ok:true}`, no filtra si el correo existe).
+- `POST /account/reset-password` — `{token,password}` → nueva contraseña.
+- `POST /account/me` — `{sessionToken}` → correo + `orders:<email>` (el
+  Dashboard de `mi-cuenta/cuenta.html`).
 
 ## Estado
 
 | Recurso | Uso |
 |---------|-----|
 | JSON `negocio/_data/<slug>.json` | Datos públicos de la tarjeta (`orderStage`, negocio, etc.) |
-| KV `PORTAL_KV` | `secrets:<slug>`, `ref:<CODE>`, `redeem:*`, `rl:access:*`, `draft:<id>`, `session-draft:<sessionId>`, `orders:<email>` |
+| KV `PORTAL_KV` | `secrets:<slug>`, `ref:<CODE>`, `redeem:*`, `rl:access:*`, `draft:<id>`, `session-draft:<sessionId>`, `orders:<email>`, `account:<email>`, `account-session:<token>`, `account-reset:<token>` |
 | R2 `PORTAL_UPLOADS` | Archivos de `/upload` → `https://uploads.mimarca.me/...` |
+
+## Cuentas (correo + contraseña) — `mi-cuenta/cuenta.html`
+
+Aparte del acceso sin password por tarjeta (`mi-cuenta/index.html`, con el
+`ownerToken` de cada slug — eso no cambió), esto es una cuenta de verdad
+para ver el Dashboard de pedidos de un mismo correo (`src/account.js`):
+
+- Password con **PBKDF2-SHA256** (100,000 iteraciones, salt aleatorio por
+  cuenta) vía Web Crypto — nativo en el runtime de Workers, sin
+  dependencias (bcrypt/scrypt no corren ahí sin WASM).
+- Sesión = token opaco en KV (`account-session:<token>`, 60 días), no
+  cookie — el sitio (`mimarca.me`) y el Worker (`*.workers.dev`) son
+  dominios distintos, así que el cliente lo guarda en `localStorage` y lo
+  manda como cualquier otro token (igual que `ownerToken`).
+- Reset: `account-reset:<token>` en KV, 1 hora, un solo uso.
+- `/account/login` y `/account/request-reset` tienen rate-limit (10/h y
+  5/h por IP) reusando `rateLimitBucket` de `portal.js`.
+- El Dashboard lee `orders:<email>` (la misma lista que siembra el webhook
+  desde la Fase A del borrador) — si está vacía, `mi-cuenta/cuenta.html`
+  muestra el estado vacío con el botón "+ Comprar mi primera tarjeta".
+
+**Limitación conocida**: un reset de contraseña no invalida las sesiones
+ya emitidas (no se llevan registradas por cuenta, solo por token) — si un
+token de sesión ya se filtró, sigue funcionando después de un reset. Para
+el volumen actual es un riesgo aceptable; si esto crece, vale la pena
+llevar una lista de sesiones por cuenta para poder revocarlas todas.
 
 ## Borrador antes de pagar (builder → checkout → gracias.html)
 
@@ -118,6 +152,15 @@ curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/draft \
   -d '{"email":"prueba@mimarca.me","data":{"business":{"name":"Prueba"}}}'
 # -> {"ok":true,"draftId":"..."}
 curl https://mimarca-stripe-webhook.mimarca.workers.dev/draft/<draftId-de-arriba>
+
+# Cuentas
+curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/account/register \
+  -H 'content-type: application/json' \
+  -d '{"email":"prueba@mimarca.me","password":"algo-largo-123"}'
+# -> {"ok":true,"sessionToken":"..."}
+curl -X POST https://mimarca-stripe-webhook.mimarca.workers.dev/account/me \
+  -H 'content-type: application/json' \
+  -d '{"sessionToken":"<el-de-arriba>"}'
 ```
 
 Vars/secrets: ver `.env.example` y `wrangler.toml`.

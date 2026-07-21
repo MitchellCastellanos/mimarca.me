@@ -22,6 +22,9 @@ function renderNavbar(activePage = "", basePath = "./") {
           <li class="nav-item">
             <a class="nav-link ${activePage === "demo" ? "active" : ""}" href="${basePath}rcr-barbershop/">Demo en vivo</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="${basePath}mi-cuenta/cuenta.html">Mi cuenta</a>
+          </li>
         </ul>
 
         <a class="btn btn-warning ms-lg-3" href="${basePath}index.html?ref=nav-cta#precios">Pedir mi tarjeta</a>

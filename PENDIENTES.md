@@ -77,17 +77,51 @@ Lo que sí se construyó ahora:
    liste todas las tarjetas de un correo (fase aparte, abrir cuando haya
    demanda de clientes con más de un negocio).
 
-**Pendiente manual para que esto funcione en producción:**
-- Agregar el meta `mitp-portal-api` (ya con la URL real del worker, la
-  misma que ya está en `mi-cuenta/index.html`) en `index.html` y
-  `gracias.html` — hoy ambos tienen el placeholder `REPLACE-PORTAL_API_BASE_URL`.
-  Mientras sigan así, el checkout funciona exactamente igual que antes,
-  nomás sin guardar el borrador ni mostrar el recap.
-- No requiere ningún recurso nuevo de Cloudflare — reusa el mismo
-  `PORTAL_KV` que ya existe.
+**Pendiente manual para que esto funcione en producción:** ninguno — el
+meta `mitp-portal-api` de `index.html` y `gracias.html` ya se rellenó con
+la URL real del worker (2026-07-21, la misma que ya traía
+`mi-cuenta/index.html`). No requiere ningún recurso nuevo de Cloudflare —
+reusa el mismo `PORTAL_KV` que ya existe.
 
 Detalle técnico completo: `workers/stripe-webhook/README.md` (sección
 "Borrador antes de pagar") y `SELF-SERVE-ORDERS.md` (sección 8).
+
+## Parte 4 — Cuentas con correo + contraseña y Dashboard (2026-07-21)
+
+Mitchell pidió ver el flujo de "crear cuenta → Dashboard vacío → botón +
+para comprar", y decidió explícitamente sí meter contraseña real (con
+reset), sabiendo que es más trabajo que el magic link de antes.
+
+1. **`src/account.js`**: [x] — PBKDF2-SHA256 (100k iteraciones, salt por
+   cuenta) vía Web Crypto, sin dependencias externas. Sesión = token
+   opaco en KV (no cookie, dominios distintos entre sitio y Worker).
+2. **Rutas `/account/*`**: [x] — `register`, `login`, `logout`,
+   `request-reset`, `reset-password`, `me`. Rate-limit en login (10/h/IP)
+   y request-reset (5/h/IP).
+3. **`emails/password-reset.html`**: [x] — link de un solo uso, vence en
+   1 hora.
+4. **`mi-cuenta/cuenta.html` + `js/cuenta.js`**: [x] — login/registro,
+   "olvidé mi contraseña", formulario de nueva contraseña (`?reset=token`),
+   y el Dashboard: si `orders:<email>` (KV, ya sembrado desde la Fase A)
+   está vacío, muestra "Aún no tienes tarjetas" + botón grande
+   "+ Comprar mi primera tarjeta" → `index.html#precios`. Si ya tiene
+   pedidos, los lista (estatus "en proceso" hasta que el equipo le ponga
+   `slug`, o "publicada" con link a su panel una vez que sí).
+5. **Navbar**: [x] — link "Mi cuenta" nuevo en `js/components.js`.
+
+**Limitación conocida** (documentada en el README del worker): un reset de
+password no invalida sesiones ya emitidas — no se llevan registradas por
+cuenta, solo por token. Aceptable para el volumen actual; si crece, vale
+la pena llevar una lista de sesiones por cuenta para poder revocarlas.
+
+**Pendiente**: el Dashboard todavía no vincula automáticamente un pedido a
+su `slug` una vez publicado — sigue siendo el paso manual que ya existía
+(`orders:<email>`, campo `slug: null` hasta que el equipo lo edite a mano
+en KV al publicar la tarjeta). Considerar automatizarlo si el volumen de
+clientes con cuenta crece.
+
+No requiere ningún recurso nuevo de Cloudflare — reusa `PORTAL_KV`.
+Detalle técnico: `workers/stripe-webhook/README.md` (sección "Cuentas").
 
 ### Operación: alta de cliente (secretos)
 
