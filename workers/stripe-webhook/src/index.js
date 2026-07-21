@@ -14,6 +14,8 @@
  *   POST /notify/approved      Cliente aprueba su diseño en revisión -> aviso al owner
  *   POST /notify/published     (admin) avisa al cliente que ya está publicada
  *   POST /notify/change-received (admin) confirma que se recibió su solicitud de cambios
+ *   POST /admin/referral/consume (admin) aplica crédito de referido a una compra
+ *   POST /referral/validate    Valida código + correo (nuevo cliente, no autorreferido)
  *
  *   GET  /card-links/:slug      Links autoeditados del cliente (público, sin auth)
  *   PUT  /card-links/:slug      {token,links} -> el cliente edita sus links dentro de su
@@ -64,6 +66,7 @@ import {
   getReferralSummary,
   REFERRAL_DISCOUNT_PERCENT,
   recordReferralRedemption,
+  consumeReferralCredit,
   parseClientReferenceId,
   saveDraft,
   getDraft,
@@ -220,6 +223,9 @@ export default {
       if (url.pathname === "/notify/change-received") {
         return await handleAdminNotify(request, env, "change-received");
       }
+      if (url.pathname === "/admin/referral/consume") {
+        return await handleAdminReferralConsume(request, env);
+      }
     } catch (err) {
       console.error(err);
       return jsonResponse({ error: "internal error" }, 500);
@@ -319,15 +325,32 @@ async function handleStripeWebhook(request, env) {
     } catch {
       // onboarding_url siempre es una URL valida armada arriba; por si acaso.
     }
-    // El redirect que arma Stripe justo despues de pagar solo trae
-    // session_id (se configura una vez en el Dashboard) — este mapeo deja
-    // que gracias.html encuentre el borrador con eso, sin esperar el correo.
+  }
+  Object.assign(vars, buildDraftSummaryFields(draftRecord));
+
+  // 1) Persistencia idempotente PRIMERO — no debe perderse si falla un correo.
+  if (draftRecord && draftId) {
     await linkSessionToDraft(env, session.id, draftId).catch((err) =>
       console.error("linkSessionToDraft failed:", err)
     );
   }
-  Object.assign(vars, buildDraftSummaryFields(draftRecord));
 
+  await recordPendingOrder(env, {
+    email: vars.customer_email || draftRecord?.email || "",
+    draftId: draftId || null,
+    sessionId: session.id,
+    packageName: vars.package_name,
+  }).catch((err) => console.error("recordPendingOrder failed:", err));
+
+  await recordReferralRedemption(
+    env,
+    session,
+    (opts) => sendEmail(env, opts),
+    (v) => renderTemplate(referralRewardTemplate, v)
+  ).catch((err) => console.error("referral tracking failed:", err));
+
+  // 2) Correos best-effort. Respondemos 200 a Stripe tras persistir para
+  // evitar reintentos que reenvíen duplicados; los fallos quedan en logs.
   const results = await Promise.allSettled([
     vars.customer_email
       ? sendEmail(env, {
@@ -345,27 +368,10 @@ async function handleStripeWebhook(request, env) {
 
   const failures = results.filter((r) => r.status === "rejected").map((r) => String(r.reason));
   if (failures.length > 0) {
-    console.error("Email delivery failed:", failures);
-    return jsonResponse({ received: true, errors: failures }, 500);
+    console.error("Email delivery failed (state already saved):", failures);
   }
 
-  // Semilla de la futura cuenta multi-negocio — best-effort.
-  await recordPendingOrder(env, {
-    email: vars.customer_email || draftRecord?.email || "",
-    draftId: draftId || null,
-    sessionId: session.id,
-    packageName: vars.package_name,
-  }).catch((err) => console.error("recordPendingOrder failed:", err));
-
-  // Referidos: best-effort, no tumba el webhook si falla.
-  await recordReferralRedemption(
-    env,
-    session,
-    (opts) => sendEmail(env, opts),
-    (v) => renderTemplate(referralRewardTemplate, v)
-  ).catch((err) => console.error("referral tracking failed:", err));
-
-  return jsonResponse({ received: true });
+  return jsonResponse({ received: true, emailErrors: failures.length ? failures.length : undefined });
 }
 
 // ============================================================
@@ -830,6 +836,34 @@ async function handleApproved(request, env) {
   }).catch((err) => console.error("approved-alert email failed:", err));
 
   return jsonResponse({ ok: true });
+}
+
+// ============================================================
+// POST /admin/referral/consume — aplica crédito interno (solo admin)
+// Body: { slug, amountCents, purchaseAmountCents, idempotencyKey, note? }
+// ============================================================
+async function handleAdminReferralConsume(request, env) {
+  const secret = request.headers.get("X-Admin-Secret") || "";
+  if (!env.ADMIN_SECRET || secret !== env.ADMIN_SECRET) {
+    return jsonResponse({ error: "unauthorized" }, 403);
+  }
+
+  const body = await safeJson(request);
+  const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  if (!slug) return jsonResponse({ error: "missing slug" }, 400);
+
+  try {
+    const record = await consumeReferralCredit(env, {
+      slug,
+      amountCents: body?.amountCents,
+      purchaseAmountCents: body?.purchaseAmountCents,
+      idempotencyKey: body?.idempotencyKey,
+      note: body?.note,
+    });
+    return jsonResponse({ ok: true, ...record });
+  } catch (err) {
+    return jsonResponse({ error: err.message || "no se pudo consumir crédito" }, 422);
+  }
 }
 
 // ============================================================

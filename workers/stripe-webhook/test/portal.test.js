@@ -5,7 +5,10 @@ import {
   rateLimitAccess,
   lookupReferral,
   getReferralSummary,
+  getReferralCreditBalance,
   recordReferralRedemption,
+  consumeReferralCredit,
+  REFERRAL_REWARD_TTL_MS,
   parseClientReferenceId,
   saveDraft,
   getDraft,
@@ -100,6 +103,7 @@ describe("referral rewards", () => {
       env,
       {
         id: "cs_123",
+        payment_status: "paid",
         client_reference_id: "r.ABC12_d.draft-1",
         amount_total: 22410,
         total_details: { amount_discount: 2490 },
@@ -110,18 +114,32 @@ describe("referral rewards", () => {
       (vars) => JSON.stringify(vars)
     );
     assert.equal(record.rewardAmount, 2241);
+    assert.ok(record.createdAt);
+    assert.ok(record.expiresAt > record.createdAt);
     assert.equal(emails.length, 1);
+    assert.match(emails[0].html, /Ana/);
+    assert.doesNotMatch(emails[0].html, /ana@example\.com/);
 
     const summary = await getReferralSummary(env, "lulu");
     assert.equal(summary.count, 1);
     assert.equal(summary.rewardAmount, 2241);
+    assert.equal(summary.referrals[0].buyerName, "Ana");
     assert.equal(summary.referrals[0].buyerEmailMasked, "a***@example.com");
+    assert.equal(summary.referrals[0].buyerEmail, undefined);
   });
 
   it("es idempotente por Checkout Session", async () => {
     const env = fakeKvEnv();
     await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
-    const session = { id: "cs_same", client_reference_id: "r.ABC12", amount_total: 10000, total_details: { amount_discount: 1000 }, currency: "mxn", customer_details: {} };
+    const session = {
+      id: "cs_same",
+      payment_status: "paid",
+      client_reference_id: "r.ABC12",
+      amount_total: 10000,
+      total_details: { amount_discount: 1000 },
+      currency: "mxn",
+      customer_details: {},
+    };
     await recordReferralRedemption(env, session);
     const again = await recordReferralRedemption(env, session);
     assert.equal(again.already, true);
@@ -132,11 +150,164 @@ describe("referral rewards", () => {
     const env = fakeKvEnv();
     await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
     const result = await recordReferralRedemption(env, {
-      id: "cs_no_discount", client_reference_id: "r.ABC12", amount_total: 10000,
-      total_details: { amount_discount: 0 }, currency: "mxn", customer_details: {},
+      id: "cs_no_discount",
+      payment_status: "paid",
+      client_reference_id: "r.ABC12",
+      amount_total: 10000,
+      total_details: { amount_discount: 0 },
+      currency: "mxn",
+      customer_details: {},
     });
     assert.equal(result, null);
     assert.equal((await getReferralSummary(env, "lulu")).count, 0);
+  });
+
+  it("no acredita si el pago no está completado", async () => {
+    const env = fakeKvEnv();
+    await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
+    const result = await recordReferralRedemption(env, {
+      id: "cs_unpaid",
+      payment_status: "unpaid",
+      client_reference_id: "r.ABC12",
+      amount_total: 10000,
+      total_details: { amount_discount: 1000 },
+      currency: "mxn",
+      customer_details: {},
+    });
+    assert.equal(result, null);
+  });
+
+  it("excluye rewards vencidos del saldo y marca status expired", async () => {
+    const env = fakeKvEnv();
+    const now = Date.now();
+    await env.PORTAL_KV.put("redeems:lulu", JSON.stringify([
+      {
+        sessionId: "cs_old",
+        buyerName: "Vieja",
+        amountPaid: 10000,
+        rewardAmount: 1000,
+        currency: "mxn",
+        at: now - REFERRAL_REWARD_TTL_MS - 1000,
+        createdAt: now - REFERRAL_REWARD_TTL_MS - 1000,
+        expiresAt: now - 1000,
+      },
+      {
+        sessionId: "cs_new",
+        buyerName: "Nueva",
+        amountPaid: 20000,
+        rewardAmount: 2000,
+        currency: "mxn",
+        at: now,
+        createdAt: now,
+        expiresAt: now + REFERRAL_REWARD_TTL_MS,
+      },
+    ]));
+    const summary = await getReferralSummary(env, "lulu", now);
+    assert.equal(summary.count, 2);
+    assert.equal(summary.activeCount, 1);
+    assert.equal(summary.rewardAmount, 2000);
+    assert.equal(summary.referrals.find((r) => r.buyerName === "Vieja").status, "expired");
+  });
+
+  it("compatibilidad con rewards antiguos sin rewardAmount ni expiresAt", async () => {
+    const env = fakeKvEnv();
+    const now = Date.now();
+    await env.PORTAL_KV.put("redeems:lulu", JSON.stringify([
+      { sessionId: "cs_legacy", buyerEmail: "x@y.com", amountPaid: 24900, currency: "mxn", at: now - 1000 },
+    ]));
+    const summary = await getReferralSummary(env, "lulu", now);
+    assert.equal(summary.rewardAmount, 2490);
+    assert.equal(summary.referrals[0].buyerName, "x***@y.com");
+    assert.equal(summary.referrals[0].status, "confirmed");
+    assert.ok(summary.referrals[0].expiresAt > now);
+  });
+
+  it("consume crédito con tope 50%, sin saldo negativo e idempotente", async () => {
+    const env = fakeKvEnv();
+    const now = Date.now();
+    await env.PORTAL_KV.put("redeems:lulu", JSON.stringify([
+      { sessionId: "cs_1", amountPaid: 20000, rewardAmount: 2000, currency: "mxn", at: now, createdAt: now, expiresAt: now + REFERRAL_REWARD_TTL_MS },
+    ]));
+
+    await assert.rejects(
+      () => consumeReferralCredit(env, { slug: "lulu", amountCents: 1500, purchaseAmountCents: 2000, idempotencyKey: "k1", now }),
+      /50%/
+    );
+
+    const first = await consumeReferralCredit(env, {
+      slug: "lulu",
+      amountCents: 1000,
+      purchaseAmountCents: 24900,
+      idempotencyKey: "consume-1",
+      note: "upgrade",
+      now,
+    });
+    assert.equal(first.amountCents, 1000);
+    assert.equal(first.balanceAfter, 1000);
+    assert.equal(await getReferralCreditBalance(env, "lulu", now), 1000);
+
+    const again = await consumeReferralCredit(env, {
+      slug: "lulu",
+      amountCents: 1000,
+      purchaseAmountCents: 24900,
+      idempotencyKey: "consume-1",
+      now,
+    });
+    assert.equal(again.already, true);
+    assert.equal(await getReferralCreditBalance(env, "lulu", now), 1000);
+
+    await assert.rejects(
+      () => consumeReferralCredit(env, {
+        slug: "lulu",
+        amountCents: 1500,
+        purchaseAmountCents: 24900,
+        idempotencyKey: "consume-2",
+        now,
+      }),
+      /saldo insuficiente/
+    );
+  });
+
+  it("conserva el reward si Resend falla", async () => {
+    const env = fakeKvEnv();
+    await env.PORTAL_KV.put("ref:ABC12", JSON.stringify({ slug: "lulu" }));
+    await env.PORTAL_KV.put("secrets:lulu", JSON.stringify({ ownerEmail: "duena@lulu.mx" }));
+    const record = await recordReferralRedemption(
+      env,
+      {
+        id: "cs_mail_fail",
+        payment_status: "paid",
+        client_reference_id: "r.ABC12",
+        amount_total: 10000,
+        total_details: { amount_discount: 1000 },
+        currency: "mxn",
+        customer_details: { name: "Bob", email: "bob@x.com" },
+      },
+      async () => { throw new Error("Resend 500"); },
+      (vars) => JSON.stringify(vars)
+    );
+    assert.equal(record.rewardAmount, 1000);
+    assert.equal(record.emailSent, false);
+    assert.equal((await getReferralSummary(env, "lulu")).rewardAmount, 1000);
+
+    let sent = 0;
+    const retry = await recordReferralRedemption(
+      env,
+      {
+        id: "cs_mail_fail",
+        payment_status: "paid",
+        client_reference_id: "r.ABC12",
+        amount_total: 10000,
+        total_details: { amount_discount: 1000 },
+        currency: "mxn",
+        customer_details: { name: "Bob", email: "bob@x.com" },
+      },
+      async () => { sent += 1; },
+      (vars) => JSON.stringify(vars)
+    );
+    assert.equal(retry.already, true);
+    assert.equal(sent, 1);
+    assert.equal((await getReferralSummary(env, "lulu")).count, 1);
   });
 });
 

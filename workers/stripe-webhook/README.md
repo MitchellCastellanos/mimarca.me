@@ -24,6 +24,11 @@ Cloudflare Worker que le da backend al sitio estático.
 - `POST /notify/approved` — cliente aprueba diseño.
 - `POST /notify/published` / `POST /notify/change-received` — admin
   (`X-Admin-Secret`). UI: `/admin/`.
+- `POST /admin/referral/consume` — admin aplica crédito de referido
+  `{slug,amountCents,purchaseAmountCents,idempotencyKey,note?}`. Tope 50%
+  de la compra, sin saldo negativo, idempotente.
+- `POST /referral/validate` — `{code,email}` valida referido antes del
+  checkout (existe, no autorreferido, cliente nuevo).
 - `GET /card-links/:slug` — links autoeditados del cliente (público, sin
   auth — ya son visibles en la tarjeta en vivo). 404 si nunca los editó
   (el front cae al `links` del JSON estático).
@@ -229,19 +234,44 @@ Namespace id (ver `wrangler.toml`): `5936a9510e2d4b4e88c7bd6ba720763d`.
    y confirma que existe, no es autorreferido y el correo no tiene compras previas.
 3. Al abrir Stripe se manda el código único en `client_reference_id` para la
    atribución y `prefilled_promo_code=NUEVO10` para aplicar 10%.
-4. El webhook registra la redención, suma 10% del monto pagado como crédito
-   del referidor y manda `emails/referral-reward.html`.
+4. El webhook registra la redención **antes** de mandar correos, suma 10% del
+   monto pagado como crédito del referidor (con `createdAt`/`expiresAt` a 12
+   meses) y manda `emails/referral-reward.html` (best-effort).
+5. El panel muestra nombre del comprador o email enmascarado — nunca el correo
+   completo. El saldo excluye rewards vencidos y descuenta consumos admin.
 
 Configuración necesaria en Stripe (una sola vez): crear el cupón de 10% y
 el promotion code `NUEVO10`, restringido a primera compra, y habilitar códigos
 promocionales en los tres Payment Links. El valor puede cambiarse con
 `REFERRAL_PROMO_CODE` en `wrangler.toml`. Para que la restricción de primera
-compra sea efectiva, los Payment Links deben crear Customer en lugar de dejar
-la compra únicamente como guest.
+compra sea efectiva, los Payment Links deben crear Customer (`customer_creation=always`).
 
-Política recomendada: el crédito vence en 12 meses, no es canjeable por efectivo
-y cubre como máximo 50% de una compra futura. KV mantiene hasta 100 redenciones
-por cliente y el panel muestra las 20 más recientes.
+Script live (requiere API key con write): `scripts/setup-referral-stripe.ps1`.
+
+Live (configurado 2026-07-21):
+- coupon `Va48cJtA` — 10% once, "Referido nuevo cliente 10%"
+- promotion code `promo_1TvjogJGvovZxLExUszuclDT` (`NUEVO10`, first_time_transaction)
+
+Payment Links (live; URLs/precios sin cambio):
+
+| Paquete | Payment Link ID | URL | Promos | Customer |
+|---------|-----------------|-----|--------|----------|
+| Lanzamiento | `plink_1Tu1a7JGvovZxLExK7euXbnT` | `https://buy.stripe.com/eVqcN67HF1xkdP7gQjgjC00` | on | always |
+| Personalizado | `plink_1Tu1a9JGvovZxLExUuRthJ1d` | `https://buy.stripe.com/4gM28s6DB0tgh1j1VpgjC01` | on | always |
+| Premium | `plink_1Tu1aBJGvovZxLExDx1juPyz` | `https://buy.stripe.com/5kQcN64vt5NA7qJ7fJgjC02` | on | always |
+
+Test mode (ya creado):
+- coupon `DSnjUVps`
+- promotion code `promo_1TvjJfJGvovZxLExCV6Hmswf` (`NUEVO10`, first_time_transaction)
+- Payment Link de prueba `plink_1TvjakJGvovZxLEx5LZ8ircG`
+  (`https://buy.stripe.com/test_eVqcN67HF1xkdP7gQjgjC00`, promos + customer always)
+
+Webhook live: `we_1TvQyKJGvovZxLExGWvojE7I` → `https://mimarca-stripe-webhook.mimarca.workers.dev` (`checkout.session.completed`).
+
+Política: el crédito vence en 12 meses, no es canjeable por efectivo y cubre
+como máximo 50% de una compra futura (`POST /admin/referral/consume`). KV
+mantiene hasta 100 redenciones por cliente y el panel muestra las 20 más recientes.
+Registros viejos sin `rewardAmount`/`expiresAt` se normalizan al leer.
 
 ## Pruebas
 
