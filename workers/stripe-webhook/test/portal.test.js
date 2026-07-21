@@ -110,7 +110,7 @@ describe("saveDraft / getDraft", () => {
 
   it("rechaza borradores demasiado grandes", async () => {
     const env = fakeKvEnv();
-    const huge = { business: { name: "x".repeat(300000) } };
+    const huge = { businessName: "x".repeat(600000) };
     await assert.rejects(() => saveDraft(env, "a@b.com", huge));
   });
 });

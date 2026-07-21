@@ -30,10 +30,17 @@ Cloudflare Worker que le da backend al sitio estático.
 
 ## Borrador antes de pagar (builder → checkout → gracias.html)
 
-1. En `index.html`, al dar clic en "Pedir mi tarjeta a la medida" con un
-   correo válido, `js/mi-tarjeta.js` manda `POST /draft` con los datos que
-   ya armó el builder (igual que los de una tarjeta real) y guarda el
-   `draftId` + correo en `sessionStorage`.
+El "borrador" NO es el mockup (theme, foto de cover, tarjeta renderizada
+en el iframe) — eso es puro gancho visual y se descarta en cuanto hace la
+orden. Lo único que se guarda es lo que llenó en la forma
+(`buildIntakeData()` en `js/mi-tarjeta.js`): `businessName`, `tagline`,
+`category`, `whatsapp`, `instagram`, `maps`, `logoDataUrl`, `slugPreference`.
+
+1. En `index.html`, con un correo válido, se guarda ese borrador
+   (`POST /draft`) en dos momentos — al dar clic en "Pedir mi tarjeta a la
+   medida" (CTA post-mockup), **y también** al dar clic directo en un
+   botón de paquete en `#precios` (por si se saltó el CTA de arriba).
+   `js/mi-tarjeta.js` guarda el `draftId` + correo en `sessionStorage`.
 2. `js/ref-capture.js` (ahora también hace esto, no solo referidos) mete
    ese `draftId` en `client_reference_id` de los links de Stripe —
    combinado con el código de referido si también hay uno, como

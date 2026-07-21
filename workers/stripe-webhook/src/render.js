@@ -109,10 +109,12 @@ export function buildAssetUploadedVars(data, assetUrl, when = new Date()) {
 }
 
 /**
- * Vars del "borrador" (builder, antes de pagar) para las filas opcionales
- * de emails/payment-alert.html. `draftRecord` es lo que regresa
- * portal.js#getDraft ({ email, data, createdAt }) o null/undefined si el
- * pago no traía draftId — en ese caso todo queda en "—".
+ * Vars de los datos que el cliente llenó en la forma del builder (no el
+ * mockup — eso es puro gancho visual y se descarta) para las filas
+ * opcionales de emails/payment-alert.html. `draftRecord` es lo que regresa
+ * portal.js#getDraft ({ email, data, createdAt }), con `data` en la forma
+ * plana que arma buildIntakeData() en js/mi-tarjeta.js — o null/undefined
+ * si el pago no traía draftId, en cuyo caso todo queda en "—".
  */
 export function buildDraftSummaryFields(draftRecord) {
   const data = draftRecord?.data;
@@ -121,13 +123,13 @@ export function buildDraftSummaryFields(draftRecord) {
   }
 
   const parts = [];
-  if (data.primaryCta?.url) parts.push(`${data.primaryCta.label || "CTA"}: ${data.primaryCta.url}`);
-  (data.links || []).forEach((l) => {
-    if (l?.url) parts.push(`${l.label || "Link"}: ${l.url}`);
-  });
+  if (data.whatsapp) parts.push(`WhatsApp: ${data.whatsapp}`);
+  if (data.instagram) parts.push(`Instagram: ${data.instagram}`);
+  if (data.maps) parts.push(`Maps: ${data.maps}`);
+  if (data.logoDataUrl) parts.push("Logo: recibido ✓");
 
   return {
-    draft_business_name: data.business?.name || "—",
+    draft_business_name: data.businessName || "—",
     draft_links_summary: parts.length ? parts.join("  ·  ") : "—",
   };
 }

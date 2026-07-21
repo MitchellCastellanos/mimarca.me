@@ -139,7 +139,7 @@ export async function recordReferralRedemption(env, session, sendEmailFn, render
 // ============================================================
 
 const DRAFT_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 dias
-const MAX_DRAFT_BYTES = 200 * 1024; // logo en dataURL es lo que más pesa
+const MAX_DRAFT_BYTES = 500 * 1024; // logo en dataURL es lo que más pesa
 
 /** Guarda {email, data} en KV con TTL y regresa el draftId generado. */
 export async function saveDraft(env, email, data) {

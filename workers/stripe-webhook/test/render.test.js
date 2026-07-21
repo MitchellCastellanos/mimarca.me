@@ -138,9 +138,9 @@ test("buildDraftSummaryFields arma el resumen de links del borrador", () => {
   const fields = buildDraftSummaryFields({
     email: "cliente@correo.com",
     data: {
-      business: { name: "Taquería La Bendita" },
-      primaryCta: { label: "WhatsApp", url: "https://wa.me/5215555555555" },
-      links: [{ label: "Instagram", url: "https://instagram.com/labendita" }],
+      businessName: "Taquería La Bendita",
+      whatsapp: "https://wa.me/5215555555555",
+      instagram: "https://instagram.com/labendita",
     },
   });
   assert.equal(fields.draft_business_name, "Taquería La Bendita");

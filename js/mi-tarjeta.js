@@ -176,6 +176,57 @@
     };
   }
 
+  // ----- datos que de verdad importan (lo que llena en la forma) -----
+  // El mockup (theme, foto de cover, tarjeta renderizada) es puro gancho
+  // visual y se tira en cuanto hace la orden — esto es lo único que
+  // guardamos y que le llega al equipo.
+  function buildIntakeData() {
+    const waDigits = elWa.value.replace(/[^0-9]/g, "");
+    return {
+      businessName: elName.value.trim(),
+      tagline: elTagline.value.trim(),
+      category: elCategory.value,
+      whatsapp: waDigits ? `https://wa.me/${waDigits}` : "",
+      instagram: elInstagram.value.trim(),
+      maps: elMaps.value.trim(),
+      logoDataUrl: logoDataURL || "",
+      slugPreference: elSlug.value || slugify(elName.value) || "",
+    };
+  }
+
+  // ----- guarda esos datos (best-effort) y refresca los links de Stripe -----
+  async function saveIntakeDraft() {
+    const email = (elEmail?.value || "").trim();
+    if (!email || !elEmail.checkValidity()) return;
+
+    const apiBase = portalApiBase();
+    if (!apiBase) return;
+
+    try {
+      const res = await fetch(`${apiBase}/draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, data: buildIntakeData() }),
+      });
+      if (res.ok) {
+        const { draftId } = await res.json();
+        if (draftId) {
+          try {
+            sessionStorage.setItem("mitp_draft_id", draftId);
+            sessionStorage.setItem("mitp_draft_email", email);
+          } catch { /* sessionStorage no disponible, seguimos igual */ }
+        }
+      }
+    } catch {
+      // best-effort: si falla, el cliente sigue a pagar igual y lo llena
+      // por Tally/WhatsApp como antes.
+    }
+
+    if (typeof window.MTP_applyCheckoutParams === "function") {
+      window.MTP_applyCheckoutParams();
+    }
+  }
+
   // ----- documento que corre dentro del iframe: mismo motor, mismo CSS -----
   function buildPreviewDocument(data) {
     const json = JSON.stringify(data).replace(/</g, "\\u003c");
@@ -248,7 +299,7 @@
     });
   });
 
-  // ----- "Pedir mi tarjeta a la medida": guarda el borrador y avanza a #precios -----
+  // ----- "Pedir mi tarjeta a la medida": guarda los datos y avanza a #precios -----
   if (elProceedBtn) {
     elProceedBtn.addEventListener("click", async () => {
       const email = (elEmail.value || "").trim();
@@ -263,40 +314,30 @@
       const origLabel = elProceedBtn.innerHTML;
       elProceedBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando…';
 
-      const apiBase = portalApiBase();
-      if (apiBase) {
-        try {
-          const res = await fetch(`${apiBase}/draft`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, data: buildCardData() }),
-          });
-          if (res.ok) {
-            const { draftId } = await res.json();
-            if (draftId) {
-              try {
-                sessionStorage.setItem("mitp_draft_id", draftId);
-                sessionStorage.setItem("mitp_draft_email", email);
-              } catch { /* sessionStorage no disponible, seguimos igual */ }
-            }
-          }
-        } catch {
-          // si falla el guardado no bloqueamos al cliente — sigue a pagar igual,
-          // solo no llegará prellenado a gracias.html.
-        }
-        // aplica los nuevos parámetros (client_reference_id/prefilled_email) a
-        // los links de Stripe antes de que el cliente les dé clic.
-        if (typeof window.MTP_applyCheckoutParams === "function") {
-          window.MTP_applyCheckoutParams();
-        }
-      }
+      await saveIntakeDraft();
 
       elProceedBtn.disabled = false;
       elProceedBtn.innerHTML = origLabel;
-      if (elProceedNote && !apiBase) {
-        elProceedNote.textContent = "";
-      }
+      if (elProceedNote) elProceedNote.textContent = "";
       document.getElementById("precios")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
+
+  // ----- también al elegir un paquete directo (por si se saltó el CTA de
+  // arriba): mismo guardado, sin bloquear la compra más de ~1.5s -----
+  document.querySelectorAll("#precios a[data-order-package]").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      const email = (elEmail?.value || "").trim();
+      if (!email || !elEmail?.checkValidity()) return; // sin correo, clic normal
+
+      e.preventDefault();
+      const target = a.getAttribute("target") === "_blank" ? "_blank" : "_self";
+      const proceed = () => window.open(a.getAttribute("href"), target, "noopener");
+
+      Promise.race([
+        saveIntakeDraft(),
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+      ]).finally(proceed);
+    });
+  });
 })();

@@ -152,16 +152,21 @@ JSON público de `negocio/_data/<slug>.json` — están en Cloudflare KV
 (`secrets:<slug>`), y `POST /session` los resuelve sin exponerlos. Ver
 `workers/stripe-webhook/README.md` para el detalle de alta de cliente.
 
-## 8. Borrador antes de pagar (mockup real → cuenta futura)
+## 8. Borrador antes de pagar (datos de la forma → cuenta futura)
 
-El builder de `index.html` ya arma el mismo objeto de datos que usa una
-tarjeta real (mismo motor `js/negocio.js` + `negocio/negocio.css`, en un
-iframe aislado — no es una plantilla de mentiras). Cuando el cliente da
-clic en "Pedir mi tarjeta a la medida":
+El builder de `index.html` renderiza el mockup con el mismo motor que una
+tarjeta real (`js/negocio.js` + `negocio/negocio.css`, en un iframe
+aislado), pero ese mockup en sí (theme, foto de cover, tarjeta renderizada)
+es solo gancho visual — se tira en cuanto se hace la orden. Lo único que
+se guarda y llega al equipo es lo que el cliente llenó en la forma:
+nombre, tagline, WhatsApp, Instagram, Maps y logo (`buildIntakeData()` en
+`js/mi-tarjeta.js`).
 
-1. Dejando su correo, `js/mi-tarjeta.js` guarda ese borrador vía
-   `POST /draft` (KV, TTL 30 días) y lo enlaza a los links de Stripe como
-   `client_reference_id` + `prefilled_email` (`js/ref-capture.js`).
+1. Con su correo, `js/mi-tarjeta.js` guarda esos datos vía `POST /draft`
+   (KV, TTL 30 días) y los enlaza a los links de Stripe como
+   `client_reference_id` + `prefilled_email` (`js/ref-capture.js`). Esto
+   pasa al dar clic en "Pedir mi tarjeta a la medida" **y también** al
+   elegir un paquete directo en `#precios`, por si se saltó ese botón.
 2. Al pagar, el webhook usa el borrador para enriquecer la alerta al owner
    (ya no depende de esperar a que llene Tally para ver su logo/links) y
    arma el recap que ve en `gracias.html`.
