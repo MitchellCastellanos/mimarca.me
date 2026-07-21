@@ -2,21 +2,17 @@
   "slug": "lulu",
   "theme": "dark-gold",
   "language": "es-MX",
-
   "business": {
     "name": "RCR",
     "subname": "BARBER SHOP",
     "verified": true,
     "tagline": "Corte, barba y estilo para caballeros",
-    "rating": 5.0,
+    "rating": 5,
     "established": 2023,
     "logoUrl": "",
     "city": "Querétaro, México"
   },
-
   "orderStage": "published",
-  "ownerEmail": "rcr.barbershop.demo@mimarca.me",
-
   "status": {
     "type": "open-hours",
     "hours": {
@@ -29,14 +25,12 @@
       "sun": "11:00-18:00"
     }
   },
-
   "primaryCta": {
     "label": "Agendar cita",
     "subtitle": "Respuesta en minutos por WhatsApp",
     "icon": "calendar2-check",
     "url": "https://wa.me/524423536769?text=Hola%20RCR%2C%20quiero%20agendar%20una%20cita"
   },
-
   "links": [
     {
       "label": "Instagram",
@@ -82,25 +76,52 @@
       "url": "https://forms.gle/M6wTSV7KCRXuBDui7"
     }
   ],
-
   "servicesTitle": "SERVICIOS Y PRECIOS",
   "services": [
-    { "name": "Corte caballero", "desc": "Corte personalizado a tijera o máquina", "price": "$150" },
-    { "name": "Corte niño", "desc": "Corte para los más pequeños", "price": "$130" },
-    { "name": "Barba", "desc": "Perfilado y arreglo de barba con toalla", "price": "$110" },
-    { "name": "Barba premium", "desc": "Barba completa con tratamiento y acabado", "price": "$160" },
-    { "name": "Fade", "desc": "Degradado limpio y preciso", "price": "$180" },
-    { "name": "Afeitado clásico", "desc": "Afeitado con navaja y toalla caliente", "price": "$150" },
-    { "name": "Perfilado", "desc": "Perfilado de líneas y detalle", "price": "$80" },
-    { "name": "Tratamiento capilar", "desc": "Hidratación y cuidado profundo del cabello", "price": "$250" }
+    {
+      "name": "Corte caballero",
+      "desc": "Corte personalizado a tijera o máquina",
+      "price": "$150"
+    },
+    {
+      "name": "Corte niño",
+      "desc": "Corte para los más pequeños",
+      "price": "$130"
+    },
+    {
+      "name": "Barba",
+      "desc": "Perfilado y arreglo de barba con toalla",
+      "price": "$110"
+    },
+    {
+      "name": "Barba premium",
+      "desc": "Barba completa con tratamiento y acabado",
+      "price": "$160"
+    },
+    {
+      "name": "Fade",
+      "desc": "Degradado limpio y preciso",
+      "price": "$180"
+    },
+    {
+      "name": "Afeitado clásico",
+      "desc": "Afeitado con navaja y toalla caliente",
+      "price": "$150"
+    },
+    {
+      "name": "Perfilado",
+      "desc": "Perfilado de líneas y detalle",
+      "price": "$80"
+    },
+    {
+      "name": "Tratamiento capilar",
+      "desc": "Hidratación y cuidado profundo del cabello",
+      "price": "$250"
+    }
   ],
   "servicesDisclaimer": "Los precios pueden variar según el servicio. Consulta por WhatsApp para detalles.",
-
   "gallery": [],
-
   "brandCardCopy": "Estilo y confianza en cada corte.",
   "copyright": "© 2023 RCR Barber Shop · Querétaro, México",
-
-  "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03",
-  "ownerToken": "lulu-x7a9k2"
+  "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03"
 }

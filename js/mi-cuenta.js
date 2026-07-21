@@ -211,12 +211,17 @@
 
   // ---------- referidos ----------
   function referralBlockHtml(data, refUrl) {
+    const code = data.referralCode ? String(data.referralCode) : '';
+    const codeLine = code
+      ? `<p class="small mb-2">Tu código: <strong>${escapeHtml(code)}</strong></p>`
+      : '';
     return `
       <div class="col-md-12">
         <div class="card mc-card border-0 shadow-sm">
           <div class="card-body p-4">
             <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-gift me-1"></i>Comparte y gana</h2>
-            <p class="small text-muted mb-3">Recomienda Mi Tarjeta Pro con otros negocios usando tu link. Cuando compren y nos digan que fue por ti, te damos un cambio gratis en tu próxima orden.</p>
+            <p class="small text-muted mb-3">Comparte tu link. Cuando alguien compre con él, te avisamos por correo y te damos un cambio gratis en tu próxima orden.</p>
+            ${codeLine}
             <div class="input-group mb-2">
               <input id="mcRefInput" type="text" class="form-control" readonly value="${escapeHtml(refUrl)}">
               <button id="mcRefCopyBtn" class="btn btn-dark" type="button"><i class="bi bi-clipboard me-1"></i>Copiar</button>
@@ -253,7 +258,8 @@
 
   function renderDashboard(data) {
     const publicUrl = `${window.location.origin}/${encodeURIComponent(data.slug)}/`;
-    const refUrl = `${publicUrl}?ref=${encodeURIComponent(data.slug)}`;
+    const refCode = (data.referralCode || data.slug || '').toString().toUpperCase();
+    const refUrl = `${window.location.origin}/?ref=${encodeURIComponent(refCode)}`;
     const qrUrl = qrServerUrl(publicUrl, 440, 6);
     const qrDownloadPng = qrServerUrl(publicUrl, 2000, 24);
     const qrDownloadSvg = qrServerUrl(publicUrl, 2000, 24, 'svg');
@@ -524,21 +530,39 @@
     });
   }
 
+  async function openSession(slug, token) {
+    const apiBase = portalApiBase();
+    if (apiBase) {
+      const res = await fetch(`${apiBase}/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, token }),
+      });
+      if (res.status === 403) {
+        renderLocked('Token inválido');
+        return;
+      }
+      if (!res.ok) throw new Error('session failed');
+      const body = await res.json();
+      if (!body || !body.data) throw new Error('bad session');
+      renderDashboard(body.data);
+      return;
+    }
+
+    // Fallback legacy (API aún no configurada): JSON público con ownerToken.
+    const r = await fetch(`../negocio/_data/${slug}.json`, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('not found');
+    const data = await r.json();
+    if (!data.ownerToken || data.ownerToken !== token) {
+      renderLocked('Token inválido');
+      return;
+    }
+    renderDashboard(data);
+  }
+
   if (!slug || !token) {
     renderAccessRequest({ slug });
   } else {
-    fetch(`../negocio/_data/${slug}.json`, { cache: 'no-cache' })
-      .then((r) => {
-        if (!r.ok) throw new Error('not found');
-        return r.json();
-      })
-      .then((data) => {
-        if (!data.ownerToken || data.ownerToken !== token) {
-          renderLocked('Token inválido');
-          return;
-        }
-        renderDashboard(data);
-      })
-      .catch(() => renderLocked('Esta tarjeta no existe'));
+    openSession(slug, token).catch(() => renderLocked('Esta tarjeta no existe'));
   }
 })();

@@ -10,3 +10,7 @@ workers/stripe-webhook/.admin_secret.tmp
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+workers/stripe-webhook/.kv-*.json
+workers/stripe-webhook/kv-*.json
+

@@ -17,6 +17,13 @@ rules = [
 binding = "PORTAL_UPLOADS"
 bucket_name = "mimarca-portal-uploads"
 
+# KV: secretos de cliente (ownerEmail/ownerToken), códigos de referido,
+# redenciones y rate-limit de /access. Crear con:
+#   npx wrangler kv namespace create mimarca-portal
+[[kv_namespaces]]
+binding = "PORTAL_KV"
+id = "5936a9510e2d4b4e88c7bd6ba720763d"
+
 # Secrets (configurar con `wrangler secret put <NOMBRE>`):
 #   STRIPE_WEBHOOK_SECRET  - whsec_... del endpoint en el Stripe Dashboard
 #   RESEND_API_KEY         - re_... de https://resend.com/api-keys

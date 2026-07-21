@@ -9,8 +9,6 @@
     "city": "Ciudad de México"
   },
   "orderStage": "review",
-  "ownerEmail": "test-client-ci@mimarca.me",
-
   "status": {
     "type": "open-hours",
     "hours": {
@@ -29,6 +27,5 @@
     "icon": "whatsapp",
     "url": "https://wa.me/5215555555555"
   },
-  "links": [],
-  "ownerToken": "test-client-ci-placeholder"
+  "links": []
 }

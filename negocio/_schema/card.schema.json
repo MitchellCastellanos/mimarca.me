@@ -3,7 +3,12 @@
   "$id": "https://mimarca.me/negocio/_schema/card.schema.json",
   "title": "Mi Tarjeta Pro · tarjeta JSON",
   "type": "object",
-  "required": ["slug", "theme", "business", "primaryCta"],
+  "required": [
+    "slug",
+    "theme",
+    "business",
+    "primaryCta"
+  ],
   "additionalProperties": true,
   "properties": {
     "slug": {
@@ -16,52 +21,119 @@
     },
     "language": {
       "type": "string",
-      "enum": ["es-MX", "en-US", "fr-CA"]
+      "enum": [
+        "es-MX",
+        "en-US",
+        "fr-CA"
+      ]
     },
     "business": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": true,
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "subname": { "type": "string" },
-        "verified": { "type": "boolean" },
-        "tagline": { "type": "string" },
-        "rating": { "type": "number" },
-        "established": { "type": "integer" },
-        "logoUrl": { "type": "string" },
-        "city": { "type": "string" }
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subname": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "tagline": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "established": {
+          "type": "integer"
+        },
+        "logoUrl": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
       }
     },
-    "status": { "type": "object" },
+    "status": {
+      "type": "object"
+    },
     "orderStage": {
       "type": "string",
-      "enum": ["paid", "designing", "review", "published"],
+      "enum": [
+        "paid",
+        "designing",
+        "review",
+        "published"
+      ],
       "description": "Estatus del pedido mostrado en mi-cuenta. 'published' es el estado final una vez que la tarjeta ya está en vivo."
     },
     "ownerEmail": {
       "type": "string",
-      "description": "Correo del cliente. El endpoint /access del worker lo valida contra este campo antes de reenviar el link de mi-cuenta por correo."
+      "description": "DEPRECATED en JSON público. Vivir en Cloudflare KV (secrets:<slug>).ownerEmail"
     },
     "primaryCta": {
       "type": "object",
-      "required": ["url", "label"],
+      "required": [
+        "url",
+        "label"
+      ],
       "additionalProperties": true,
       "properties": {
-        "label": { "type": "string", "minLength": 1 },
-        "subtitle": { "type": "string" },
-        "icon": { "type": "string" },
-        "url": { "type": "string", "minLength": 1 }
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
-    "links": { "type": "array" },
-    "servicesTitle": { "type": "string" },
-    "services": { "type": "array" },
-    "servicesDisclaimer": { "type": "string" },
-    "gallery": { "type": "array" },
-    "brandCardCopy": { "type": "string" },
-    "copyright": { "type": "string" },
-    "changeRequestUrl": { "type": "string" },
-    "ownerToken": { "type": "string" }
+    "links": {
+      "type": "array"
+    },
+    "servicesTitle": {
+      "type": "string"
+    },
+    "services": {
+      "type": "array"
+    },
+    "servicesDisclaimer": {
+      "type": "string"
+    },
+    "gallery": {
+      "type": "array"
+    },
+    "brandCardCopy": {
+      "type": "string"
+    },
+    "copyright": {
+      "type": "string"
+    },
+    "changeRequestUrl": {
+      "type": "string"
+    },
+    "ownerToken": {
+      "type": "string",
+      "description": "DEPRECATED en JSON público. Vivir en Cloudflare KV (secrets:<slug>).ownerToken"
+    },
+    "referralCode": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{4,16}$",
+      "description": "DEPRECATED en JSON público. Código de referido en KV (secrets:<slug>).referralCode + ref:<CODE>"
+    }
   }
 }

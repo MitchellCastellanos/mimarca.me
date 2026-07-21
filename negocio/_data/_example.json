@@ -3,21 +3,17 @@
   "slug": "ejemplo",
   "theme": "dark-gold",
   "language": "es-MX",
-
   "business": {
     "name": "Nombre del Negocio",
     "subname": "SUBTÍTULO / GIRO",
     "verified": true,
     "tagline": "Frase corta que describe el negocio",
-    "rating": 5.0,
+    "rating": 5,
     "established": 2023,
     "logoUrl": "/Images/clients/<slug>/logo.png",
     "city": "Ciudad, México"
   },
-
   "orderStage": "published",
-  "ownerEmail": "cliente@correo.com",
-
   "status": {
     "type": "open-hours",
     "hours": {
@@ -30,14 +26,12 @@
       "sun": "closed"
     }
   },
-
   "primaryCta": {
     "label": "Agendar cita",
     "subtitle": "Respuesta en minutos por WhatsApp",
     "icon": "calendar2-check",
     "url": "https://wa.me/5215555555555?text=Hola%20quiero%20agendar"
   },
-
   "links": [
     {
       "label": "Instagram",
@@ -76,23 +70,26 @@
       "url": "https://maps.app.goo.gl/xxx"
     }
   ],
-
   "servicesTitle": "SERVICIOS Y PRECIOS",
   "services": [
-    { "name": "Servicio 1", "desc": "Descripción corta", "price": "$150" },
-    { "name": "Servicio 2", "desc": "Descripción corta", "price": "$200" }
+    {
+      "name": "Servicio 1",
+      "desc": "Descripción corta",
+      "price": "$150"
+    },
+    {
+      "name": "Servicio 2",
+      "desc": "Descripción corta",
+      "price": "$200"
+    }
   ],
   "servicesDisclaimer": "Los precios pueden variar según el servicio. Consulta por WhatsApp.",
-
   "gallery": [
     "/Images/clients/<slug>/g1.jpg",
     "/Images/clients/<slug>/g2.jpg",
     "/Images/clients/<slug>/g3.jpg"
   ],
-
   "brandCardCopy": "Frase de cierre o slogan del negocio.",
   "copyright": "© 2025 Nombre del Negocio · Ciudad, México",
-
-  "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03",
-  "ownerToken": "CAMBIAR-POR-TOKEN-UNICO"
+  "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03"
 }

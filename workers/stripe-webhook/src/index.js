@@ -6,14 +6,14 @@
  *
  *   POST /                    Webhook de Stripe (checkout.session.completed)
  *   POST /access              Magic link: {slug, email} -> reenvía el link de mi-cuenta
+ *   POST /session             Valida slug+token (secretos en KV) y devuelve datos públicos
  *   POST /upload               Logo/fotos del cliente -> R2 + aviso al owner
  *   POST /notify/approved      Cliente aprueba su diseño en revisión -> aviso al owner
  *   POST /notify/published     (admin) avisa al cliente que ya está publicada
  *   POST /notify/change-received (admin) confirma que se recibió su solicitud de cambios
  *
- * Todas menos el webhook de Stripe usan negocio/_data/<slug>.json (público en
- * mimarca.me) como "base de datos" de solo lectura: no hay estado propio del
- * Worker salvo R2 para los archivos subidos.
+ * Secretos (ownerEmail, ownerToken, referralCode) viven en Cloudflare KV
+ * (PORTAL_KV). El JSON público en Pages ya no debe incluirlos.
  */
 
 import orderConfirmationTemplate from "../../../emails/order-confirmation.html";
@@ -23,6 +23,7 @@ import cardPublishedTemplate from "../../../emails/card-published.html";
 import changeRequestReceivedTemplate from "../../../emails/change-request-received.html";
 import assetUploadedTemplate from "../../../emails/asset-uploaded.html";
 import designApprovedAlertTemplate from "../../../emails/design-approved-alert.html";
+import referralRewardTemplate from "../../../emails/referral-reward.html";
 import {
   buildTemplateVars,
   buildAccessLinkVars,
@@ -32,6 +33,12 @@ import {
   buildApprovedAlertVars,
   renderTemplate,
 } from "./render.js";
+import {
+  stripSecrets,
+  resolveClient,
+  rateLimitAccess,
+  recordReferralRedemption,
+} from "./portal.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +64,9 @@ export default {
       }
       if (url.pathname === "/access") {
         return await handleAccessRequest(request, env);
+      }
+      if (url.pathname === "/session") {
+        return await handleSession(request, env);
       }
       if (url.pathname === "/upload") {
         return await handleUpload(request, env);
@@ -88,22 +98,23 @@ function jsonResponse(body, status = 200) {
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 
-/** Lee negocio/_data/<slug>.json desde el sitio en vivo (es público). */
-async function fetchClientData(slug) {
+async function loadClient(env, slug) {
   if (!SLUG_RE.test(slug)) return null;
   const r = await fetch(`https://mimarca.me/negocio/_data/${slug}.json`, {
     cf: { cacheTtl: 0, cacheEverything: false },
   });
   if (!r.ok) return null;
+  let raw;
   try {
-    return await r.json();
+    raw = await r.json();
   } catch {
     return null;
   }
+  return resolveClient(env, slug, raw);
 }
 
 // ============================================================
-// POST / — Stripe webhook (sin cambios de comportamiento)
+// POST / — Stripe webhook (Payment Links / checkout sin cambios de flujo)
 // ============================================================
 async function handleStripeWebhook(request, env) {
   const payload = await request.text();
@@ -143,25 +154,37 @@ async function handleStripeWebhook(request, env) {
     return jsonResponse({ received: true, errors: failures }, 500);
   }
 
+  // Referidos: best-effort, no tumba el webhook si falla.
+  await recordReferralRedemption(
+    env,
+    session,
+    (opts) => sendEmail(env, opts),
+    (v) => renderTemplate(referralRewardTemplate, v)
+  ).catch((err) => console.error("referral tracking failed:", err));
+
   return jsonResponse({ received: true });
 }
 
 // ============================================================
-// POST /access — magic link (sin password)
+// POST /access — magic link (sin password) + rate limit por IP
 // ============================================================
 async function handleAccessRequest(request, env) {
   const body = await safeJson(request);
   const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const email = String(body?.email || "").trim().toLowerCase();
 
-  // Respuesta genérica siempre, exista o no la tarjeta/el correo — no
-  // queremos que este endpoint sirva para adivinar qué correos están
-  // registrados en qué slug.
   const GENERIC_OK = jsonResponse({ ok: true });
 
   if (!slug || !email) return GENERIC_OK;
 
-  const data = await fetchClientData(slug);
+  const ip =
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
+  const rl = await rateLimitAccess(env, ip);
+  if (!rl.allowed) return GENERIC_OK;
+
+  const data = await loadClient(env, slug);
   if (!data || !data.ownerEmail || !data.ownerToken) return GENERIC_OK;
   if (String(data.ownerEmail).trim().toLowerCase() !== email) return GENERIC_OK;
 
@@ -173,6 +196,30 @@ async function handleAccessRequest(request, env) {
   }).catch((err) => console.error("access email failed:", err));
 
   return GENERIC_OK;
+}
+
+// ============================================================
+// POST /session — valida token y devuelve datos públicos (+ referralCode)
+// ============================================================
+async function handleSession(request, env) {
+  const body = await safeJson(request);
+  const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const token = String(body?.token || "").trim();
+  if (!slug || !token) return jsonResponse({ error: "unauthorized" }, 403);
+
+  const data = await loadClient(env, slug);
+  if (!data || !data.ownerToken || data.ownerToken !== token) {
+    return jsonResponse({ error: "unauthorized" }, 403);
+  }
+
+  return jsonResponse({
+    ok: true,
+    data: {
+      ...stripSecrets(data),
+      referralCode: data.referralCode || "",
+      orderStage: data.orderStage || "",
+    },
+  });
 }
 
 // ============================================================
@@ -199,7 +246,7 @@ async function handleUpload(request, env) {
     return jsonResponse({ error: "file too large" }, 413);
   }
 
-  const data = await fetchClientData(slug);
+  const data = await loadClient(env, slug);
   if (!data || !data.ownerToken || data.ownerToken !== token) {
     return jsonResponse({ error: "unauthorized" }, 403);
   }
@@ -234,7 +281,7 @@ async function handleApproved(request, env) {
   const token = String(body?.token || "").trim();
   if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
 
-  const data = await fetchClientData(slug);
+  const data = await loadClient(env, slug);
   if (!data || !data.ownerToken || data.ownerToken !== token) {
     return jsonResponse({ error: "unauthorized" }, 403);
   }
@@ -250,8 +297,7 @@ async function handleApproved(request, env) {
 }
 
 // ============================================================
-// POST /notify/published, /notify/change-received — el equipo las dispara
-// a mano (curl/Postman) con el secret compartido, no hay panel de admin.
+// POST /notify/published, /notify/change-received — admin
 // ============================================================
 async function handleAdminNotify(request, env, action) {
   const secret = request.headers.get("X-Admin-Secret") || "";
@@ -263,7 +309,7 @@ async function handleAdminNotify(request, env, action) {
   const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!slug) return jsonResponse({ error: "missing slug" }, 400);
 
-  const data = await fetchClientData(slug);
+  const data = await loadClient(env, slug);
   if (!data || !data.ownerEmail) return jsonResponse({ error: "client not found" }, 404);
 
   const template = action === "published" ? cardPublishedTemplate : changeRequestReceivedTemplate;
@@ -288,10 +334,6 @@ async function safeJson(request) {
   }
 }
 
-/**
- * Valida la cabecera `stripe-signature` (esquema v1: HMAC-SHA256 de
- * "<timestamp>.<payload>" con el signing secret del endpoint).
- */
 async function verifyStripeSignature(payload, header, secret, toleranceSeconds = 300) {
   if (!header || !secret) return false;
 
