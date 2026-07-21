@@ -711,9 +711,37 @@
     wireDashboardEvents(data, { publicUrl, refUrl });
   }
 
+  /** Escala el iframe del “iPhone” para que la tarjeta quepa entera en el marco. */
+  function fitMcPreview() {
+    const frame = document.querySelector('.mc-preview');
+    if (!frame) return;
+    const DESIGN_W = 390;
+
+    function apply() {
+      const w = frame.clientWidth;
+      if (!w) return;
+      frame.style.setProperty('--mc-preview-scale', String(w / DESIGN_W));
+    }
+
+    apply();
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(apply);
+      ro.observe(frame);
+    } else {
+      window.addEventListener('resize', apply);
+    }
+    // Reaplica cuando el iframe carga (por si el layout aún no tenía ancho).
+    const iframe = frame.querySelector('iframe');
+    if (iframe) {
+      iframe.addEventListener('load', apply);
+    }
+    requestAnimationFrame(apply);
+  }
+
   function wireDashboardEvents(data, { publicUrl, refUrl }) {
     wireLinksEditor(data);
     wireServicesEditor(data);
+    fitMcPreview();
 
     const btn = document.getElementById('mcCopyBtn');
     const input = document.getElementById('mcLinkInput');

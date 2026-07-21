@@ -910,17 +910,21 @@ MI CUENTA (client dashboard)
   box-shadow:0 20px 48px rgba(0,0,0,0.22);
   background:#0a0a0a;
   position:relative;
-  container-type:size;
   margin-inline:auto;
+  box-sizing:border-box;
 }
 
 .mc-preview iframe{
+  position:absolute;
+  top:0;
+  left:0;
   width:390px;
   height:844px;
   border:0;
   display:block;
-  transform:scale(calc(100cqw / 390));
-  transform-origin:top left;
+  transform-origin:0 0;
+  /* --mc-preview-scale lo setea js/mi-cuenta.js (ResizeObserver) */
+  transform:scale(var(--mc-preview-scale, 0.615));
   pointer-events:auto;
 }
 
