@@ -542,7 +542,7 @@ MI TARJETA PRO (Mexico division)
   border-radius:18px;
 }
 
-/* QR + logo centrado (ECC H en la URL del QR; logo ~30% para que siga escaneando) */
+/* QR + logo centrado (ECC H en la URL del QR; logo ~38% con poco padding) */
 .mt-qr-logo-wrap{
   position:relative;
   display:inline-block;
@@ -561,14 +561,15 @@ MI TARJETA PRO (Mexico division)
   left:50%;
   top:50%;
   transform:translate(-50%, -50%);
-  width:30%;
-  max-width:30%;
+  width:38%;
+  max-width:38%;
   height:auto;
   aspect-ratio:1;
   object-fit:contain;
+  object-position:center;
   background:#fff;
-  border-radius:22%;
-  padding:min(2.8vw, 10px);
+  border-radius:18%;
+  padding:3px;
   box-sizing:border-box;
   box-shadow:0 2px 14px rgba(0, 0, 0, 0.14);
   pointer-events:none;
@@ -901,20 +902,32 @@ MI CUENTA (client dashboard)
 
 .mc-preview{
   width:100%;
-  max-width:340px;
-  aspect-ratio:9/19;
-  border-radius:24px;
-  border:8px solid #1a1a1a;
+  max-width:260px;
+  aspect-ratio:9/19.5;
+  border-radius:28px;
+  border:10px solid #1a1a1a;
   overflow:hidden;
-  box-shadow:0 25px 60px rgba(0,0,0,0.25);
+  box-shadow:0 20px 48px rgba(0,0,0,0.22);
   background:#0a0a0a;
+  position:relative;
+  container-type:size;
+  margin-inline:auto;
 }
 
 .mc-preview iframe{
-  width:100%;
-  height:100%;
+  width:390px;
+  height:844px;
   border:0;
   display:block;
+  transform:scale(calc(100cqw / 390));
+  transform-origin:top left;
+  pointer-events:auto;
+}
+
+@media (max-width:991.98px){
+  .mc-preview{
+    max-width:220px;
+  }
 }
 
 .mc-card{

@@ -5,8 +5,8 @@
 // workers/stripe-webhook/src/account.js). Sesión en localStorage — no
 // cookies (el sitio y el Worker viven en dominios distintos).
 //
-// Esto es aparte del acceso por tarjeta (mi-cuenta/index.html, sin
-// password, con el ownerToken de cada slug) — esa parte no cambia.
+// Desde aquí, "Ver panel" abre /mi-cuenta/?n=<slug> usando la misma
+// sesión de cuenta (sin ownerToken en la URL).
 // ============================================================
 
 (function () {
@@ -282,7 +282,7 @@
           const status = orderStatusLabel(o);
           const date = o.at ? new Date(o.at).toLocaleDateString("es-MX", { year: "numeric", month: "short", day: "numeric" }) : "";
           const link = o.slug
-            ? `<a href="./?n=${encodeURIComponent(o.slug)}" class="btn btn-outline-dark btn-sm">Ver panel</a>`
+            ? `<a href="./?n=${encodeURIComponent(o.slug)}" class="btn btn-dark btn-sm">Abrir panel</a>`
             : `<span class="text-muted small">Te avisamos por correo cuando esté lista</span>`;
           return `
             <div class="card mc-card border-0 shadow-sm mb-3">

@@ -247,6 +247,39 @@ async function loadClient(env, slug) {
   return resolveClient(env, slug, raw);
 }
 
+/**
+ * Autoriza el panel de una tarjeta con:
+ *   - ownerToken (magic link legacy / ?token=), o
+ *   - sessionToken de cuenta (Dashboard → Ver panel, sin token en la URL)
+ *
+ * La sesión de cuenta vale si el correo es el ownerEmail del slug o si
+ * tiene ese slug en orders:<email>.
+ */
+async function authorizeCardAccess(env, slug, { token, sessionToken } = {}) {
+  const data = await loadClient(env, slug);
+  if (!data) return null;
+
+  const ownerToken = String(token || "").trim();
+  if (ownerToken && data.ownerToken && data.ownerToken === ownerToken) {
+    return data;
+  }
+
+  const sess = String(sessionToken || "").trim();
+  if (!sess) return null;
+
+  const email = await resolveAccountSession(env, sess);
+  if (!email) return null;
+
+  const ownerEmail = normalizeEmail(data.ownerEmail || "");
+  if (ownerEmail && ownerEmail === email) return data;
+
+  const orders = await listOrdersForAccount(env, email);
+  if (Array.isArray(orders) && orders.some((o) => o && o.slug === slug)) {
+    return data;
+  }
+  return null;
+}
+
 // ============================================================
 // POST / — Stripe webhook (Payment Links / checkout sin cambios de flujo)
 // ============================================================
@@ -363,18 +396,17 @@ async function handleAccessRequest(request, env) {
 }
 
 // ============================================================
-// POST /session — valida token y devuelve datos públicos (+ referralCode)
+// POST /session — valida ownerToken O sesión de cuenta y devuelve datos
 // ============================================================
 async function handleSession(request, env) {
   const body = await safeJson(request);
   const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const token = String(body?.token || "").trim();
-  if (!slug || !token) return jsonResponse({ error: "unauthorized" }, 403);
+  const sessionToken = String(body?.sessionToken || "").trim();
+  if (!slug || (!token && !sessionToken)) return jsonResponse({ error: "unauthorized" }, 403);
 
-  const data = await loadClient(env, slug);
-  if (!data || !data.ownerToken || data.ownerToken !== token) {
-    return jsonResponse({ error: "unauthorized" }, 403);
-  }
+  const data = await authorizeCardAccess(env, slug, { token, sessionToken });
+  if (!data) return jsonResponse({ error: "unauthorized" }, 403);
 
   const secrets = (await getSecrets(env, slug)) || {};
   const linksOverride = await getLinks(env, slug);
@@ -419,12 +451,11 @@ async function handlePutCardLinks(request, env, slugParam) {
   const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const body = await safeJson(request);
   const token = String(body?.token || "").trim();
-  if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
+  const sessionToken = String(body?.sessionToken || "").trim();
+  if (!slug || (!token && !sessionToken)) return jsonResponse({ error: "missing fields" }, 400);
 
-  const data = await loadClient(env, slug);
-  if (!data || !data.ownerToken || data.ownerToken !== token) {
-    return jsonResponse({ error: "unauthorized" }, 403);
-  }
+  const data = await authorizeCardAccess(env, slug, { token, sessionToken });
+  if (!data) return jsonResponse({ error: "unauthorized" }, 403);
   if (data.orderStage !== "published") {
     return jsonResponse({ error: "tu tarjeta todavía no está publicada" }, 409);
   }
@@ -461,12 +492,11 @@ async function handlePutCardServices(request, env, slugParam) {
   const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const body = await safeJson(request);
   const token = String(body?.token || "").trim();
-  if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
+  const sessionToken = String(body?.sessionToken || "").trim();
+  if (!slug || (!token && !sessionToken)) return jsonResponse({ error: "missing fields" }, 400);
 
-  const data = await loadClient(env, slug);
-  if (!data || !data.ownerToken || data.ownerToken !== token) {
-    return jsonResponse({ error: "unauthorized" }, 403);
-  }
+  const data = await authorizeCardAccess(env, slug, { token, sessionToken });
+  if (!data) return jsonResponse({ error: "unauthorized" }, 403);
   if (data.orderStage !== "published") {
     return jsonResponse({ error: "tu tarjeta todavía no está publicada" }, 409);
   }
@@ -697,9 +727,10 @@ async function handleUpload(request, env) {
 
   const slug = String(form.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const token = String(form.get("token") || "").trim();
+  const sessionToken = String(form.get("sessionToken") || "").trim();
   const file = form.get("file");
 
-  if (!slug || !token || !(file instanceof File)) {
+  if (!slug || (!token && !sessionToken) || !(file instanceof File)) {
     return jsonResponse({ error: "missing fields" }, 400);
   }
   if (!ALLOWED_UPLOAD_TYPES.has(file.type)) {
@@ -709,10 +740,8 @@ async function handleUpload(request, env) {
     return jsonResponse({ error: "file too large" }, 413);
   }
 
-  const data = await loadClient(env, slug);
-  if (!data || !data.ownerToken || data.ownerToken !== token) {
-    return jsonResponse({ error: "unauthorized" }, 403);
-  }
+  const data = await authorizeCardAccess(env, slug, { token, sessionToken });
+  if (!data) return jsonResponse({ error: "unauthorized" }, 403);
 
   if (!env.PORTAL_UPLOADS || !env.R2_PUBLIC_BASE_URL) {
     return jsonResponse({ error: "uploads not configured" }, 503);
@@ -742,12 +771,11 @@ async function handleApproved(request, env) {
   const body = await safeJson(request);
   const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const token = String(body?.token || "").trim();
-  if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
+  const sessionToken = String(body?.sessionToken || "").trim();
+  if (!slug || (!token && !sessionToken)) return jsonResponse({ error: "missing fields" }, 400);
 
-  const data = await loadClient(env, slug);
-  if (!data || !data.ownerToken || data.ownerToken !== token) {
-    return jsonResponse({ error: "unauthorized" }, 403);
-  }
+  const data = await authorizeCardAccess(env, slug, { token, sessionToken });
+  if (!data) return jsonResponse({ error: "unauthorized" }, 403);
 
   const vars = buildApprovedAlertVars(data);
   await sendEmail(env, {

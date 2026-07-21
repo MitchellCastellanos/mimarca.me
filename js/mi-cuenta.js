@@ -1,16 +1,36 @@
 // ============================================================
-// Mi Tarjeta Pro · Panel cliente (token-gated, sin login con password)
-// URL: /mi-cuenta/?token=<token>&n=<slug>
-// Sin token: formulario "pedir acceso" (slug + correo) -> worker /access
+// Mi Tarjeta Pro · Panel por tarjeta
+// URL preferida: /mi-cuenta/?n=<slug>  (con sesión de cuenta en
+// localStorage, desde el Dashboard). El ?token=<ownerToken> del
+// magic link sigue funcionando como fallback.
 // ============================================================
 
 (function () {
   const app = document.getElementById('mcApp');
   if (!app) return;
 
+  const SESSION_KEY = 'mitp_account_session';
   const params = new URLSearchParams(window.location.search);
   const slug = (params.get('n') || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
   const token = (params.get('token') || '').trim();
+
+  function getAccountSession() {
+    try { return localStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+  }
+
+  const accountSession = getAccountSession();
+
+  /** Credenciales para el Worker: ownerToken y/o sesión de cuenta. */
+  function authFields() {
+    const out = {};
+    if (token) out.token = token;
+    if (accountSession) out.sessionToken = accountSession;
+    return out;
+  }
+
+  function hasAuth() {
+    return !!(token || accountSession);
+  }
 
   const ORDER_STAGES = [
     { key: 'paid', label: 'Pago confirmado', icon: 'bi-credit-card' },
@@ -58,7 +78,7 @@
     }
   }
 
-  // ---------- "pedir acceso" (magic link, sin password) ----------
+  // ---------- sin sesión: manda a Mi cuenta o magic link ----------
   function renderAccessRequest(opts) {
     const message = (opts && opts.message) || '';
     const prefillSlug = (opts && opts.slug) || '';
@@ -67,34 +87,42 @@
     app.innerHTML = `
       <div class="mc-locked">
         <div style="max-width:420px;width:100%;">
-          <div class="display-1 mb-3">🔑</div>
-          <h1 class="h4 fw-bold mb-2">Entra a tu cuenta</h1>
-          <p class="text-muted mb-4">${message ? escapeHtml(message) + ' ' : ''}Escribe el link de tu tarjeta y tu correo — te reenviamos tu acceso.</p>
+          <div class="display-1 mb-3">👤</div>
+          <h1 class="h4 fw-bold mb-2">Entra a tu panel</h1>
+          <p class="text-muted mb-4">${message ? escapeHtml(message) + ' ' : ''}Inicia sesión en <strong>Mi cuenta</strong> y abre el panel desde tus pedidos. No necesitas un link con token.</p>
 
-          <form id="mcAccessForm" class="text-start mb-3">
-            <div class="mb-2">
-              <label class="form-label small fw-semibold" for="mcAccessSlug">Tu link (mimarca.me/<strong>tu-marca</strong>)</label>
-              <div class="input-group">
-                <span class="input-group-text">mimarca.me/</span>
-                <input id="mcAccessSlug" type="text" class="form-control" placeholder="tu-marca" value="${escapeHtml(prefillSlug)}" required>
+          <a href="./cuenta.html" class="btn btn-dark w-100 mb-3">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Ir a Mi cuenta
+          </a>
+
+          <details class="text-start mb-3">
+            <summary class="small text-muted" style="cursor:pointer;">¿Prefieres el acceso por correo?</summary>
+            <form id="mcAccessForm" class="mt-3">
+              <div class="mb-2">
+                <label class="form-label small fw-semibold" for="mcAccessSlug">Tu link (mimarca.me/<strong>tu-marca</strong>)</label>
+                <div class="input-group">
+                  <span class="input-group-text">mimarca.me/</span>
+                  <input id="mcAccessSlug" type="text" class="form-control" placeholder="tu-marca" value="${escapeHtml(prefillSlug)}" required>
+                </div>
               </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold" for="mcAccessEmail">Tu correo</label>
-              <input id="mcAccessEmail" type="email" class="form-control" placeholder="tucorreo@ejemplo.com" required>
-            </div>
-            <button type="submit" class="btn btn-dark w-100" id="mcAccessSubmit">
-              <i class="bi bi-envelope me-1"></i> Enviarme mi acceso
-            </button>
-            <div id="mcAccessNote" class="form-text small mt-2"></div>
-          </form>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold" for="mcAccessEmail">Tu correo</label>
+                <input id="mcAccessEmail" type="email" class="form-control" placeholder="tucorreo@ejemplo.com" required>
+              </div>
+              <button type="submit" class="btn btn-outline-dark w-100" id="mcAccessSubmit" ${apiBase ? '' : 'disabled'}>
+                <i class="bi bi-envelope me-1"></i> Enviarme mi acceso
+              </button>
+              <div id="mcAccessNote" class="form-text small mt-2"></div>
+            </form>
+          </details>
 
-          <a href="../contact.html" class="btn btn-outline-dark btn-sm">Contactar soporte</a>
+          <a href="../contact.html" class="btn btn-link btn-sm">Contactar soporte</a>
         </div>
       </div>
     `;
 
     const form = document.getElementById('mcAccessForm');
+    if (!form) return;
     const note = document.getElementById('mcAccessNote');
     const submitBtn = document.getElementById('mcAccessSubmit');
 
@@ -103,34 +131,27 @@
       const s = document.getElementById('mcAccessSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
       const email = document.getElementById('mcAccessEmail').value.trim();
       if (!s || !email) return;
-
       if (!apiBase) {
         note.className = 'form-text small mt-2 text-danger';
-        note.textContent = 'El envío automático no está disponible todavía. Escríbenos por WhatsApp y te mandamos tu acceso.';
+        note.textContent = 'El envío automático no está disponible. Usa Mi cuenta o escríbenos por WhatsApp.';
         return;
       }
-
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando…';
-      note.className = 'form-text small mt-2';
-      note.textContent = '';
-
       try {
         await fetch(`${apiBase}/access`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: s, email }),
         });
+        note.className = 'form-text small mt-2 text-success';
+        note.textContent = 'Si ese correo está registrado, te mandamos el acceso en unos segundos. Revisa spam.';
       } catch {
-        // Aun si falla la red, mostramos el mismo mensaje genérico abajo:
-        // no queremos que alguien deduzca si un correo/slug existe según el error.
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'No se pudo enviar. Intenta de nuevo o entra por Mi cuenta.';
       }
-
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<i class="bi bi-envelope me-1"></i> Enviarme mi acceso';
-      note.className = 'form-text small mt-2 text-success';
-      note.textContent = 'Si el correo coincide con esa tarjeta, te mandamos tu link de acceso. Revisa tu bandeja (y spam).';
-      form.reset();
     });
   }
 
@@ -139,11 +160,11 @@
       <div class="mc-locked">
         <div>
           <div class="display-1 mb-3">🔒</div>
-          <h1 class="h4 fw-bold">${escapeHtml(message || 'Token inválido')}</h1>
-          <p class="text-muted">Si perdiste tu link, pídelo de nuevo con tu correo.</p>
+          <h1 class="h4 fw-bold">${escapeHtml(message || 'Sin acceso')}</h1>
+          <p class="text-muted">Inicia sesión en Mi cuenta o pide el acceso por correo.</p>
           <div class="d-flex gap-2 justify-content-center flex-wrap">
-            <button type="button" id="mcRetryAccess" class="btn btn-dark">Pedir mi acceso</button>
-            <a href="../contact.html" class="btn btn-outline-dark">Contactar soporte</a>
+            <a href="./cuenta.html" class="btn btn-dark">Ir a Mi cuenta</a>
+            <button type="button" id="mcRetryAccess" class="btn btn-outline-dark">Pedir acceso por correo</button>
           </div>
         </div>
       </div>
@@ -344,7 +365,7 @@
         const res = await fetch(`${apiBase}/card-links/${encodeURIComponent(data.slug)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, links: cleaned }),
+          body: JSON.stringify({ ...authFields(), links: cleaned }),
         });
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body.error || 'no se pudo guardar');
@@ -484,7 +505,7 @@
         const res = await fetch(`${apiBase}/card-services/${encodeURIComponent(data.slug)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, services: cleaned }),
+          body: JSON.stringify({ ...authFields(), services: cleaned }),
         });
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body.error || 'no se pudo guardar');
@@ -563,9 +584,10 @@
     app.innerHTML = `
       <header class="hero hero-mt bg-dark text-white py-5">
         <div class="container">
-          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
             <span class="badge text-bg-warning fw-semibold">Mi Tarjeta Pro</span>
             <span class="badge text-bg-success">En vivo</span>
+            ${accountSession ? '<a href="./cuenta.html" class="btn btn-sm btn-outline-light ms-auto">← Mis pedidos</a>' : ''}
           </div>
           <h1 class="display-6 fw-bold mb-1">Hola, ${escapeHtml(data.business?.name || 'tu negocio')}</h1>
           <p class="text-white-50 mb-0">Tu tarjeta digital está activa. Aquí puedes ver tu link, descargar tu QR y pedir cambios.</p>
@@ -731,7 +753,7 @@
             await fetch(`${apiBase}/notify/approved`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ slug: data.slug, token }),
+              body: JSON.stringify({ slug: data.slug, ...authFields() }),
             });
           }
         } catch {
@@ -801,7 +823,8 @@
         try {
           const form = new FormData();
           form.append('slug', data.slug);
-          form.append('token', token);
+          if (token) form.append('token', token);
+          if (accountSession) form.append('sessionToken', accountSession);
           form.append('file', file);
           const res = await fetch(`${apiBase}/upload`, { method: 'POST', body: form });
           if (!res.ok) throw new Error('upload failed');
@@ -829,16 +852,18 @@
     });
   }
 
-  async function openSession(slug, token) {
+  async function openSession(forSlug) {
     const apiBase = portalApiBase();
     if (apiBase) {
       const res = await fetch(`${apiBase}/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, token }),
+        body: JSON.stringify({ slug: forSlug, ...authFields() }),
       });
       if (res.status === 403) {
-        renderLocked('Token inválido');
+        renderLocked(accountSession && !token
+          ? 'Esta tarjeta no está en tu cuenta'
+          : 'Acceso inválido');
         return;
       }
       if (!res.ok) throw new Error('session failed');
@@ -849,19 +874,29 @@
     }
 
     // Fallback legacy (API aún no configurada): JSON público con ownerToken.
-    const r = await fetch(`../negocio/_data/${slug}.json`, { cache: 'no-cache' });
+    if (!token) {
+      renderAccessRequest({ slug: forSlug });
+      return;
+    }
+    const r = await fetch(`../negocio/_data/${forSlug}.json`, { cache: 'no-cache' });
     if (!r.ok) throw new Error('not found');
     const data = await r.json();
     if (!data.ownerToken || data.ownerToken !== token) {
-      renderLocked('Token inválido');
+      renderLocked('Acceso inválido');
       return;
     }
     renderDashboard(data);
   }
 
-  if (!slug || !token) {
+  if (!slug) {
+    if (accountSession) {
+      window.location.replace('./cuenta.html');
+      return;
+    }
+    renderAccessRequest({});
+  } else if (!hasAuth()) {
     renderAccessRequest({ slug });
   } else {
-    openSession(slug, token).catch(() => renderLocked('Esta tarjeta no existe'));
+    openSession(slug).catch(() => renderLocked('Esta tarjeta no existe'));
   }
 })();
