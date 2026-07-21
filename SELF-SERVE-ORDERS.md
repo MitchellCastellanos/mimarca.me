@@ -22,7 +22,7 @@ pendiente — ver nota al final).
 5. Webhook de Stripe (`checkout.session.completed`) dispara:
    - El correo de confirmación de marca al cliente (`emails/order-confirmation.html`).
    - La alerta de pago al owner (`emails/payment-alert.html`).
-6. Equipo humano diseña la tarjeta (3–5 días hábiles), agrega
+6. Equipo humano diseña la tarjeta (24 horas), agrega
    `negocio/_data/<slug>.json` y publica la página pública en `/<slug>/`
    (copia de `negocio/index.html` con el `<link>` de `negocio.css` en
    ruta absoluta — el motor en `js/negocio.js` lee el slug de la URL).
@@ -111,7 +111,7 @@ pruebas locales y variables de entorno (`workers/stripe-webhook/.env.example`).
 
 ## 6. Políticas
 
-`terminos.html` documenta precios, proceso de entrega (3–5 días hábiles),
+`terminos.html` documenta precios, proceso de entrega (24 horas),
 política de cambios, cancelaciones/reembolsos y propiedad del diseño por
 paquete. Enlazado desde el footer de todo el sitio.
 
