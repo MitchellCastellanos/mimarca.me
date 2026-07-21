@@ -1,0 +1,9 @@
+# Cloudflare Pages / proxied cache for static assets that change often
+/js/*
+  Cache-Control: public, max-age=60, must-revalidate
+
+/MyCSS.css
+  Cache-Control: public, max-age=60, must-revalidate
+
+/mi-cuenta/*
+  Cache-Control: public, max-age=60, must-revalidate

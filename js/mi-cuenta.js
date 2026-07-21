@@ -895,7 +895,9 @@
     }
     renderAccessRequest({});
   } else if (!hasAuth()) {
-    renderAccessRequest({ slug });
+    // Sin sesión: manda al Dashboard (login) y vuelve al panel al entrar.
+    const next = encodeURIComponent(slug);
+    window.location.replace(`./cuenta.html?abrir=${next}`);
   } else {
     openSession(slug).catch(() => renderLocked('Esta tarjeta no existe'));
   }

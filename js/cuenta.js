@@ -378,14 +378,23 @@
 
   async function loadDashboard() {
     const token = getSession();
+    const abrir = (new URLSearchParams(window.location.search).get("abrir") || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "");
+
     if (!token) {
-      renderAuth({ mode: "login" });
+      renderAuth({ mode: "login", message: abrir ? "Inicia sesión para abrir el panel de tu tarjeta." : "" });
       return;
     }
     const res = await apiPost("/account/me", { sessionToken: token });
     if (!res.ok) {
       clearSession();
       renderAuth({ mode: "login", message: res.error === "no-api" ? "" : "Tu sesión expiró, inicia sesión de nuevo." });
+      return;
+    }
+    if (abrir) {
+      window.location.replace(`./?n=${encodeURIComponent(abrir)}`);
       return;
     }
     renderDashboard(res.email, res.orders || []);
