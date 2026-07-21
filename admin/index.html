@@ -23,6 +23,11 @@
       <label class="form-label small fw-semibold" for="adminSlug">Slug del cliente</label>
       <input id="adminSlug" type="text" class="form-control" placeholder="lulu" pattern="[a-z0-9-]+">
     </div>
+    <div class="mb-3">
+      <label class="form-label small fw-semibold" for="adminCc">CC (opcional)</label>
+      <input id="adminCc" type="email" class="form-control" placeholder="pedidos@mimarca.me">
+      <div class="form-text small">Copia el correo a esta dirección — déjalo vacío para enviar solo al cliente.</div>
+    </div>
     <div class="d-grid gap-2 mb-3">
       <button type="button" class="btn btn-dark" id="btnPublished">Avisar: tarjeta publicada</button>
       <button type="button" class="btn btn-outline-dark" id="btnChange">Avisar: cambio recibido</button>
@@ -38,6 +43,7 @@
       const note = document.getElementById('adminNote');
       const secretInput = document.getElementById('adminSecret');
       const slugInput = document.getElementById('adminSlug');
+      const ccInput = document.getElementById('adminCc');
 
       try {
         const saved = sessionStorage.getItem('mitp_admin_secret');
@@ -65,7 +71,7 @@
               'content-type': 'application/json',
               'X-Admin-Secret': secret,
             },
-            body: JSON.stringify({ slug }),
+            body: JSON.stringify({ slug, cc: ccInput.value.trim() }),
           });
           const body = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(body.error || ('HTTP ' + res.status));

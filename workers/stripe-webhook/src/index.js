@@ -699,6 +699,10 @@ async function handleAdminNotify(request, env, action) {
   const slug = String(body?.slug || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!slug) return jsonResponse({ error: "missing slug" }, 400);
 
+  // CC opcional (ej. copiar a pedidos@mimarca.me en un envío puntual).
+  const ccRaw = String(body?.cc || "").trim().toLowerCase();
+  const cc = ccRaw && EMAIL_RE.test(ccRaw) ? ccRaw : "";
+
   const data = await loadClient(env, slug);
   if (!data || !data.ownerEmail) return jsonResponse({ error: "client not found" }, 404);
 
@@ -708,7 +712,7 @@ async function handleAdminNotify(request, env, action) {
     ? "¡Tu tarjeta digital ya está en vivo! 🎉"
     : "Recibimos tu solicitud de cambios";
 
-  await sendEmail(env, { to: data.ownerEmail, subject, html: renderTemplate(template, vars) });
+  await sendEmail(env, { to: data.ownerEmail, subject, html: renderTemplate(template, vars), cc });
 
   return jsonResponse({ ok: true });
 }
@@ -767,7 +771,7 @@ function timingSafeEqual(a, b) {
   return diff === 0;
 }
 
-async function sendEmail(env, { to, subject, html }) {
+async function sendEmail(env, { to, subject, html, cc }) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -777,6 +781,7 @@ async function sendEmail(env, { to, subject, html }) {
     body: JSON.stringify({
       from: env.FROM_EMAIL || "mimarca <pedidos@mimarca.me>",
       to: [to],
+      ...(cc ? { cc: [cc] } : {}),
       subject,
       html,
     }),

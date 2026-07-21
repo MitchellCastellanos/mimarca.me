@@ -7,6 +7,8 @@
   <meta name="description" content="RCR Barber Shop en Querétaro: cortes de cabello, barba, fade, afeitado y tratamientos capilares. Consulta horarios, ubicación y agenda por WhatsApp." />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#111111" />
+  <meta name="mitp-portal-api" content="https://mimarca-stripe-webhook.mimarca.workers.dev" />
+  <meta name="mitp-slug" content="rcr-barbershop" />
   <link rel="canonical" href="https://mimarca.me/rcr-barbershop/" />
   <link rel="icon" type="image/png" href="../images/logo.PNG" />
   <link rel="apple-touch-icon" href="../images/apple-touch-icon.png" />
@@ -79,7 +81,7 @@
         <div class="gold-divider"></div>
       </header>
 
-      <main class="links-section">
+      <main class="links-section" data-mitp-links>
 
         <a href="https://wa.me/524423536769" target="_blank" rel="noopener" class="link-btn whatsapp">
           <span class="btn-icon">
@@ -222,5 +224,18 @@
 
     </div>
   </div>
+
+  <!-- Plantilla de link para la autoedición desde mi-cuenta ("Tus links"):
+       js/wire-card.js clona esto (mismo markup y CSS de esta página) solo
+       si el cliente ya editó sus links. Sin edición, el HTML de arriba se
+       queda tal cual. -->
+  <template data-mitp-link-template>
+    <a target="_blank" rel="noopener" class="link-btn">
+      <span class="btn-icon" data-mitp="icon"><i class="fas fa-globe"></i></span>
+      <span class="btn-label" data-mitp="label"></span>
+      <span class="btn-arrow"><i class="fas fa-chevron-right"></i></span>
+    </a>
+  </template>
+  <script src="../js/wire-card.js" defer></script>
 </body>
 </html>

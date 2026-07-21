@@ -160,6 +160,22 @@ mientras no se pase del cupo de su paquete:
   self-serve, sin trabajo humano de por medio para cambios dentro del
   cupo).
 
+### Tarjetas hechas a mano (`js/wire-card.js`)
+
+Para páginas artesanales (no generadas por `js/negocio.js`, ej.
+`/rcr-barbershop/`) que igual quieren dar acceso a `mi-cuenta` y a la
+autoedición de links: no se convierten al motor JSON (se perdería el
+diseño único), se "cablean" con `js/wire-card.js`. La página declara
+`<meta name="mitp-slug">`, marca su contenedor de links con
+`data-mitp-links` y provee un `<template data-mitp-link-template>` con
+SU propio markup/CSS. El script pide `GET /card-links/:slug` y solo
+reemplaza el contenido si el cliente ya editó algo — sin editar nunca,
+el HTML se queda tal cual se diseñó. Necesita, además del HTML marcado,
+un JSON "sombra" en `negocio/_data/<slug>.json` (no se usa para
+renderizar la página pública — solo alimenta `/session` para que el
+panel de `mi-cuenta` funcione: stepper, links iniciales,
+`changeRequestUrl`, etc.). Ejemplo de referencia: `rcr-barbershop/`.
+
 ## Deploy
 
 ```bash

@@ -181,4 +181,47 @@ solo afecta qué cupo ven en "Tus links".
 Detalle técnico completo: `workers/stripe-webhook/README.md` (secciones
 "Links autoeditados" y "Borrador como form").
 
+## Parte 6 — Cableado de tarjetas hechas a mano (2026-07-21)
+
+Mitchell quiere seguir diseñando tarjetas 100% a la medida (como
+`rcr-barbershop/`, HTML/CSS artesanal, no el motor JSON) pero que de
+todos modos el cliente pueda entrar a `mi-cuenta` y autoeditar sus links
+igual que las tarjetas del motor. Se armó el patrón genérico:
+
+1. **`js/wire-card.js`**: [x] — script chiquito y genérico. La página
+   artesanal marca `<meta name="mitp-slug">`, su contenedor de links con
+   `data-mitp-links`, y un `<template data-mitp-link-template>` con su
+   propio markup/CSS. El script pide `GET /card-links/:slug` y, solo si
+   el cliente ya editó algo, clona la plantilla por cada link — nunca
+   toca el diseño si nadie editó nada. Ver
+   `workers/stripe-webhook/README.md` sección "Tarjetas hechas a mano".
+2. **`rcr-barbershop/` cableada como piloto**: [x] — `index.html` marcado
+   (metas, `data-mitp-links`, template, script), y
+   `negocio/_data/rcr-barbershop.json` nuevo como "expediente sombra"
+   (no renderiza la página, solo alimenta `/session` para que el panel
+   funcione: nombre, `orderStage: published`, los 6 links actuales,
+   `changeRequestUrl`).
+3. **CC opcional en `/notify/published`**: [x] — `{slug, cc}`, con campo
+   nuevo en `admin/index.html`. Se usó una vez para copiar el correo de
+   "tu tarjeta ya está en vivo" de RCR a `pedidos@mimarca.me`.
+4. **Copy del correo "ya está en vivo"** (`emails/card-published.html`):
+   [x] — ahora menciona la autoedición de links y ya no dice que
+   cambiarlos cuesta $25.
+
+**Pendiente manual (requiere wrangler/curl con acceso real — no se puede
+desde una sesión sandboxed sin salida a internet abierta)**:
+- Deploy del Worker (trae las rutas de la Parte 5 + el `cc` de esta parte).
+- `secrets:rcr-barbershop` en KV: `ownerEmail`, `ownerToken` nuevo,
+  `referralCode` nuevo, `package` (sugerido `"premium"` como vitrina, sin
+  restringir sus 6 links actuales — ajustable).
+- Crear la cuenta de RCR (`POST /account/register`) y sembrar
+  `orders:<email>` a mano con `slug: "rcr-barbershop"` para que el
+  Dashboard (`mi-cuenta/cuenta.html`) lo muestre "Publicada" (no vino de
+  un pago real de Stripe, así que no hay entrada automática).
+- Disparar `/notify/published` con `cc: pedidos@mimarca.me` desde
+  `admin/`.
+
+Prompt completo para hacer todo esto con Cursor: ver conversación /
+entregado como archivo aparte.
+
 Detalle técnico: `workers/stripe-webhook/README.md`.
