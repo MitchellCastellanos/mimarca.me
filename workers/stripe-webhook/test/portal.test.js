@@ -15,6 +15,9 @@ import {
   updateDraft,
   linkSessionToDraft,
   getDraftBySession,
+  buildDraftCheckoutUrl,
+  recordAwaitingPaymentOrder,
+  recordPendingOrder,
   resolveLinksQuota,
   validateLinks,
   getLinks,
@@ -37,9 +40,44 @@ function fakeKvEnv() {
       async put(key, value) {
         store.set(key, typeof value === "string" ? value : JSON.stringify(value));
       },
+      async delete(key) {
+        store.delete(key);
+      },
     },
   };
 }
+
+describe("orden antes del pago", () => {
+  it("crea borrador pendiente y el webhook actualiza la misma orden", async () => {
+    const env = fakeKvEnv();
+    const pending = await recordAwaitingPaymentOrder(env, {
+      email: "cliente@example.com",
+      draftId: "draft-1",
+      packageSlug: "personalizado",
+      packageName: "Personalizado",
+      businessName: "CafÃ© Aurora",
+    });
+    assert.equal(pending.status, "awaiting_payment");
+    assert.match(pending.checkoutUrl, /client_reference_id=d\.draft-1/);
+
+    await recordPendingOrder(env, {
+      email: "cliente@example.com",
+      draftId: "draft-1",
+      sessionId: "cs_paid_1",
+      packageName: "Personalizado",
+    });
+    const orders = await env.PORTAL_KV.get("orders:cliente@example.com", { type: "json" });
+    assert.equal(orders.length, 1);
+    assert.equal(orders[0].status, "paid");
+    assert.equal(orders[0].sessionId, "cs_paid_1");
+    assert.equal(await env.PORTAL_KV.get("payment-reminder:draft-1"), null);
+  });
+
+  it("solo genera checkout para paquetes permitidos", () => {
+    assert.equal(buildDraftCheckoutUrl({ packageSlug: "inventado", draftId: "x" }), null);
+    assert.match(buildDraftCheckoutUrl({ packageSlug: "premium", draftId: "x", email: "A@B.COM" }), /prefilled_email=a%40b.com/);
+  });
+});
 
 describe("stripSecrets", () => {
   it("removes owner fields", () => {

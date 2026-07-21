@@ -37,3 +37,7 @@ SUPPORT_EMAIL = "contacto@mimarca.me"
 R2_PUBLIC_BASE_URL = "https://uploads.mimarca.me"
 # Código de promoción de Stripe (10%) habilitado en los tres Payment Links.
 REFERRAL_PROMO_CODE = "NUEVO10"
+
+[triggers]
+# 16:00 UTC = 10:00 en Ciudad de MÃ©xico. Revisa borradores vencidos a diario.
+crons = ["0 16 * * *"]

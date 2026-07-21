@@ -422,12 +422,85 @@ export async function getDraftBySession(env, sessionId) {
  * pedidos ya pagados, sin UI todavía — el equipo la usa a mano para saber
  * qué borrador corresponde a qué pago mientras no exista el dashboard.
  */
+export const PAYMENT_REMINDER_DELAY_MS = 24 * 60 * 60 * 1000;
+export const UNPAID_ORDER_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+const PAYMENT_LINKS_BY_PACKAGE = {
+  lanzamiento: "https://buy.stripe.com/eVqcN67HF1xkdP7gQjgjC00",
+  personalizado: "https://buy.stripe.com/4gM28s6DB0tgh1j1VpgjC01",
+  premium: "https://buy.stripe.com/5kQcN64vt5NA7qJ7fJgjC02",
+};
+
+export function buildDraftCheckoutUrl({ packageSlug, draftId, email, referralCode, promotionCode }) {
+  const base = PAYMENT_LINKS_BY_PACKAGE[String(packageSlug || "").toLowerCase()];
+  if (!base || !draftId) return null;
+  const url = new URL(base);
+  const ref = String(referralCode || "").trim().toUpperCase();
+  url.searchParams.set("client_reference_id", [ref && /^[A-Z0-9]{4,16}$/.test(ref) ? `r.${ref}` : "", `d.${draftId}`].filter(Boolean).join("_"));
+  if (email) url.searchParams.set("prefilled_email", String(email).trim().toLowerCase());
+  if (promotionCode) url.searchParams.set("prefilled_promo_code", promotionCode);
+  return url.toString();
+}
+
+export async function recordAwaitingPaymentOrder(env, { email, draftId, packageSlug, packageName, businessName, referralCode, promotionCode }) {
+  if (!env.PORTAL_KV || !email || !draftId) return null;
+  const normalizedEmail = email.trim().toLowerCase();
+  const checkoutUrl = buildDraftCheckoutUrl({ packageSlug, draftId, email: normalizedEmail, referralCode, promotionCode });
+  if (!checkoutUrl) throw new Error("invalid package");
+  const now = Date.now();
+  const key = `orders:${normalizedEmail}`;
+  const prev = (await env.PORTAL_KV.get(key, { type: "json" })) || [];
+  const index = prev.findIndex((order) => order?.draftId === draftId);
+  const existing = index >= 0 ? prev[index] : null;
+  if (existing?.status === "paid" || existing?.sessionId) return existing;
+  const record = {
+    ...(existing || {}),
+    draftId,
+    sessionId: null,
+    packageSlug,
+    packageName,
+    businessName: String(businessName || "").slice(0, 80),
+    status: "awaiting_payment",
+    checkoutUrl,
+    at: existing?.at || now,
+    updatedAt: now,
+    expiresAt: now + UNPAID_ORDER_TTL_MS,
+    slug: null,
+  };
+  if (index >= 0) prev[index] = record;
+  else prev.push(record);
+  await env.PORTAL_KV.put(key, JSON.stringify(prev.slice(-50)));
+  await env.PORTAL_KV.put(`payment-reminder:${draftId}`, JSON.stringify({
+    email: normalizedEmail,
+    draftId,
+    businessName: record.businessName,
+    packageName,
+    checkoutUrl,
+    dueAt: now + PAYMENT_REMINDER_DELAY_MS,
+  }), { expirationTtl: 60 * 60 * 24 * 30 });
+  return record;
+}
+
 export async function recordPendingOrder(env, { email, draftId, sessionId, packageName }) {
   if (!env.PORTAL_KV || !email) return;
   const key = `orders:${email.trim().toLowerCase()}`;
   const prev = (await env.PORTAL_KV.get(key, { type: "json" })) || [];
-  prev.push({ draftId: draftId || null, sessionId, packageName, at: Date.now(), slug: null });
+  const index = draftId ? prev.findIndex((order) => order?.draftId === draftId) : -1;
+  const paid = {
+    ...(index >= 0 ? prev[index] : {}),
+    draftId: draftId || null,
+    sessionId,
+    packageName,
+    status: "paid",
+    paidAt: Date.now(),
+    at: index >= 0 ? prev[index].at : Date.now(),
+    slug: index >= 0 ? prev[index].slug || null : null,
+  };
+  if (index >= 0) prev[index] = paid;
+  else if (!prev.some((order) => order?.sessionId === sessionId)) prev.push(paid);
   await env.PORTAL_KV.put(key, JSON.stringify(prev.slice(-50)));
+  if (draftId) await env.PORTAL_KV.delete(`payment-reminder:${draftId}`);
+  return paid;
 }
 
 // ============================================================

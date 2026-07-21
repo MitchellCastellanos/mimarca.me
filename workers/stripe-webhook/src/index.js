@@ -45,6 +45,7 @@ import assetUploadedTemplate from "../../../emails/asset-uploaded.html";
 import designApprovedAlertTemplate from "../../../emails/design-approved-alert.html";
 import referralRewardTemplate from "../../../emails/referral-reward.html";
 import passwordResetTemplate from "../../../emails/password-reset.html";
+import paymentReminderTemplate from "../../../emails/payment-reminder.html";
 import {
   buildTemplateVars,
   buildAccessLinkVars,
@@ -74,6 +75,7 @@ import {
   linkSessionToDraft,
   getDraftBySession,
   recordPendingOrder,
+  recordAwaitingPaymentOrder,
   resolveLinksQuota,
   validateLinks,
   getLinks,
@@ -233,6 +235,9 @@ export default {
 
     return new Response("Not Found", { status: 404, headers: CORS_HEADERS });
   },
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(sendDuePaymentReminders(env, controller.scheduledTime));
+  },
 };
 
 function jsonResponse(body, status = 200) {
@@ -336,7 +341,10 @@ async function handleStripeWebhook(request, env) {
   }
 
   await recordPendingOrder(env, {
-    email: vars.customer_email || draftRecord?.email || "",
+    // Si existe borrador, su correo es la llave original de la orden
+    // awaiting_payment. Stripe puede devolver un correo distinto; usarlo
+    // aquÃ­ dejarÃ­a la orden original pendiente y crearÃ­a un duplicado.
+    email: draftRecord?.email || vars.customer_email || "",
     draftId: draftId || null,
     sessionId: session.id,
     packageName: vars.package_name,
@@ -589,12 +597,71 @@ async function handleSaveDraft(request, env) {
   }
 
   try {
-    const draftId = await saveDraft(env, email, data);
-    return jsonResponse({ ok: true, draftId });
+    const requestedDraftId = String(body?.draftId || "").trim();
+    let draftId = requestedDraftId;
+    if (draftId) {
+      const existing = await getDraft(env, draftId);
+      if (!existing || normalizeEmail(existing.email) !== email) {
+        return jsonResponse({ error: "draft not found" }, 404);
+      }
+      await updateDraft(env, draftId, data);
+    } else {
+      draftId = await saveDraft(env, email, data);
+    }
+
+    let order = null;
+    if (body?.createOrder === true) {
+      order = await recordAwaitingPaymentOrder(env, {
+        email,
+        draftId,
+        packageSlug: data.selectedPackage,
+        packageName: data.selectedPackageName,
+        businessName: data.businessName,
+        referralCode: body?.referralCode,
+        promotionCode: body?.referralCode ? env.REFERRAL_PROMO_CODE : "",
+      });
+    }
+    return jsonResponse({ ok: true, draftId, order });
   } catch (err) {
     console.error("saveDraft failed:", err);
     return jsonResponse({ error: "could not save draft" }, 413);
   }
+}
+
+export async function sendDuePaymentReminders(env, now = Date.now()) {
+  if (!env.PORTAL_KV || !env.RESEND_API_KEY) return { sent: 0, skipped: 0 };
+  let cursor;
+  let sent = 0;
+  let skipped = 0;
+  do {
+    const page = await env.PORTAL_KV.list({ prefix: "payment-reminder:", limit: 100, ...(cursor ? { cursor } : {}) });
+    for (const key of page.keys) {
+      const reminder = await env.PORTAL_KV.get(key.name, { type: "json" });
+      if (!reminder || Number(reminder.dueAt) > now) {
+        skipped++;
+        continue;
+      }
+      try {
+        await sendEmail(env, {
+          to: reminder.email,
+          subject: "EstÃ¡s a un clic de tener tu tarjeta lista para tus clientes",
+          html: renderTemplate(paymentReminderTemplate, {
+            business_name: reminder.businessName || "tu negocio",
+            package_name: reminder.packageName || "Mi Tarjeta Pro",
+            checkout_url: reminder.checkoutUrl,
+            support_email: env.SUPPORT_EMAIL || "contacto@mimarca.me",
+          }),
+          text: `Tu pedido de Mi Tarjeta Pro para ${reminder.businessName || "tu negocio"} estÃ¡ guardado. Termina tu pago aquÃ­: ${reminder.checkoutUrl}`,
+        });
+        await env.PORTAL_KV.delete(key.name);
+        sent++;
+      } catch (err) {
+        console.error("payment reminder failed:", { draftId: reminder.draftId, error: String(err) });
+      }
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor && sent + skipped < 500);
+  return { sent, skipped };
 }
 
 async function handleGetDraft(env, draftId) {
@@ -951,7 +1018,7 @@ function timingSafeEqual(a, b) {
   return diff === 0;
 }
 
-async function sendEmail(env, { to, subject, html, cc }) {
+async function sendEmail(env, { to, subject, html, text, cc }) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -964,6 +1031,7 @@ async function sendEmail(env, { to, subject, html, cc }) {
       ...(cc ? { cc: [cc] } : {}),
       subject,
       html,
+      ...(text ? { text } : {}),
     }),
   });
 

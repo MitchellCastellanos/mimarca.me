@@ -118,6 +118,12 @@ test("las plantillas nuevas quedan sin ningun {{placeholder}}", async () => {
     ["../../../emails/change-request-received.html", buildChangeRequestVars(fakeClient, {})],
     ["../../../emails/asset-uploaded.html", buildAssetUploadedVars(fakeClient, "https://uploads.mimarca.me/x.png")],
     ["../../../emails/design-approved-alert.html", buildApprovedAlertVars(fakeClient)],
+    ["../../../emails/payment-reminder.html", {
+      business_name: "CafÃ© Aurora",
+      package_name: "Personalizado",
+      checkout_url: "https://buy.stripe.com/test",
+      support_email: "contacto@mimarca.me",
+    }],
   ];
   for (const [file, vars] of cases) {
     const template = await readFile(new URL(file, import.meta.url), "utf8");

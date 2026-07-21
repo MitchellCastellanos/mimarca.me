@@ -14,6 +14,12 @@ pendiente — ver nota al final).
 > `requestedFeatures`; el Dashboard los muestra mientras el pedido no tenga
 > `slug`.
 
+> La orden ahora existe antes del pago con estado `awaiting_payment`. Si el
+> cliente entra o crea su cuenta con el mismo correo, puede editar el
+> borrador y continuar a Stripe desde el Dashboard. Tras 24 horas se envía
+> un único recordatorio; Stripe actualiza la misma orden a `paid` por
+> `draftId`, sin crear duplicados.
+
 1. Cliente entra a `index.html` y arma su tarjeta en el builder con datos
    reales (WhatsApp, Instagram, Maps, logo) — el mismo motor que renderiza
    las tarjetas ya publicadas (ver sección 8). Este paso es opcional: si lo

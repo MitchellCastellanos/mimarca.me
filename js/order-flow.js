@@ -11,6 +11,7 @@
   let manualTier = null;
   let selectedTier = "lanzamiento";
   let validatedReferral = null;
+  let currentCheckoutUrl = "";
 
   const checked = (root) => Array.from(document.querySelectorAll(`${root} input:checked`)).map((el) => el.value);
   const wantedFeatures = () => Array.from(document.querySelectorAll("#orderFeatures .mt-feature-want:checked")).map((el) => el.value);
@@ -151,15 +152,24 @@
 
   async function saveDraft() {
     const logoDataUrl = await readLogo();
+    const storedEmail = sessionStorage.getItem("mitp_draft_email") || "";
+    const storedDraftId = storedEmail === $("orderEmail").value.trim() ? sessionStorage.getItem("mitp_draft_id") || "" : "";
     const response = await fetch(`${apiBase()}/draft`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: $("orderEmail").value.trim(), data: draftData(logoDataUrl) }),
+      body: JSON.stringify({
+        email: $("orderEmail").value.trim(),
+        draftId: storedDraftId,
+        createOrder: true,
+        referralCode: validatedReferral?.code || "",
+        data: draftData(logoDataUrl),
+      }),
     });
     if (!response.ok) throw new Error("draft");
     const result = await response.json();
     sessionStorage.setItem("mitp_draft_id", result.draftId);
     sessionStorage.setItem("mitp_draft_email", $("orderEmail").value.trim());
+    currentCheckoutUrl = result.order?.checkoutUrl || currentCheckoutUrl;
     window.MTP_applyCheckoutParams?.();
     return result.draftId;
   }
@@ -174,7 +184,7 @@
   $("orderReferralCode").addEventListener("input", () => { validatedReferral = null; });
   $("orderEmail").addEventListener("input", () => { validatedReferral = null; });
 
-  $("orderReviewBtn").onclick = () => {
+  $("orderReviewBtn").onclick = async () => {
     syncMockup();
     const name = $("orderBusinessName");
     const email = $("orderEmail");
@@ -184,7 +194,23 @@
       (!name.value.trim() ? name : email).focus();
       return;
     }
+    const reviewButton = $("orderReviewBtn");
     $("orderFormNote").textContent = "";
+    reviewButton.disabled = true;
+    reviewButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando borradorâ€¦';
+    try {
+      const currentCode = referralCode();
+      if (currentCode && (!validatedReferral || validatedReferral.code !== currentCode)) await validateReferral();
+      await saveDraft();
+    } catch (err) {
+      $("orderFormNote").className = "small mt-2 text-center text-danger";
+      $("orderFormNote").textContent = err.message === "referral" ? "Revisa el cÃ³digo de referido." : "No pudimos guardar el borrador. Intenta otra vez.";
+      reviewButton.disabled = false;
+      reviewButton.innerHTML = 'Revisar mi pedido <i class="bi bi-arrow-right ms-1"></i>';
+      return;
+    }
+    reviewButton.disabled = false;
+    reviewButton.innerHTML = 'Revisar mi pedido <i class="bi bi-arrow-right ms-1"></i>';
     const links = checked("#orderLinks");
     const features = wantedFeatures();
     $("orderSummaryBody").innerHTML = `
@@ -209,7 +235,7 @@
       if (currentCode && (!validatedReferral || validatedReferral.code !== currentCode)) await validateReferral();
       const draftId = await saveDraft();
       const ref = validatedReferral?.code || "";
-      const checkout = new URL(tiers[selectedTier].checkout);
+      const checkout = new URL(currentCheckoutUrl || tiers[selectedTier].checkout);
       checkout.searchParams.set("client_reference_id", [ref && `r.${ref}`, `d.${draftId}`].filter(Boolean).join("_"));
       checkout.searchParams.set("prefilled_email", $("orderEmail").value.trim());
       if (validatedReferral?.promotionCode) checkout.searchParams.set("prefilled_promo_code", validatedReferral.promotionCode);

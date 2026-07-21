@@ -157,5 +157,6 @@ export async function consumeResetToken(env, token) {
 export async function listOrdersForAccount(env, email) {
   if (!env.PORTAL_KV) return [];
   const orders = await env.PORTAL_KV.get(`orders:${normalizeEmail(email)}`, { type: "json" });
-  return orders || [];
+  const now = Date.now();
+  return (orders || []).filter((order) => order?.status !== "awaiting_payment" || !order.expiresAt || order.expiresAt > now);
 }

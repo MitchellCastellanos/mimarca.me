@@ -11,6 +11,9 @@ Cloudflare Worker que le da backend al sitio estático.
   `ownerToken`/`ownerEmail`).
 - `POST /draft` — `{email,data}` → guarda el borrador del builder (antes de
   pagar) en KV con TTL de 30 días, regresa `{draftId}`. Ver "Borrador" abajo.
+  Con `{createOrder:true,draftId?}` también crea/actualiza una orden
+  `awaiting_payment`, devuelve su `checkoutUrl` seguro y la deja visible en
+  el Dashboard antes del pago.
 - `GET /draft/:id` — lee un borrador por su id.
 - `PUT /draft/:id` — `{sessionToken,data}` → lo edita (mismo `draftId`,
   conserva `email`/`createdAt`, reinicia TTL). Solo el dueño de la cuenta
@@ -80,6 +83,13 @@ el volumen actual es un riesgo aceptable; si esto crece, vale la pena
 llevar una lista de sesiones por cuenta para poder revocarlas todas.
 
 ## Borrador antes de pagar (builder → checkout → gracias.html)
+
+Al confirmar el resumen, el front manda `createOrder:true`. La orden se
+guarda inmediatamente en `orders:<email>` con estado `awaiting_payment` y
+se actualiza por `draftId`; el webhook de Stripe cambia esa misma entrada a
+`paid`, evitando duplicados. Un Cron Trigger diario revisa
+`payment-reminder:*` y, tras 24 horas sin pago, envía una sola recuperación
+de checkout. El marcador se elimina al enviar el correo o al recibir el pago.
 
 El "borrador" NO es el mockup (theme, foto de cover, tarjeta renderizada
 en el iframe) — eso es puro gancho visual y se descarta en cuanto hace la

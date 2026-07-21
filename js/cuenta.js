@@ -231,6 +231,7 @@
   // ---------- Dashboard ----------
   function orderStatusLabel(order) {
     if (order.slug) return { text: "Publicada", cls: "text-bg-success" };
+    if (order.status === "awaiting_payment") return { text: "Pago pendiente", cls: "text-bg-secondary" };
     return { text: "En proceso", cls: "text-bg-warning" };
   }
 
@@ -244,7 +245,7 @@
     const d = order.draft.data || {};
     const id = escapeHtml(order.draftId);
     return `
-      <div class="mt-3 pt-3 border-top" data-draft-id="${id}">
+      <div id="draft-${id}" class="mt-3 pt-3 border-top" data-draft-id="${id}">
         <div class="small fw-semibold text-uppercase text-muted mb-2">Info de tu negocio (edítala si hace falta)</div>
         <div class="row g-2">
           <div class="col-md-6">
@@ -290,7 +291,9 @@
           const date = o.at ? new Date(o.at).toLocaleDateString("es-MX", { year: "numeric", month: "short", day: "numeric" }) : "";
           const link = o.slug
             ? `<a href="./?n=${encodeURIComponent(o.slug)}" class="btn btn-dark btn-sm">Abrir panel</a>`
-            : `<span class="text-muted small">Te avisamos por correo cuando esté lista</span>`;
+            : o.status === "awaiting_payment" && o.checkoutUrl
+              ? `<div class="d-flex gap-2 flex-wrap"><a href="#draft-${escapeHtml(o.draftId)}" class="btn btn-outline-dark btn-sm">Editar pedido</a><a href="${escapeHtml(o.checkoutUrl)}" target="_blank" rel="noopener" class="btn btn-warning btn-sm">Continuar al pago</a></div>`
+              : `<span class="text-muted small">Te avisamos por correo cuando esté lista</span>`;
           return `
             <div class="card mc-card border-0 shadow-sm mb-3">
               <div class="card-body p-4">
