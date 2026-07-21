@@ -59,7 +59,7 @@ const pageI18n = {
       home_expect_3d: "Simple guidance on what to do next so your business can grow faster.",
 
       star_tag: "Star Package",
-      star_h2: "GABAN Launch & Grow Package",
+      star_h2: "mimarca Launch & Grow Package",
       star_lead: "More than a website. This package gives new businesses the essential digital setup they need to look credible, get found and start attracting clients from the beginning.",
       star_b1: "Professional mini website built for trust and conversion",
       star_b2: "Google Business optimization and reviews system setup",
@@ -123,7 +123,7 @@ const pageI18n = {
       home_expect_3d: "Des conseils simples sur les prochaines actions à prendre pour accélérer votre croissance.",
 
       star_tag: "Forfait vedette",
-      star_h2: "GABAN Launch & Grow Package",
+      star_h2: "mimarca Launch & Grow Package",
       star_lead: "Plus qu’un site web. Ce forfait donne aux nouvelles entreprises les éléments numériques essentiels pour paraître crédibles, être trouvées et attirer des clients dès le départ.",
       star_b1: "Mini site professionnel conçu pour la confiance et la conversion",
       star_b2: "Optimisation Google Business et mise en place d’un système d’avis",
@@ -187,7 +187,7 @@ const pageI18n = {
       home_expect_3d: "Guía simple sobre qué hacer después para que tu negocio crezca más rápido.",
 
       star_tag: "Paquete estrella",
-      star_h2: "GABAN Launch & Grow Package",
+      star_h2: "mimarca Launch & Grow Package",
       star_lead: "Más que un sitio web. Este paquete les da a los negocios nuevos la base digital esencial que necesitan para verse creíbles, ser encontrados y empezar a atraer clientes desde el principio.",
       star_b1: "Mini sitio profesional construido para confianza y conversión",
       star_b2: "Optimización de Google Business y sistema de reseñas",
@@ -239,7 +239,7 @@ const pageI18n = {
     en: {
       services_tag: "Services for launch, trust and growth",
       services_h1: "Digital services built to help local businesses grow faster",
-      services_lead: "GABAN helps local businesses launch professionally online with practical digital structure — not just a website, but the pieces that help you get found, build trust and attract clients.",
+      services_lead: "mimarca helps local businesses launch professionally online with practical digital structure — not just a website, but the pieces that help you get found, build trust and attract clients.",
       services_cta1: "Explore Grow Package",
       services_cta2: "Book a Free Consultation",
       services_trust: "Montréal-based • Local business focused • Practical solutions",
@@ -281,7 +281,7 @@ const pageI18n = {
       svc_help_btn: "Request a Free Consultation",
 
       pkg_star_tag: "Star Package",
-      pkg_star_title: "GABAN Grow Package",
+      pkg_star_title: "mimarca Grow Package",
       pkg_star_desc: "Our main offer for businesses that want more than “just a website.” This package combines the digital essentials needed to launch properly and grow with more confidence.",
       pkg_star_b1: "Professional website presence",
       pkg_star_b2: "Google Business optimization",
@@ -360,7 +360,7 @@ const pageI18n = {
     fr: {
       services_tag: "Services pour le lancement, la confiance et la croissance",
       services_h1: "Des services numériques conçus pour aider les entreprises locales à croître plus vite",
-      services_lead: "GABAN aide les entreprises locales à se lancer professionnellement en ligne avec une structure numérique pratique — pas seulement un site web, mais les éléments qui vous aident à être trouvé, à bâtir la confiance et à attirer des clients.",
+      services_lead: "mimarca aide les entreprises locales à se lancer professionnellement en ligne avec une structure numérique pratique — pas seulement un site web, mais les éléments qui vous aident à être trouvé, à bâtir la confiance et à attirer des clients.",
       services_cta1: "Découvrir le Grow Package",
       services_cta2: "Réserver une consultation gratuite",
       services_trust: "Basé à Montréal • Axé entreprises locales • Solutions pratiques",
@@ -402,7 +402,7 @@ const pageI18n = {
       svc_help_btn: "Demander une consultation gratuite",
 
       pkg_star_tag: "Forfait vedette",
-      pkg_star_title: "GABAN Grow Package",
+      pkg_star_title: "mimarca Grow Package",
       pkg_star_desc: "Notre offre principale pour les entreprises qui veulent plus qu’« un simple site web ». Ce forfait regroupe les essentiels numériques nécessaires pour bien se lancer et croître avec plus de confiance.",
       pkg_star_b1: "Présence web professionnelle",
       pkg_star_b2: "Optimisation Google Business",
@@ -481,7 +481,7 @@ const pageI18n = {
     es: {
       services_tag: "Servicios para lanzamiento, confianza y crecimiento",
       services_h1: "Servicios digitales hechos para ayudar a negocios locales a crecer más rápido",
-      services_lead: "GABAN ayuda a negocios locales a lanzarse profesionalmente en línea con una estructura digital práctica — no solo un sitio web, sino las piezas que te ayudan a ser encontrado, generar confianza y atraer clientes.",
+      services_lead: "mimarca ayuda a negocios locales a lanzarse profesionalmente en línea con una estructura digital práctica — no solo un sitio web, sino las piezas que te ayudan a ser encontrado, generar confianza y atraer clientes.",
       services_cta1: "Ver Grow Package",
       services_cta2: "Agendar consulta gratis",
       services_trust: "Basado en Montréal • Enfocado en negocios locales • Soluciones prácticas",
@@ -523,7 +523,7 @@ const pageI18n = {
       svc_help_btn: "Solicitar consulta gratis",
 
       pkg_star_tag: "Paquete estrella",
-      pkg_star_title: "GABAN Grow Package",
+      pkg_star_title: "mimarca Grow Package",
       pkg_star_desc: "Nuestra oferta principal para negocios que quieren más que “solo un sitio web”. Este paquete combina los esenciales digitales necesarios para lanzarse bien y crecer con más confianza.",
       pkg_star_b1: "Presencia web profesional",
       pkg_star_b2: "Optimización de Google Business",
@@ -604,7 +604,7 @@ const pageI18n = {
     en: {
       grow_tag: "Star Package",
       grow_h1: "Launch your business properly and start growing faster",
-      grow_lead: "The GABAN Grow Package gives local businesses the essential digital setup they need to look professional, get found on Google, build trust and turn attention into real client action.",
+      grow_lead: "The mimarca Grow Package gives local businesses the essential digital setup they need to look professional, get found on Google, build trust and turn attention into real client action.",
       grow_cta1: "Start Your Project",
       grow_cta2: "View Packages",
       grow_trust: "Website + Google + Reviews + Instagram + Smart Links + Guidance",
@@ -699,7 +699,7 @@ const pageI18n = {
 
       grow_diff_tag: "Why it’s different",
       grow_diff_title: "We focus on growth, not just design",
-      grow_diff_desc: "Many people can build a website. The difference with GABAN is that we help new businesses launch with the digital pieces that actually support visibility, trust and action.",
+      grow_diff_desc: "Many people can build a website. The difference with mimarca is that we help new businesses launch with the digital pieces that actually support visibility, trust and action.",
       grow_diff_b1: "Built for local businesses, not generic templates",
       grow_diff_b2: "Focused on growth signals like Google, reviews and contact flow",
       grow_diff_b3: "Practical guidance, not just file delivery",
@@ -726,7 +726,7 @@ const pageI18n = {
     fr: {
       grow_tag: "Forfait vedette",
       grow_h1: "Lancez votre entreprise correctement et commencez à croître plus vite",
-      grow_lead: "Le GABAN Grow Package donne aux entreprises locales la structure numérique essentielle dont elles ont besoin pour paraître professionnelles, être trouvées sur Google, bâtir la confiance et transformer l’attention en vraies actions de clients.",
+      grow_lead: "Le mimarca Grow Package donne aux entreprises locales la structure numérique essentielle dont elles ont besoin pour paraître professionnelles, être trouvées sur Google, bâtir la confiance et transformer l’attention en vraies actions de clients.",
       grow_cta1: "Commencer votre projet",
       grow_cta2: "Voir les forfaits",
       grow_trust: "Site web + Google + avis + Instagram + liens intelligents + accompagnement",
@@ -821,7 +821,7 @@ const pageI18n = {
 
       grow_diff_tag: "Pourquoi c’est différent",
       grow_diff_title: "Nous nous concentrons sur la croissance, pas seulement sur le design",
-      grow_diff_desc: "Beaucoup de gens peuvent créer un site web. La différence avec GABAN, c’est que nous aidons les nouvelles entreprises à se lancer avec les pièces numériques qui soutiennent vraiment la visibilité, la confiance et l’action.",
+      grow_diff_desc: "Beaucoup de gens peuvent créer un site web. La différence avec mimarca, c’est que nous aidons les nouvelles entreprises à se lancer avec les pièces numériques qui soutiennent vraiment la visibilité, la confiance et l’action.",
       grow_diff_b1: "Conçu pour les entreprises locales, pas pour des modèles génériques",
       grow_diff_b2: "Axé sur les signaux de croissance comme Google, les avis et le parcours de contact",
       grow_diff_b3: "Accompagnement pratique, pas seulement livraison de fichiers",
@@ -848,7 +848,7 @@ const pageI18n = {
     es: {
       grow_tag: "Paquete estrella",
       grow_h1: "Lanza tu negocio correctamente y empieza a crecer más rápido",
-      grow_lead: "El GABAN Grow Package le da a los negocios locales la estructura digital esencial que necesitan para verse profesionales, ser encontrados en Google, generar confianza y convertir atención en acción real de clientes.",
+      grow_lead: "El mimarca Grow Package le da a los negocios locales la estructura digital esencial que necesitan para verse profesionales, ser encontrados en Google, generar confianza y convertir atención en acción real de clientes.",
       grow_cta1: "Iniciar tu proyecto",
       grow_cta2: "Ver paquetes",
       grow_trust: "Sitio web + Google + reseñas + Instagram + smart links + guía",
@@ -943,7 +943,7 @@ const pageI18n = {
 
       grow_diff_tag: "Por qué es diferente",
       grow_diff_title: "Nos enfocamos en crecimiento, no solo en diseño",
-      grow_diff_desc: "Mucha gente puede hacer un sitio web. La diferencia con GABAN es que ayudamos a negocios nuevos a lanzarse con las piezas digitales que de verdad apoyan visibilidad, confianza y acción.",
+      grow_diff_desc: "Mucha gente puede hacer un sitio web. La diferencia con mimarca es que ayudamos a negocios nuevos a lanzarse con las piezas digitales que de verdad apoyan visibilidad, confianza y acción.",
       grow_diff_b1: "Hecho para negocios locales, no plantillas genéricas",
       grow_diff_b2: "Enfocado en señales de crecimiento como Google, reseñas y flujo de contacto",
       grow_diff_b3: "Guía práctica, no solo entrega de archivos",
@@ -1419,7 +1419,7 @@ const pageI18n = {
       about_sub: "We help small businesses launch practical digital tools that actually improve operations.",
       about_story_t: "Our approach",
       about_story_p1: "Many small businesses know they need a website or better digital tools, but they don’t want to spend months managing a complex project.",
-      about_story_p2: "GABAN Solutions Numériques focuses on simple, practical digital solutions that help businesses look professional online and operate more efficiently.",
+      about_story_p2: "mimarca focuses on simple, practical digital solutions that help businesses look professional online and operate more efficiently.",
       about_story_p3: "Our goal is not to sell complicated software — it’s to build tools that actually help businesses grow.",
       about_values_t: "What we focus on",
       about_val_1t: "Speed",
@@ -1437,7 +1437,7 @@ const pageI18n = {
       about_sub: "Nous aidons les petites entreprises à lancer des outils numériques pratiques qui améliorent réellement leurs opérations.",
       about_story_t: "Notre approche",
       about_story_p1: "Beaucoup de petites entreprises savent qu’elles ont besoin d’un site web ou de meilleurs outils numériques, mais elles ne veulent pas passer des mois à gérer un projet complexe.",
-      about_story_p2: "GABAN Solutions Numériques se concentre sur des solutions numériques simples et pratiques qui aident les entreprises à paraître professionnelles en ligne et à fonctionner plus efficacement.",
+      about_story_p2: "mimarca se concentre sur des solutions numériques simples et pratiques qui aident les entreprises à paraître professionnelles en ligne et à fonctionner plus efficacement.",
       about_story_p3: "Notre objectif n’est pas de vendre des logiciels compliqués — c’est de construire des outils qui aident réellement les entreprises à croître.",
       about_values_t: "Ce sur quoi nous nous concentrons",
       about_val_1t: "Vitesse",
@@ -1455,7 +1455,7 @@ const pageI18n = {
       about_sub: "Ayudamos a pequeños negocios a lanzar herramientas digitales prácticas que realmente mejoran sus operaciones.",
       about_story_t: "Nuestro enfoque",
       about_story_p1: "Muchos pequeños negocios saben que necesitan un sitio web o mejores herramientas digitales, pero no quieren pasar meses gestionando un proyecto complejo.",
-      about_story_p2: "GABAN Solutions Numériques se enfoca en soluciones digitales simples y prácticas que ayudan a los negocios a verse profesionales en línea y operar con más eficiencia.",
+      about_story_p2: "mimarca se enfoca en soluciones digitales simples y prácticas que ayudan a los negocios a verse profesionales en línea y operar con más eficiencia.",
       about_story_p3: "Nuestra meta no es vender software complicado — es construir herramientas que de verdad ayuden a los negocios a crecer.",
       about_values_t: "En qué nos enfocamos",
       about_val_1t: "Velocidad",

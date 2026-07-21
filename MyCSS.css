@@ -90,6 +90,20 @@ NAVBAR
   letter-spacing:.02em;
 }
 
+.navbar-brand-logo{
+  height:32px;
+  width:auto;
+  max-width:none;
+  object-fit:contain;
+}
+
+.footer-brand-logo{
+  height:18px;
+  width:auto;
+  max-width:none;
+  object-fit:contain;
+}
+
 .nav-link{
   font-weight:500;
 }

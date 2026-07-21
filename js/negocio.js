@@ -118,6 +118,10 @@
     }
   }
 
+  function safeCssUrl(url) {
+    return (url || '').replace(/'/g, '%27').replace(/"/g, '%22');
+  }
+
   function cardLang(data) {
     const l = data && data.language;
     if (l === 'en-US' || l === 'fr-CA') return l;
@@ -290,8 +294,10 @@
   function renderService(s) {
     const desc = s.desc ? `<div class="desc">${escapeHtml(s.desc)}</div>` : '';
     const price = s.price ? `<div class="price">${escapeHtml(s.price)}</div>` : '';
+    const thumb = s.img ? `<img class="service-thumb" src="${escapeHtml(s.img)}" alt="" loading="lazy">` : '';
     return `
       <div class="biz-service">
+        ${thumb}
         <div class="info">
           <div class="name">${escapeHtml(s.name)}</div>
           ${desc}
@@ -378,6 +384,7 @@
 
     const linksHtml = (data.links || []).map(renderLink).join('');
 
+    const servicesLayout = data.servicesLayout === 'menu' ? 'menu' : 'list';
     const servicesBlock = (data.services && data.services.length)
       ? `
         <div class="biz-section-title">
@@ -385,11 +392,14 @@
           <h2>${escapeHtml(data.servicesTitle || 'SERVICIOS Y PRECIOS')}</h2>
           <div class="line"></div>
         </div>
-        ${data.services.map(renderService).join('')}
+        <div class="biz-services layout-${servicesLayout}">
+          ${data.services.map(renderService).join('')}
+        </div>
         ${data.servicesDisclaimer ? `<div class="biz-disclaimer">${escapeHtml(data.servicesDisclaimer)}</div>` : ''}
       `
       : '';
 
+    const galleryLayout = data.galleryLayout === 'feed' ? 'feed' : 'grid';
     const galleryItems = renderGallery(data.gallery);
     const galleryBlock = galleryItems
       ? `
@@ -398,7 +408,7 @@
           <h2>${escapeHtml(S.gallery)}</h2>
           <div class="line"></div>
         </div>
-        <div class="biz-gallery">${galleryItems}</div>
+        <div class="biz-gallery layout-${galleryLayout}">${galleryItems}</div>
       `
       : '';
 
@@ -426,9 +436,13 @@
       `
       : '';
 
+    const heroBgUrl = data.business?.heroBackgroundUrl;
+    const heroClass = heroBgUrl ? ' biz-hero--photo' : '';
+    const heroStyle = heroBgUrl ? ` style="--hero-bg-image:url('${escapeHtml(safeCssUrl(heroBgUrl))}')"` : '';
+
     app.innerHTML = `
       <div class="biz-wrap">
-        <section class="biz-hero">
+        <section class="biz-hero${heroClass}"${heroStyle}>
           <div class="biz-logo">${logoHtml}</div>
           <h1 class="biz-name serif">${escapeHtml(data.business?.name || '')}</h1>
           ${data.business?.subname ? `<div class="biz-sub serif">${escapeHtml(data.business.subname)} ${data.business.verified ? '<span class="biz-verified">✓</span>' : ''}</div>` : ''}
