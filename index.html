@@ -367,8 +367,8 @@
   <div class="container">
     <div class="text-center mb-5 reveal-up">
       <div class="text-uppercase small fw-semibold text-warning mb-2">Probador en vivo</div>
-      <h2 class="fw-bold">Mira cómo se vería <em>la tuya</em> en 30 segundos</h2>
-      <p class="text-white-50">Nuestro robot arma un <strong>mockup de referencia</strong> usando una de nuestras plantillas con tu logo. <br>Después un humano de carne y hueso (sí, nuestro equipo 👋) diseña la tuya <strong>desde cero</strong>.</p>
+      <h2 class="fw-bold">Arma tu tarjeta <em>de verdad</em> en 30 segundos</h2>
+      <p class="text-white-50">Mete tus datos reales y te la armamos al instante con el mismo motor que usan nuestros clientes ya publicados — no es una plantilla de mentiras. <br>Cuando pagas, un humano de carne y hueso (sí, nuestro equipo 👋) la pule a mano y te manda tu <strong>propuesta personalizada</strong> para que le des tu <strong>visto bueno</strong> antes de publicarla.</p>
     </div>
 
     <div class="row g-4 align-items-start">
@@ -411,6 +411,25 @@
               </select>
             </div>
 
+            <!-- WhatsApp -->
+            <div class="mb-3">
+              <label class="form-label" for="mtWa">Tu WhatsApp</label>
+              <input type="tel" id="mtWa" class="form-control" placeholder="Ej. 5215555555555" maxlength="20">
+              <div class="form-text">Con código de país, solo números.</div>
+            </div>
+
+            <!-- Instagram -->
+            <div class="mb-3">
+              <label class="form-label" for="mtInstagram">Tu Instagram (opcional)</label>
+              <input type="text" id="mtInstagram" class="form-control" placeholder="@tunegocio" maxlength="60">
+            </div>
+
+            <!-- Maps -->
+            <div class="mb-3">
+              <label class="form-label" for="mtMaps">Tu ubicación en Maps (opcional)</label>
+              <input type="url" id="mtMaps" class="form-control" placeholder="Pega tu link de Google Maps">
+            </div>
+
             <!-- Logo upload -->
             <div class="mb-3">
               <label class="form-label" for="mtLogo">Sube tu logo</label>
@@ -419,10 +438,10 @@
             </div>
 
             <button id="mtGenerate" class="btn btn-dark w-100 btn-lg">
-              <i class="bi bi-magic me-1"></i> Generar mockup
+              <i class="bi bi-magic me-1"></i> Generar mi tarjeta
             </button>
             <div class="text-muted small mt-2 text-center">
-              <i class="bi bi-shield-lock"></i> No guardamos tu logo. Es solo para el preview.
+              <i class="bi bi-shield-lock"></i> No guardamos nada de esto todavía — es solo para esta vista previa.
             </div>
           </div>
         </div>
@@ -435,44 +454,32 @@
             <!-- Empty state -->
             <div class="mt-phone-empty" id="mtPhoneEmpty">
               <i class="bi bi-phone fs-1 mb-3 d-block"></i>
-              <div class="fw-semibold mb-1">Tu mockup aparecerá aquí</div>
-              <div class="small text-muted">Llena los datos y presiona “Generar mockup”.</div>
+              <div class="fw-semibold mb-1">Tu tarjeta aparecerá aquí</div>
+              <div class="small text-muted">Llena los datos y presiona “Generar mi tarjeta”.</div>
             </div>
 
             <!-- Loading state -->
             <div class="mt-phone-loading d-none" id="mtPhoneLoading">
               <div class="spinner-border text-warning mb-3" role="status" aria-hidden="true"></div>
-              <div class="fw-semibold mb-1" id="mtLoadingTitle">Buscando el mejor diseño...</div>
-              <div class="small text-muted" id="mtLoadingSub">Probando plantillas para tu giro</div>
+              <div class="fw-semibold mb-1" id="mtLoadingTitle">Armando tu tarjeta...</div>
+              <div class="small text-muted" id="mtLoadingSub">Con el motor real de Mi Tarjeta Pro</div>
             </div>
 
             <!-- Result -->
             <div class="mt-phone-result d-none" id="mtPhoneResult">
               <div class="mt-result-stage">
-                <div class="mt-watermark">MOCKUP · DEMO</div>
-                <div class="mt-result-card" id="mtResultCard">
-                  <div class="mt-result-logo-wrap">
-                    <img id="mtResultLogo" alt="Tu logo" src="">
-                  </div>
-                  <div class="mt-result-name" id="mtResultName">Tu Negocio</div>
-                  <div class="mt-result-tagline" id="mtResultTagline">Tu frase corta</div>
-                  <div class="mt-result-buttons">
-                    <div class="mt-btn-fake"><i class="bi bi-whatsapp"></i> WhatsApp</div>
-                    <div class="mt-btn-fake"><i class="bi bi-instagram"></i> Instagram</div>
-                    <div class="mt-btn-fake"><i class="bi bi-geo-alt"></i> Cómo llegar</div>
-                    <div class="mt-btn-fake"><i class="bi bi-star"></i> Deja tu reseña</div>
-                  </div>
-                  <div class="mt-result-foot">mimarca.me/<span id="mtResultSlug">mi-negocio</span></div>
-                  <div class="mt-result-credit">Hecho con ♥ por mimarca</div>
-                </div>
+                <div class="mt-watermark">BORRADOR</div>
+                <iframe id="mtResultFrame" class="mt-result-frame" title="Vista previa de tu tarjeta"></iframe>
               </div>
+
+              <div class="mt-result-foot-line">mimarca.me/<span id="mtResultSlug">mi-negocio</span></div>
 
               <div class="mt-result-qr">
                 <div class="mt-qr-logo-wrap mx-auto" style="--mt-qr-display:220px">
-                  <img id="mtResultQR" class="mt-qr-base rounded-2" alt="QR de tu tarjeta digital (demo)" src="">
+                  <img id="mtResultQR" class="mt-qr-base rounded-2" alt="QR de tu tarjeta digital (borrador)" src="">
                   <img id="mtResultQRLayer" class="mt-qr-center-logo" alt="" aria-hidden="true" width="1" height="1">
                 </div>
-                <div class="small text-muted mt-2">QR de demo · Escanéalo para ver el flujo real</div>
+                <div class="small text-muted mt-2">QR de borrador · Escanéalo para ver el flujo real</div>
               </div>
             </div>
           </div>
@@ -480,8 +487,8 @@
 
         <!-- Result CTA -->
         <div class="text-center mt-4 d-none" id="mtResultCTA">
-          <h3 class="h5 fw-bold text-white mb-2">¿Te encantó? A nosotros también.</h3>
-          <p class="text-white-50 mb-3">Pide la tuya hoy mismo y eleva el potencial de tu negocio. <br>El equipo humano de mimarca la diseña <strong>desde cero</strong>, no es una plantilla.</p>
+          <h3 class="h5 fw-bold text-white mb-2">Esto ya es tuyo — solo falta pulirlo.</h3>
+          <p class="text-white-50 mb-3">Es tu tarjeta con tus datos reales, no una plantilla genérica. Al pagar, un diseñador humano la toma, la perfecciona y te manda tu <strong>propuesta personalizada</strong> a tu panel para que le des tu <strong>visto bueno</strong> antes de publicarla.</p>
           <a href="#precios" class="btn btn-warning btn-lg">
             <i class="bi bi-rocket me-1"></i> Pedir mi tarjeta a la medida
           </a>

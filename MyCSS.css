@@ -658,7 +658,7 @@ MI TARJETA PRO (Mexico division)
 .mt-phone-result{
   flex:1;
   overflow-y:auto;
-  padding:18px 14px 20px;
+  padding:0 0 20px;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -667,6 +667,17 @@ MI TARJETA PRO (Mexico division)
 .mt-result-stage{
   position:relative;
   width:100%;
+  flex:1;
+  min-height:420px;
+}
+
+.mt-result-frame{
+  width:100%;
+  height:100%;
+  min-height:420px;
+  border:0;
+  display:block;
+  background:#0a0a0a;
 }
 
 .mt-watermark{
@@ -684,91 +695,14 @@ MI TARJETA PRO (Mexico division)
   box-shadow:0 4px 10px rgba(0,0,0,0.3);
 }
 
-.mt-result-card{
-  --mt-accent:#d4b86a;
-  --mt-btn-bg:linear-gradient(180deg,#f0d98a,#d4b86a,#b8973f);
-  --mt-text:#f3f1ea;
-  width:100%;
-  background:linear-gradient(160deg, #0a0a0a 0%, #181410 100%);
-  border:1px solid rgba(212,184,106,0.22);
-  border-radius:18px;
-  padding:18px 16px 16px;
-  text-align:center;
-  color:var(--mt-text);
-}
-
-.mt-result-logo-wrap{
-  width:78px; height:78px;
-  border-radius:50%;
-  margin:0 auto 12px;
-  background:#000;
-  border:2px solid var(--mt-accent);
-  display:grid; place-items:center;
-  overflow:hidden;
-  box-shadow:0 0 0 3px #0a0a0a, 0 8px 22px rgba(0,0,0,0.5);
-}
-
-.mt-result-logo-wrap img{
-  width:90%; height:90%; object-fit:contain;
-}
-
-.mt-result-name{
-  font-weight:700;
-  font-size:1.15rem;
-  letter-spacing:.04em;
-  margin-bottom:4px;
-  color:var(--mt-accent);
-}
-
-.mt-result-tagline{
-  font-size:.82rem;
-  font-style:italic;
-  opacity:.85;
-  margin-bottom:14px;
-}
-
-.mt-result-buttons{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.mt-btn-fake{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(212,184,106,0.18);
-  border-radius:12px;
-  padding:10px 12px;
-  font-size:.82rem;
-  text-align:left;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.mt-btn-fake i{ color:var(--mt-accent); }
-
-.mt-btn-fake:nth-child(1){
-  background:var(--mt-btn-bg);
-  border:none;
-  color:#0c0a05;
-  font-weight:700;
-  box-shadow:0 8px 22px rgba(184,151,63,0.25);
-}
-.mt-btn-fake:nth-child(1) i{ color:#0c0a05; }
-
-.mt-result-foot{
-  margin-top:14px;
+.mt-result-foot-line{
+  margin:10px 0 4px;
   font-size:.7rem;
-  color:rgba(255,255,255,0.55);
+  color:#bbb;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   word-break:break-all;
-}
-
-.mt-result-credit{
-  margin-top:4px;
-  font-size:.65rem;
-  color:rgba(212,184,106,0.7);
-  letter-spacing:.04em;
+  text-align:center;
+  padding:0 14px;
 }
 
 .mt-result-qr{

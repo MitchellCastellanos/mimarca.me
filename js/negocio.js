@@ -3,6 +3,11 @@
 // Public card: /<slug>/ (slug read from the URL path)
 // Internal preview: /negocio/?n=<slug> (query param, still supported)
 // Either way it fetches /negocio/_data/<slug>.json → renders
+//
+// Builder preview: if window.MTP_PREVIEW_DATA is set before this script
+// runs (see js/mi-tarjeta.js, loaded inside an iframe srcdoc), it renders
+// that data directly instead of fetching — same engine, same CSS, no
+// network call. Nothing here changes for the real /<slug>/ bootstrap path.
 // ============================================================
 
 (function () {
@@ -457,6 +462,11 @@
   }
 
   // ---------- bootstrap ----------
+  if (window.MTP_PREVIEW_DATA) {
+    render(window.MTP_PREVIEW_DATA);
+    return;
+  }
+
   if (!slug) {
     renderBizError('missing');
     return;

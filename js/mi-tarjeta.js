@@ -1,11 +1,12 @@
 // ============================================================
-// MI TARJETA PRO · Interactive mockup builder
-// - Slug normalization
-// - Logo preview
-// - Loading "AI looking for best design" experience
-// - Live mockup preview (phone frame)
+// MI TARJETA PRO · Interactive builder
+// - Toma datos reales del negocio (links, WhatsApp, etc.)
+// - Renderiza la vista previa con el MISMO motor y CSS que usan las
+//   tarjetas reales (js/negocio.js + negocio/negocio.css), aislado en un
+//   iframe srcdoc — no es una plantilla de mentiras, es tu tarjeta con
+//   tu info, sin publicar nada todavía.
 // - Dynamic QR via api.qrserver.com
-// - Watermarked demo result + post-result CTA
+// - Watermarked draft result + post-result CTA (propuesta personalizada)
 // ============================================================
 
 (function () {
@@ -15,6 +16,9 @@
   const elName      = $("mtName");
   const elTagline   = $("mtTagline");
   const elCategory  = $("mtCategory");
+  const elWa        = $("mtWa");
+  const elInstagram = $("mtInstagram");
+  const elMaps      = $("mtMaps");
   const elLogo      = $("mtLogo");
   const elGenerate  = $("mtGenerate");
 
@@ -24,10 +28,7 @@
   const elLoadingTitle = $("mtLoadingTitle");
   const elLoadingSub   = $("mtLoadingSub");
 
-  const elResultCard    = $("mtResultCard");
-  const elResultLogo    = $("mtResultLogo");
-  const elResultName    = $("mtResultName");
-  const elResultTagline = $("mtResultTagline");
+  const elResultFrame   = $("mtResultFrame");
   const elResultSlug    = $("mtResultSlug");
   const elResultQR      = $("mtResultQR");
   const elResultQRLayer = $("mtResultQRLayer");
@@ -76,53 +77,18 @@
     reader.readAsDataURL(file);
   });
 
-  // ----- category palette presets -----
-  const palettes = {
-    belleza: {
-      bg: "linear-gradient(160deg, #0a0a0a 0%, #181410 100%)",
-      text: "#f3f1ea",
-      accent: "#d4b86a",
-      btn: "linear-gradient(180deg,#f0d98a,#d4b86a,#b8973f)",
-      font: "'Cormorant Garamond', serif"
-    },
-    comida: {
-      bg: "linear-gradient(160deg, #2a140a 0%, #4a1f0e 100%)",
-      text: "#fff2e1",
-      accent: "#ffb347",
-      btn: "linear-gradient(180deg,#ffd27a,#ffa133,#cc7a14)",
-      font: "'Inter', sans-serif"
-    },
-    profesional: {
-      bg: "linear-gradient(160deg, #0a1a2a 0%, #14243a 100%)",
-      text: "#eef3fa",
-      accent: "#6ab0ff",
-      btn: "linear-gradient(180deg,#a8cdff,#6ab0ff,#3e85d4)",
-      font: "'Inter', sans-serif"
-    },
-    universal: {
-      bg: "linear-gradient(160deg, #111 0%, #1d1d1d 100%)",
-      text: "#f3f3f3",
-      accent: "#c9a227",
-      btn: "linear-gradient(180deg,#e8c95e,#c9a227,#8d7016)",
-      font: "'Inter', sans-serif"
-    }
+  // ----- categoría -> uno de los temas reales de negocio.css -----
+  const THEME_BY_CATEGORY = {
+    belleza: "pastel-pink",
+    comida: "kraft-taqueria",
+    profesional: "navy-corporate",
+    universal: "universal-gold",
   };
-
-  function applyPalette(cat) {
-    const p = palettes[cat] || palettes.universal;
-    elResultCard.style.background = p.bg;
-    elResultCard.style.color = p.text;
-    elResultCard.style.fontFamily = p.font;
-    elResultCard.style.borderColor = p.accent + "44";
-    elResultCard.style.setProperty("--mt-accent", p.accent);
-    elResultCard.style.setProperty("--mt-btn-bg", p.btn);
-    elResultCard.style.setProperty("--mt-text", p.text);
-  }
 
   // ----- loading copy rotation -----
   const loadingSteps = [
-    { t: "Analizando tu logo...", s: "Detectando colores dominantes" },
-    { t: "Buscando el mejor diseño...", s: "Probando plantillas para tu giro" },
+    { t: "Leyendo tus datos...", s: "Nombre, links y logo" },
+    { t: "Armando tu tarjeta...", s: "Con el motor real de Mi Tarjeta Pro" },
     { t: "Ajustando tipografía...", s: "Eligiendo combinaciones premium" },
     { t: "Casi listo...", s: "Pasándolo al equipo humano de mimarca" }
   ];
@@ -153,40 +119,79 @@
     return `https://api.qrserver.com/v1/create-qr-code/?size=${px}x${px}&margin=${margin}&ecc=H&color=111111&bgcolor=FFFFFF&data=${encodeURIComponent(target)}`;
   }
 
-  // ----- render result -----
-  function renderResult() {
+  // ----- arma el mismo objeto de datos que usa una tarjeta real -----
+  function buildCardData() {
     const slug = elSlug.value || slugify(elName.value) || "mi-negocio";
     const name = elName.value.trim() || "Tu Negocio";
     const tagline = elTagline.value.trim() || "Tu frase corta aquí";
     const cat = elCategory.value;
+    const theme = THEME_BY_CATEGORY[cat] || THEME_BY_CATEGORY.universal;
 
-    applyPalette(cat);
-
-    elResultName.textContent    = name;
-    elResultTagline.textContent = tagline;
-    elResultSlug.textContent    = slug;
-
-    if (logoDataURL) {
-      elResultLogo.src = logoDataURL;
-      elResultLogo.style.display = "block";
-    } else {
-      // initials fallback
-      const initials = name.split(/\s+/).map(w => w[0]).join("").slice(0,2).toUpperCase() || "MN";
-      elResultLogo.src = "data:image/svg+xml;utf8," + encodeURIComponent(
-        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-          <rect width='100' height='100' rx='50' fill='#1a1a1a' stroke='#d4b86a' stroke-width='2'/>
-          <text x='50' y='62' text-anchor='middle' font-family='Cormorant Garamond, serif'
-                font-size='42' font-weight='700' fill='#d4b86a'>${initials}</text>
-        </svg>`);
-      elResultLogo.style.display = "block";
+    const links = [];
+    const igRaw = elInstagram.value.trim();
+    if (igRaw) {
+      const handle = igRaw.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/$/, "");
+      const url = /^https?:\/\//i.test(igRaw) ? igRaw : `https://instagram.com/${handle}`;
+      links.push({ label: "Instagram", subtitle: handle ? `@${handle}` : "", icon: "instagram", style: "ig", url, popular: true });
+    }
+    const mapsRaw = elMaps.value.trim();
+    if (mapsRaw) {
+      links.push({ label: "Ubicación", subtitle: "Cómo llegar", icon: "geo-alt-fill", style: "map", url: mapsRaw });
     }
 
+    let primaryCta;
+    const waDigits = elWa.value.replace(/[^0-9]/g, "");
+    if (waDigits) {
+      primaryCta = { label: "WhatsApp", subtitle: "Escríbenos directo", icon: "whatsapp", url: `https://wa.me/${waDigits}` };
+    }
+
+    return {
+      slug,
+      theme,
+      language: "es-MX",
+      business: { name, tagline, logoUrl: logoDataURL || "" },
+      ...(primaryCta ? { primaryCta } : {}),
+      links,
+      brandCardCopy: "Diseñada a la medida por mimarca.",
+      copyright: `© ${new Date().getFullYear()} ${name}`,
+    };
+  }
+
+  // ----- documento que corre dentro del iframe: mismo motor, mismo CSS -----
+  function buildPreviewDocument(data) {
+    const json = JSON.stringify(data).replace(/</g, "\\u003c");
+    return `<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="/negocio/negocio.css">
+</head>
+<body data-theme="${data.theme}">
+<div id="bizApp"></div>
+<script>window.MTP_PREVIEW_DATA = ${json};</script>
+<script src="/js/negocio.js"></script>
+</body>
+</html>`;
+  }
+
+  // ----- render result -----
+  function renderResult() {
+    const data = buildCardData();
+
+    elResultSlug.textContent = data.slug;
+    elResultFrame.srcdoc = buildPreviewDocument(data);
+
     // QR con logo centrado (ECC H + capa; logo = mismo preview que arriba)
-    const qrTarget = `https://mimarca.me/?demo=${encodeURIComponent(slug)}`;
+    const qrTarget = `https://mimarca.me/?demo=${encodeURIComponent(data.slug)}`;
     elResultQR.src = qrServerUrl(qrTarget, 480, 4);
     if (elResultQRLayer) {
-      elResultQRLayer.src = elResultLogo.src;
-      elResultQRLayer.style.display = elResultLogo.style.display === "none" ? "none" : "block";
+      elResultQRLayer.src = logoDataURL || "";
+      elResultQRLayer.style.display = logoDataURL ? "block" : "none";
     }
 
     elPhoneLoading.classList.add("d-none");
@@ -218,7 +223,7 @@
   });
 
   // ----- nice-to-have: enter key submits -----
-  [elName, elTagline, elSlug].forEach((el) => {
+  [elName, elTagline, elSlug, elWa, elInstagram, elMaps].forEach((el) => {
     el.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); elGenerate.click(); }
     });
