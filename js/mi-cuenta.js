@@ -209,6 +209,132 @@
     `;
   }
 
+  // ---------- tus links (autoedición dentro del cupo de tu tier) ----------
+  const PACKAGE_LABELS = { lanzamiento: 'Lanzamiento', personalizado: 'Personalizado', premium: 'Premium' };
+
+  function linksEditorBlockHtml(data) {
+    if (data.orderStage !== 'published') return '';
+    return `
+      <div class="col-md-12">
+        <div class="card mc-card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+              <h2 class="h6 fw-bold text-uppercase mb-0"><i class="bi bi-link-45deg me-1"></i>Tus links</h2>
+              <span class="badge text-bg-light border" id="mcLinksCounter"></span>
+            </div>
+            <p class="small text-muted mb-3">Edita, agrega o quita los links de tu tarjeta cuando quieras — gratis y al instante, sin esperar a nuestro equipo, hasta el cupo de tu paquete.</p>
+            <div id="mcLinksRows"></div>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <button type="button" id="mcLinksAddBtn" class="btn btn-outline-dark btn-sm"><i class="bi bi-plus-lg me-1"></i> Agregar link</button>
+              <button type="button" id="mcLinksSaveBtn" class="btn btn-dark btn-sm"><i class="bi bi-check-lg me-1"></i> Guardar cambios</button>
+            </div>
+            <div id="mcLinksNote" class="form-text small mt-2"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function linksRowHtml(link, i) {
+    return `
+      <div class="row g-2 align-items-center mb-2 mc-links-row" data-idx="${i}">
+        <div class="col-5">
+          <input type="text" class="form-control form-control-sm mc-link-label" placeholder="Nombre (ej. Instagram)" value="${escapeHtml(link.label || '')}">
+        </div>
+        <div class="col-6">
+          <input type="url" class="form-control form-control-sm mc-link-url" placeholder="https://..." value="${escapeHtml(link.url || '')}">
+        </div>
+        <div class="col-1 text-end">
+          <button type="button" class="btn btn-outline-danger btn-sm mc-link-remove" title="Quitar"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireLinksEditor(data) {
+    const linksRowsEl = document.getElementById('mcLinksRows');
+    if (!linksRowsEl) return;
+
+    let linksState = (Array.isArray(data.links) ? data.links : []).map((l) => ({ ...l }));
+    const quota = Number(data.linksQuota) || Math.max(linksState.length, 1);
+    const counterEl = document.getElementById('mcLinksCounter');
+    const addBtn = document.getElementById('mcLinksAddBtn');
+    const saveBtn = document.getElementById('mcLinksSaveBtn');
+    const note = document.getElementById('mcLinksNote');
+
+    function renderRows() {
+      linksRowsEl.innerHTML = linksState.length
+        ? linksState.map(linksRowHtml).join('')
+        : '<p class="small text-muted fst-italic mb-2">Todavía no tienes links — agrega el primero.</p>';
+      counterEl.textContent = `${linksState.length}/${quota} usados`;
+      counterEl.className = linksState.length >= quota ? 'badge text-bg-warning' : 'badge text-bg-light border';
+
+      linksRowsEl.querySelectorAll('.mc-links-row').forEach((row) => {
+        const idx = Number(row.dataset.idx);
+        row.querySelector('.mc-link-label').addEventListener('input', (e) => { linksState[idx].label = e.target.value; });
+        row.querySelector('.mc-link-url').addEventListener('input', (e) => { linksState[idx].url = e.target.value; });
+        row.querySelector('.mc-link-remove').addEventListener('click', () => {
+          linksState.splice(idx, 1);
+          renderRows();
+        });
+      });
+    }
+    renderRows();
+
+    addBtn.addEventListener('click', () => {
+      if (linksState.length >= quota) {
+        const pkgLabel = PACKAGE_LABELS[data.package] || 'tu paquete actual';
+        const waText = encodeURIComponent(`Hola, ya usé mis ${quota} links de ${data.slug} y quiero subir de paquete para tener más.`);
+        note.className = 'form-text small mt-2 text-warning';
+        note.innerHTML = `Ya usaste los ${quota} links incluidos en <strong>${escapeHtml(pkgLabel)}</strong>. Para agregar más, <a href="https://wa.me/15142580648?text=${waText}" target="_blank" rel="noopener">sube de paquete</a>.`;
+        return;
+      }
+      linksState.push({ label: '', url: '', subtitle: '', icon: 'link-45deg', style: '' });
+      note.textContent = '';
+      renderRows();
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      const cleaned = linksState.map((l) => ({ ...l, label: (l.label || '').trim(), url: (l.url || '').trim() }));
+      if (cleaned.some((l) => !l.label || !l.url)) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'Cada link necesita un nombre y una URL.';
+        return;
+      }
+
+      const apiBase = portalApiBase();
+      if (!apiBase) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = 'El guardado automático no está disponible todavía. Escríbenos por WhatsApp mientras tanto.';
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando…';
+      note.className = 'form-text small mt-2';
+      note.textContent = '';
+
+      try {
+        const res = await fetch(`${apiBase}/card-links/${encodeURIComponent(data.slug)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, links: cleaned }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error || 'no se pudo guardar');
+        linksState = body.links || cleaned;
+        renderRows();
+        note.className = 'form-text small mt-2 text-success';
+        note.textContent = '¡Listo! Tu tarjeta ya muestra los links actualizados.';
+      } catch (err) {
+        note.className = 'form-text small mt-2 text-danger';
+        note.textContent = err.message && err.message !== 'no se pudo guardar' ? err.message : 'No se pudo guardar. Intenta de nuevo.';
+      }
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Guardar cambios';
+    });
+  }
+
   // ---------- referidos ----------
   function referralBlockHtml(data, refUrl) {
     const code = data.referralCode ? String(data.referralCode) : '';
@@ -300,6 +426,8 @@
 
                 ${reviewBlockHtml(data)}
 
+                ${linksEditorBlockHtml(data)}
+
                 <div class="col-md-12">
                   <div class="card mc-card border-0 shadow-sm">
                     <div class="card-body p-4">
@@ -347,7 +475,7 @@
                   <div class="card mc-card border-0 shadow-sm h-100" style="background:linear-gradient(135deg,#fff8e1 0%,#fff 100%);border:1px solid #f0d98a !important;">
                     <div class="card-body p-4">
                       <h2 class="h6 fw-bold text-uppercase mb-2"><i class="bi bi-pencil-square me-1"></i>Pedir cambios</h2>
-                      <p class="small text-muted mb-3">Cambios chiquitos (texto, links, colores de la paleta) por solo <strong>$25 MXN</strong> por orden. <a href="../index.html#politica">Ver qué entra</a>.</p>
+                      <p class="small text-muted mb-3">Cambios de texto, colores o diseño por solo <strong>$25 MXN</strong> por orden. (Agregar, quitar o editar links ya es gratis arriba, en "Tus links".) <a href="../index.html#politica">Ver qué entra</a>.</p>
                       <a href="${escapeHtml(changeUrl)}" target="_blank" rel="noopener" class="btn btn-warning w-100 mb-2">
                         <i class="bi bi-credit-card me-1"></i> Pagar $25 MXN
                       </a>
@@ -394,6 +522,8 @@
   }
 
   function wireDashboardEvents(data, { publicUrl, refUrl }) {
+    wireLinksEditor(data);
+
     const btn = document.getElementById('mcCopyBtn');
     const input = document.getElementById('mcLinkInput');
     btn.addEventListener('click', async () => {

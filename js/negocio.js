@@ -475,6 +475,27 @@
     }
   }
 
+  // ---------- links autoeditados por el cliente (mi-cuenta) ----------
+  // Best-effort y en paralelo con el fetch de datos de abajo: si el
+  // cliente ya editó sus links desde mi-cuenta, esto pisa los del JSON
+  // estático. Si falla o no hay override, se usan los del JSON tal cual —
+  // el sitio sigue siendo estático de verdad, esto es puro extra.
+  function portalApiBase() {
+    const meta = document.querySelector('meta[name="mitp-portal-api"]');
+    const url = meta && meta.getAttribute('content') && meta.getAttribute('content').trim();
+    if (!url || url.indexOf('REPLACE') !== -1) return null;
+    return url.replace(/\/$/, '');
+  }
+
+  function fetchLinksOverride(forSlug) {
+    const apiBase = portalApiBase();
+    if (!apiBase) return Promise.resolve(null);
+    return fetch(`${apiBase}/card-links/${encodeURIComponent(forSlug)}`, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body) => (body && Array.isArray(body.links) ? body.links : null))
+      .catch(() => null);
+  }
+
   // ---------- bootstrap ----------
   if (window.MTP_PREVIEW_DATA) {
     render(window.MTP_PREVIEW_DATA);
@@ -486,24 +507,27 @@
     return;
   }
 
-  fetch(`/negocio/_data/${slug}.json`, { cache: 'no-cache' })
-    .then((r) => {
-      if (!r.ok) {
-        const err = new Error('http');
-        err.status = r.status;
-        throw err;
-      }
-      return r.text();
-    })
-    .then((text) => {
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        const err = new Error('parse');
-        throw err;
-      }
-      render(data);
+  Promise.all([
+    fetch(`/negocio/_data/${slug}.json`, { cache: 'no-cache' })
+      .then((r) => {
+        if (!r.ok) {
+          const err = new Error('http');
+          err.status = r.status;
+          throw err;
+        }
+        return r.text();
+      })
+      .then((text) => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          throw new Error('parse');
+        }
+      }),
+    fetchLinksOverride(slug),
+  ])
+    .then(([data, linksOverride]) => {
+      render(linksOverride ? { ...data, links: linksOverride } : data);
     })
     .catch((err) => {
       if (err && err.message === 'parse') renderBizError('malformed');

@@ -12,6 +12,10 @@
 
   Suggested subject line:
     "¡Tu tarjeta digital ya está en vivo! 🎉"
+
+  Optional CC: /notify/published accepts {slug, cc} — cc gets copied on
+  that one send (admin/index.html has a CC field for this). Useful for a
+  one-off internal copy (e.g. pedidos@mimarca.me) without hardcoding it.
 -->
 <!doctype html>
 <html lang="es-MX">
@@ -59,21 +63,23 @@
                 <tr>
                   <td style="border-radius:8px;background-color:#c9a227;">
                     <a href="{{mi_cuenta_url}}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;">
-                      Ver mi QR y descargarlo →
+                      Ver mi panel →
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <h2 style="font-size:15px;color:#212529;margin:0 0 12px;">Ya puedes:</h2>
+              <h2 style="font-size:15px;color:#212529;margin:0 0 12px;">Desde tu panel ya puedes:</h2>
               <ul style="font-size:14px;color:#212529;padding-left:18px;margin:0 0 24px;">
+                <li style="margin-bottom:8px;">Ver el estatus de tu pedido y tu tarjeta en vivo.</li>
                 <li style="margin-bottom:8px;">Descargar tu QR (PNG o SVG) e imprimirlo donde quieras.</li>
+                <li style="margin-bottom:8px;"><strong>Editar, agregar o quitar tus links tú mismo</strong> (WhatsApp, Instagram, Maps, etc.) — gratis y al instante, dentro del cupo de tu paquete.</li>
                 <li style="margin-bottom:8px;">Poner el link en tu bio de Instagram o WhatsApp Business.</li>
                 <li style="margin-bottom:8px;">Compartir tu link con otros negocios y ganar un cambio gratis si compran por ti.</li>
               </ul>
 
               <p style="font-size:13px;color:#6c757d;margin:0;">
-                ¿Algo que ajustar? Desde tu cuenta puedes pedir cambios chiquitos por $25 MXN, o escríbenos a
+                ¿Algo más que ajustar (texto, colores, diseño)? Desde tu panel puedes pedir cambios chiquitos por $25 MXN, o escríbenos a
                 <a href="mailto:{{support_email}}" style="color:#111111;">{{support_email}}</a>.
               </p>
             </td>

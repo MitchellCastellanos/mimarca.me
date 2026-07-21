@@ -34,9 +34,10 @@ pendiente — ver nota al final).
 7. Cliente recibe su link + QR. A partir de ahí puede entrar a `mi-cuenta/`
    (sin password: pide su acceso con su slug+correo, o usa el link directo
    con su `ownerToken`) para ver el estatus de su pedido, aprobar su diseño
-   en revisión, ver su tarjeta, descargar el QR, subir logo/fotos, compartir
-   su link de referido y pedir cambios ($25 MXN por orden vía otro Stripe
-   Payment Link). Ver sección 7.
+   en revisión, ver su tarjeta, descargar el QR, subir logo/fotos, **editar
+   sus links él mismo sin costo** (dentro del cupo de su paquete — ver
+   sección 7), compartir su link de referido y pedir cambios que no sean
+   de links ($25 MXN por orden vía otro Stripe Payment Link). Ver sección 7.
 
 ## 2. Productos y Payment Links en Stripe — ✅ creados (LIVE)
 
@@ -134,6 +135,14 @@ resetear). Con `js/mi-cuenta.js` + el Worker:
 - **Subir logo/fotos**: el cliente sube el archivo, cae a R2, y el owner
   recibe el link por correo para aplicarlo a mano — el cliente nunca edita
   el JSON directo (así seguimos cobrando por cambios de diseño reales).
+- **Tus links** (2026-07-21): a diferencia de logo/fotos, los *links* (no
+  el resto de la tarjeta) sí los edita el cliente directo — agregar,
+  quitar o cambiar URL, sin revisión humana ni costo, mientras no se pase
+  del cupo de su paquete (3 Lanzamiento / 6 Personalizado / 12 Premium).
+  Pasarse del cupo empuja a subir de paquete, no cobra por link suelto.
+  Se guarda en KV (`links:<slug>`) como un *override* sobre el JSON
+  estático — `js/negocio.js` lo aplica en la tarjeta pública si existe.
+  Ver `workers/stripe-webhook/README.md` (sección "Links autoeditados").
 - **Referidos**: link `?ref=<slug>` + botón de compartir por WhatsApp. El
   premio (un cambio gratis) se aplica a mano por ahora — no hay tracking
   automático de quién compró por referido todavía.
@@ -199,6 +208,13 @@ para ver el Dashboard de todos los pedidos de un mismo correo:
   ya existía) — ahí el Dashboard ya muestra "Publicada" con link directo
   a su panel (`mi-cuenta/index.html?n=<slug>`, que todavía pide su
   `ownerToken` — no comparte sesión con la cuenta).
+- **Borrador editable (2026-07-21)**: mientras un pedido sigue "En
+  proceso" (sin `slug`), el Dashboard muestra su borrador
+  (nombre/tagline/WhatsApp/Instagram/Maps) como un formulario editable —
+  el mismo `draft:<id>` que ya usa el equipo para diseñar, ahora también
+  actúa como intake form que el cliente puede corregir en cualquier
+  momento (`PUT /draft/:id`). El logo se muestra pero no se edita aquí
+  todavía (sin endpoint de subida sin `slug`).
 
 Detalle técnico completo: `workers/stripe-webhook/README.md` (sección
 "Cuentas").

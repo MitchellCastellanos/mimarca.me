@@ -167,6 +167,23 @@ export async function getDraft(env, draftId) {
 }
 
 /**
+ * Edita un borrador ya existente conservando su `email`/`createdAt` (el
+ * Dashboard lo usa como "form" mientras el pedido sigue sin `slug" — ver
+ * mi-cuenta/cuenta.html). Reinicia el TTL de 30 días. null si no existe.
+ */
+export async function updateDraft(env, draftId, data) {
+  if (!env.PORTAL_KV || !draftId || !data || typeof data !== "object") return null;
+  const prev = await getDraft(env, draftId);
+  if (!prev) return null;
+
+  const record = JSON.stringify({ email: prev.email, data, createdAt: prev.createdAt, updatedAt: Date.now() });
+  if (record.length > MAX_DRAFT_BYTES) throw new Error("draft too large");
+
+  await env.PORTAL_KV.put(`draft:${draftId}`, record, { expirationTtl: DRAFT_TTL_SECONDS });
+  return { email: prev.email, data, createdAt: prev.createdAt };
+}
+
+/**
  * El redirect que Stripe manda al navegador justo después de pagar solo
  * trae `session_id` (se configura una sola vez en el Dashboard, no se le
  * puede pegar un `draft=` dinámico por sesión) — así que el webhook deja
@@ -201,5 +218,74 @@ export async function recordPendingOrder(env, { email, draftId, sessionId, packa
   const prev = (await env.PORTAL_KV.get(key, { type: "json" })) || [];
   prev.push({ draftId: draftId || null, sessionId, packageName, at: Date.now(), slug: null });
   await env.PORTAL_KV.put(key, JSON.stringify(prev.slice(-50)));
+}
+
+// ============================================================
+// Links del cliente (autoedición, mi-cuenta/index.html) — ver
+// js/mi-cuenta.js "Tus links". Cuánto puede editar depende de su tier:
+// cambiar/reordenar/quitar dentro de su cupo es gratis y sin revisión
+// humana; pasarse del cupo empuja a subir de tier, no cobra por link.
+// ============================================================
+
+/** Links incluidos por paquete. Decisión 2026-07-21 (ver PENDIENTES.md). */
+export const LINKS_QUOTA_BY_PACKAGE = {
+  lanzamiento: 3,
+  personalizado: 6,
+  premium: 12,
+};
+
+const DEFAULT_LINKS_QUOTA = LINKS_QUOTA_BY_PACKAGE.personalizado;
+
+function normalizePackageKey(packageName) {
+  return String(packageName || "").trim().toLowerCase();
+}
+
+/**
+ * Cupo de links para un paquete. Si el paquete no se reconoce (cliente
+ * viejo sin `package` en sus secretos), no le quitamos links que ya tenía:
+ * el cupo es el mayor entre el default y lo que ya tiene puesto.
+ */
+export function resolveLinksQuota(packageName, currentCount = 0) {
+  const known = LINKS_QUOTA_BY_PACKAGE[normalizePackageKey(packageName)];
+  if (known != null) return known;
+  return Math.max(DEFAULT_LINKS_QUOTA, currentCount);
+}
+
+const LINK_URL_RE = /^(https?:\/\/|tel:|mailto:|wa\.me\/)/i;
+
+/**
+ * Valida la forma del array de links que manda el cliente desde
+ * mi-cuenta. Lanza Error con un mensaje corto y seguro de mostrar tal
+ * cual (nunca datos crudos del cliente) si algo no cuadra.
+ */
+export function validateLinks(links, quota) {
+  if (!Array.isArray(links)) throw new Error("formato inválido");
+  if (links.length > quota) throw new Error(`tu paquete incluye ${quota} links — quita alguno o sube de paquete`);
+
+  return links.map((raw, i) => {
+    if (!raw || typeof raw !== "object") throw new Error(`link #${i + 1} inválido`);
+    const label = String(raw.label || "").trim().slice(0, 60);
+    const url = String(raw.url || "").trim().slice(0, 500);
+    if (!label) throw new Error(`al link #${i + 1} le falta un nombre`);
+    if (!url || !LINK_URL_RE.test(url)) throw new Error(`el link de "${label}" no es una URL válida`);
+    return {
+      label,
+      url,
+      subtitle: String(raw.subtitle || "").trim().slice(0, 80),
+      icon: String(raw.icon || "link-45deg").trim().slice(0, 40),
+      style: String(raw.style || "").trim().slice(0, 20),
+    };
+  });
+}
+
+/** Links guardados por el cliente (override sobre el JSON público). null si nunca editó. */
+export async function getLinks(env, slug) {
+  if (!env.PORTAL_KV || !slug) return null;
+  return env.PORTAL_KV.get(`links:${slug}`, { type: "json" });
+}
+
+export async function setLinks(env, slug, links) {
+  if (!env.PORTAL_KV || !slug) return;
+  await env.PORTAL_KV.put(`links:${slug}`, JSON.stringify({ links, updatedAt: Date.now() }));
 }
 

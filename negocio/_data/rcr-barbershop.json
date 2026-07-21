@@ -1,0 +1,69 @@
+{
+  "$schema_notes": "Expediente de tarjeta HECHA A MANO (no la renderiza js/negocio.js — la página real es /rcr-barbershop/index.html, artesanal). Este JSON existe para que el Worker y mi-cuenta funcionen: /session lo lee para el panel, y el editor 'Tus links' guarda el override en KV (links:rcr-barbershop) que js/wire-card.js aplica sobre el HTML artesanal. Los links de aquí son el estado inicial (los mismos hardcodeados en el HTML). OJO: 'links[].style' aquí son las clases CSS reales de rcr-barbershop/style.css (whatsapp/instagram/facebook/appointment/website/location), NO la convención ig/fb/web/map del motor — así wire-card.js pinta el color/icono correcto si el cliente guarda sin tocar un link.",
+  "slug": "rcr-barbershop",
+  "theme": "handmade",
+  "language": "es-MX",
+  "business": {
+    "name": "RCR Barber Shop",
+    "subname": "BARBERÍA · QUERÉTARO",
+    "verified": true,
+    "tagline": "Corte, barba y estilo para caballeros",
+    "established": 2023,
+    "logoUrl": "/images/logo.PNG",
+    "city": "Querétaro, México"
+  },
+  "orderStage": "published",
+  "primaryCta": {
+    "label": "WhatsApp",
+    "subtitle": "Agenda tu cita",
+    "icon": "whatsapp",
+    "url": "https://wa.me/524423536769"
+  },
+  "links": [
+    {
+      "label": "WhatsApp",
+      "subtitle": "",
+      "icon": "whatsapp",
+      "style": "whatsapp",
+      "url": "https://wa.me/524423536769"
+    },
+    {
+      "label": "Instagram",
+      "subtitle": "",
+      "icon": "instagram",
+      "style": "instagram",
+      "url": "https://www.instagram.com/rcr_barbershop"
+    },
+    {
+      "label": "Facebook",
+      "subtitle": "",
+      "icon": "facebook",
+      "style": "facebook",
+      "url": "https://www.facebook.com/rcr.carlos.2025"
+    },
+    {
+      "label": "Agendar Cita",
+      "subtitle": "",
+      "icon": "calendar2-check",
+      "style": "appointment",
+      "url": "https://wa.me/524423536769"
+    },
+    {
+      "label": "Sitio Web",
+      "subtitle": "",
+      "icon": "globe2",
+      "style": "website",
+      "url": "https://www.rcr-barbershop.com/"
+    },
+    {
+      "label": "Ubicación",
+      "subtitle": "",
+      "icon": "geo-alt-fill",
+      "style": "location",
+      "url": "https://maps.google.com/maps/place//data=!4m2!3m1!1s0x85d3519347f2dbaf:0x97367f641c5c6057?entry=s&sa=X&ved=2ahUKEwjB_7K-5ZaTAxWFC0QIHVKZN8sQ4kB6BAgMEAA&hl=es"
+    }
+  ],
+  "brandCardCopy": "Corte, barba y estilo para caballeros.",
+  "copyright": "© 2023 RCR Barber Shop · Est. 2023",
+  "changeRequestUrl": "https://buy.stripe.com/cNieVee63b7U26p0RlgjC03"
+}
