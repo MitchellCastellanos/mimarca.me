@@ -56,6 +56,10 @@
         "logoUrl": {
           "type": "string"
         },
+        "heroBackgroundUrl": {
+          "type": "string",
+          "description": "URL de foto de fondo para el hero (cover image). Si se define, .biz-hero muestra la foto con overlay oscuro en vez del fondo de color del tema."
+        },
         "city": {
           "type": "string"
         }
@@ -114,8 +118,24 @@
     "servicesDisclaimer": {
       "type": "string"
     },
+    "servicesLayout": {
+      "type": "string",
+      "enum": [
+        "list",
+        "menu"
+      ],
+      "description": "'list' es el estilo por defecto. 'menu' da a cada servicio un layout tipo menú de restaurante (miniatura + línea punteada + precio)."
+    },
     "gallery": {
       "type": "array"
+    },
+    "galleryLayout": {
+      "type": "string",
+      "enum": [
+        "grid",
+        "feed"
+      ],
+      "description": "'grid' es el mosaico 3 columnas por defecto. 'feed' muestra las imágenes a 100% de ancho, tipo portafolio."
     },
     "brandCardCopy": {
       "type": "string"

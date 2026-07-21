@@ -119,6 +119,58 @@
     elResultCard.style.setProperty("--mt-text", p.text);
   }
 
+  // ----- structural layout per category (hero composition) -----
+  const LAYOUT_CLASSES = ["layout-food", "layout-corporate", "layout-belleza", "layout-universal"];
+  const layoutByCat = {
+    comida: "layout-food",
+    profesional: "layout-corporate",
+    belleza: "layout-belleza",
+    universal: "layout-universal"
+  };
+
+  function applyLayout(cat) {
+    elResultCard.classList.remove(...LAYOUT_CLASSES);
+    elResultCard.classList.add(layoutByCat[cat] || "layout-universal");
+  }
+
+  // ----- dummy button copy per category -----
+  const ctaCopy = {
+    belleza: [
+      { icon: "bi-card-list", text: "Lista de Servicios" },
+      { icon: "bi-calendar2-check", text: "Reservar Cita" },
+      { icon: "bi-gift", text: "Promociones" },
+      { icon: "bi-whatsapp", text: "Escríbenos" }
+    ],
+    comida: [
+      { icon: "bi-card-list", text: "Ver Menú" },
+      { icon: "bi-bag-check", text: "Hacer Pedido" },
+      { icon: "bi-calendar2-check", text: "Reservar Mesa" },
+      { icon: "bi-whatsapp", text: "Escríbenos" }
+    ],
+    profesional: [
+      { icon: "bi-calendar2-check", text: "Agendar Asesoría" },
+      { icon: "bi-briefcase", text: "Áreas de Práctica" },
+      { icon: "bi-file-earmark-arrow-down", text: "Descargar CV" },
+      { icon: "bi-whatsapp", text: "Escríbenos" }
+    ],
+    universal: [
+      { icon: "bi-whatsapp", text: "WhatsApp" },
+      { icon: "bi-instagram", text: "Instagram" },
+      { icon: "bi-geo-alt", text: "Cómo llegar" },
+      { icon: "bi-star", text: "Deja tu reseña" }
+    ]
+  };
+
+  function applyCtaCopy(cat) {
+    const items = ctaCopy[cat] || ctaCopy.universal;
+    items.forEach((item, i) => {
+      const icon = $(`mtBtn${i + 1}Icon`);
+      const text = $(`mtBtn${i + 1}Text`);
+      if (icon) icon.className = `bi ${item.icon}`;
+      if (text) text.textContent = item.text;
+    });
+  }
+
   // ----- loading copy rotation -----
   const loadingSteps = [
     { t: "Analizando tu logo...", s: "Detectando colores dominantes" },
@@ -161,6 +213,8 @@
     const cat = elCategory.value;
 
     applyPalette(cat);
+    applyLayout(cat);
+    applyCtaCopy(cat);
 
     elResultName.textContent    = name;
     elResultTagline.textContent = tagline;

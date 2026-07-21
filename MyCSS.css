@@ -695,6 +695,46 @@ MI TARJETA PRO (Mexico division)
   padding:18px 16px 16px;
   text-align:center;
   color:var(--mt-text);
+  position:relative;
+  overflow:hidden;
+}
+
+/* ----- hero layout variants per business category ----- */
+.mt-result-cover{ display:none; }
+
+.mt-result-card.layout-food .mt-result-cover{
+  display:block;
+  height:64px;
+  margin:-18px -16px 10px;
+  border-radius:18px 18px 0 0;
+  background:
+    radial-gradient(120% 140% at 20% 0%, rgba(255,255,255,0.18), transparent 60%),
+    linear-gradient(135deg, #ff9a56 0%, #ff6b35 45%, #c1440e 100%);
+}
+.mt-result-card.layout-food .mt-result-logo-wrap{
+  margin-top:-40px;
+}
+
+.mt-result-card.layout-corporate{ text-align:left; }
+.mt-result-card.layout-corporate .mt-result-logo-wrap{
+  border-radius:10px;
+  width:56px; height:56px;
+  margin:0 0 14px;
+}
+.mt-result-card.layout-corporate .mt-result-name{
+  font-family:'Cormorant Garamond', serif;
+  font-size:1.55rem;
+}
+.mt-result-card.layout-corporate .mt-result-tagline{ font-style:normal; }
+
+.mt-result-card.layout-belleza::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.06) 0, transparent 35%),
+    radial-gradient(circle at 85% 78%, rgba(255,255,255,0.05) 0, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0, transparent 60%);
+  pointer-events:none;
 }
 
 .mt-result-logo-wrap{
