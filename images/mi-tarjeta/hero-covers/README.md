@@ -8,6 +8,7 @@ tarjetas ya publicadas.
 
 Archivos (JPG, 1600×900 px, <200 KB):
 
+- `barberia.jpg`
 - `comida.jpg`
 - `belleza.jpg`
 - `profesional.jpg`

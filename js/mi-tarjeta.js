@@ -89,6 +89,7 @@
 
   // ----- categoría -> uno de los temas reales de negocio.css -----
   const THEME_BY_CATEGORY = {
+    barberia: "dark-gold",
     belleza: "pastel-pink",
     comida: "kraft-taqueria",
     profesional: "navy-corporate",
@@ -97,6 +98,7 @@
 
   // ----- categoría -> foto de cover para el hero (heroBackgroundUrl) -----
   const HERO_COVER_BY_CATEGORY = {
+    barberia: "/images/mi-tarjeta/hero-covers/barberia.jpg",
     belleza: "/images/mi-tarjeta/hero-covers/belleza.jpg",
     comida: "/images/mi-tarjeta/hero-covers/comida.jpg",
     profesional: "/images/mi-tarjeta/hero-covers/profesional.jpg",
