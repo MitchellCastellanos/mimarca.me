@@ -13,11 +13,10 @@ partes.
 
 Worker: `https://mimarca-stripe-webhook.mimarca.workers.dev`
 
-1. **Resend**: [x] API key cargada. Dominio verificado:
-   `updates.mimarca.me`. `FROM_EMAIL` =
-   `mimarca <pedidos@updates.mimarca.me>` (smoke + alerta de pago OK).
-   - [ ] Opcional: verificar `mimarca.me` raíz y volver a
-     `pedidos@mimarca.me`.
+1. **Resend**: [x] API key cargada. Dominio **`mimarca.me`** verificado
+   (2026-07-20). `FROM_EMAIL` = `mimarca <pedidos@mimarca.me>` (smoke OK).
+   - ~~Opcional: verificar mimarca.me~~ hecho; se dejó de usar
+     `updates.mimarca.me`.
 2. **Cloudflare Worker**:
    - [x] `wrangler login`
    - [x] `STRIPE_WEBHOOK_SECRET` (live `whsec_…`, 2026-07-20)
