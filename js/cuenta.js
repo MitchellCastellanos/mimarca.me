@@ -54,6 +54,22 @@
     }
   }
 
+  async function apiPut(path, body) {
+    const apiBase = portalApiBase();
+    if (!apiBase) return { ok: false, error: "no-api" };
+    try {
+      const res = await fetch(`${apiBase}${path}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+      });
+      const json = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, ...json };
+    } catch {
+      return { ok: false, error: "network" };
+    }
+  }
+
   // ---------- estado sin sesión: login / registro ----------
   function renderAuth(opts) {
     const mode = (opts && opts.mode) || "login"; // login | register | forgot
@@ -218,6 +234,46 @@
     return { text: "En proceso", cls: "text-bg-warning" };
   }
 
+  // El borrador es lo único editable mientras el pedido no tiene `slug` —
+  // esto es la info que usa el equipo para diseñar (reemplaza/complementa
+  // Tally) y, cuando exista autoedición completa, la que alimente la
+  // tarjeta en vivo. El logo no se edita aquí (no hay endpoint de subida
+  // sin slug todavía) — solo se muestra.
+  function draftFormHtml(order) {
+    if (order.slug || !order.draft) return "";
+    const d = order.draft.data || {};
+    const id = escapeHtml(order.draftId);
+    return `
+      <div class="mt-3 pt-3 border-top" data-draft-id="${id}">
+        <div class="small fw-semibold text-uppercase text-muted mb-2">Info de tu negocio (edítala si hace falta)</div>
+        <div class="row g-2">
+          <div class="col-md-6">
+            <input type="text" class="form-control form-control-sm mc-draft-field" data-field="businessName" placeholder="Nombre del negocio" value="${escapeHtml(d.businessName || "")}">
+          </div>
+          <div class="col-md-6">
+            <input type="text" class="form-control form-control-sm mc-draft-field" data-field="tagline" placeholder="Frase corta" value="${escapeHtml(d.tagline || "")}">
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm mc-draft-field" data-field="whatsapp" placeholder="WhatsApp (link wa.me)" value="${escapeHtml(d.whatsapp || "")}">
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm mc-draft-field" data-field="instagram" placeholder="Instagram" value="${escapeHtml(d.instagram || "")}">
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control form-control-sm mc-draft-field" data-field="maps" placeholder="Link de Google Maps" value="${escapeHtml(d.maps || "")}">
+          </div>
+        </div>
+        ${d.logoDataUrl ? `<div class="mt-2 d-flex align-items-center gap-2"><img src="${escapeHtml(d.logoDataUrl)}" alt="Logo" style="height:36px;border-radius:8px;object-fit:cover;"><span class="small text-muted">Logo recibido — para cambiarlo, escríbenos por WhatsApp.</span></div>` : ""}
+        <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+          <button type="button" class="btn btn-dark btn-sm mc-draft-save">
+            <i class="bi bi-check-lg me-1"></i> Guardar info
+          </button>
+          <span class="form-text small mb-0 mc-draft-note"></span>
+        </div>
+      </div>
+    `;
+  }
+
   function renderDashboard(email, orders) {
     const hasOrders = Array.isArray(orders) && orders.length > 0;
 
@@ -230,15 +286,18 @@
             : `<span class="text-muted small">Te avisamos por correo cuando esté lista</span>`;
           return `
             <div class="card mc-card border-0 shadow-sm mb-3">
-              <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                  <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="badge ${status.cls}">${status.text}</span>
-                    <span class="fw-semibold">${escapeHtml(o.packageName || "Mi Tarjeta Pro")}</span>
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="badge ${status.cls}">${status.text}</span>
+                      <span class="fw-semibold">${escapeHtml(o.packageName || "Mi Tarjeta Pro")}</span>
+                    </div>
+                    <div class="text-muted small">${escapeHtml(date)}</div>
                   </div>
-                  <div class="text-muted small">${escapeHtml(date)}</div>
+                  ${link}
                 </div>
-                ${link}
+                ${draftFormHtml(o)}
               </div>
             </div>
           `;
@@ -281,6 +340,39 @@
       await apiPost("/account/logout", { sessionToken: getSession() });
       clearSession();
       renderAuth({ mode: "login", message: "Sesión cerrada." });
+    });
+
+    document.querySelectorAll(".mc-draft-save").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const wrap = btn.closest("[data-draft-id]");
+        const draftId = wrap.dataset.draftId;
+        const order = orders.find((o) => o.draftId === draftId);
+        const note = wrap.querySelector(".mc-draft-note");
+        if (!order || !order.draft) return;
+
+        const data = { ...(order.draft.data || {}) };
+        wrap.querySelectorAll(".mc-draft-field").forEach((input) => {
+          data[input.dataset.field] = input.value.trim();
+        });
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando…';
+        note.className = "form-text small mb-0 mc-draft-note";
+        note.textContent = "";
+
+        const res = await apiPut(`/draft/${encodeURIComponent(draftId)}`, { sessionToken: getSession(), data });
+
+        if (res.ok) {
+          order.draft.data = data;
+          note.className = "form-text small mb-0 mc-draft-note text-success";
+          note.textContent = "¡Guardado!";
+        } else {
+          note.className = "form-text small mb-0 mc-draft-note text-danger";
+          note.textContent = res.error === "no-api" ? "El guardado automático no está disponible todavía." : "No se pudo guardar. Intenta de nuevo.";
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Guardar info';
+      });
     });
   }
 

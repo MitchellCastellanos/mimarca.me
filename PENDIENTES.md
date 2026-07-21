@@ -33,9 +33,10 @@ Worker: `https://mimarca-stripe-webhook.mimarca.workers.dev`
    (`rl:access:<ip>`). Sigue respondiendo `{ok:true}` (no filtra info).
 4. **Panel de admin mínimo**: [x] (2026-07-20) — `admin/index.html`
    (secret en sessionStorage; botones published / change-received).
-5. **Fase 2 del portal** (autoedición limitada): [ ] diferida a propósito —
-   implica mover datos editables a D1/KV y un form validado contra el schema.
-   No bloquea el portal actual; abrir cuando haya demanda real de clientes.
+5. **Fase 2 del portal** (autoedición limitada): [x] parcial (2026-07-21) —
+   se abrió específicamente para **links** (ver Parte 5 abajo), que era el
+   caso de uso real que llegó. El resto (texto, colores, secciones) sigue
+   diferido a propósito — abrir cuando haya demanda real de clientes.
 6. **Galería con marca equivocada**: [ ] sigue pendiente — se intentó
    cambiar a los SVG placeholder de `images/mi-tarjeta/mockups/*.svg`, pero
    son wireframes genéricos (mucho más feos que los mockups reales), así
@@ -134,6 +135,50 @@ npx wrangler kv key put "ref:CODIGO" --remote --path=ref.json
 ```
 
 `secrets.json` ejemplo:
-`{"ownerEmail":"cliente@correo.com","ownerToken":"token-unico","referralCode":"ABC12XY"}`
+`{"ownerEmail":"cliente@correo.com","ownerToken":"token-unico","referralCode":"ABC12XY","package":"personalizado"}`
+
+## Parte 5 — Links autoeditados + borrador como form (2026-07-21)
+
+Mitchell no quedó convencido del checkout/panel: (a) el borrador que ya se
+capturaba antes de pagar (Parte 3) debía verse y editarse desde el
+Dashboard, actuando como el intake form real del equipo; (b) cobrar $25
+MXN por editar un link se sentía mal — mejor darle al cliente el poder de
+agregar/quitar/editar sus links él mismo, limitado por lo que su tier ya
+incluye, y que la única "venta" cuando se pasa del cupo sea subir de
+paquete (no un cobro por link).
+
+1. **Borrador editable desde el Dashboard**: [x] — `PUT /draft/:id`
+   (auth por sesión de cuenta, valida que el correo coincida con el dueño
+   del borrador). `mi-cuenta/cuenta.html` muestra un form
+   (nombre/tagline/WhatsApp/Instagram/Maps) para cada pedido sin `slug`
+   todavía. El logo solo se previsualiza — no hay endpoint de subida sin
+   `slug`, así que cambiarlo pre-publicación sigue siendo por WhatsApp.
+2. **Cupos de links por tier**: [x] — 3 (Lanzamiento) / 6 (Personalizado)
+   / 12 (Premium), definidos en `LINKS_QUOTA_BY_PACKAGE`
+   (`workers/stripe-webhook/src/portal.js`). Requiere el campo nuevo
+   `package` en `secrets:<slug>` (ver "Alta de cliente" arriba) — sin él,
+   cae al cupo de Personalizado o a lo que el cliente ya tenía, lo que
+   sea mayor (no le quitamos links a nadie retroactivamente).
+3. **Autoedición de links**: [x] — `mi-cuenta/index.html` tiene una
+   sección "Tus links" (editar, agregar, quitar, sin revisión humana ni
+   costo dentro del cupo). Al llegar al cupo, el panel invita a subir de
+   paquete por WhatsApp — **no** se ofrece comprar links sueltos.
+   `PUT /card-links/:slug` valida y guarda en KV (`links:<slug>`), sin
+   tocar el JSON estático.
+4. **La tarjeta pública ya respeta la autoedición**: [x] — `js/negocio.js`
+   pide `GET /card-links/:slug` en paralelo al JSON estático y usa el
+   override si existe. Sin Worker o sin editar nunca, se ve el JSON tal
+   cual — cero downtime nuevo, el sitio sigue siendo estático de verdad.
+5. **Copy actualizado**: [x] — `index.html` (#precios: cupos 3/6/12;
+   #politica: los links salen del $25 MXN, con nota de que superar el
+   cupo es upgrade, no pago por link) y `terminos.html` §5.
+
+**Pendiente manual**: rellenar el campo `package` en `secrets:<slug>` para
+los clientes que ya existen (`lulu`, `test-client`, etc.) — sin él caen al
+default de Personalizado, que puede no ser su tier real. No bloquea nada,
+solo afecta qué cupo ven en "Tus links".
+
+Detalle técnico completo: `workers/stripe-webhook/README.md` (secciones
+"Links autoeditados" y "Borrador como form").
 
 Detalle técnico: `workers/stripe-webhook/README.md`.

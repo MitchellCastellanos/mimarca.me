@@ -82,6 +82,15 @@
       "type": "string",
       "description": "DEPRECATED en JSON público. Vivir en Cloudflare KV (secrets:<slug>).ownerEmail"
     },
+    "package": {
+      "type": "string",
+      "enum": [
+        "lanzamiento",
+        "personalizado",
+        "premium"
+      ],
+      "description": "DEPRECATED en JSON público — vive en Cloudflare KV (secrets:<slug>).package. Define el cupo de links autoeditables en mi-cuenta (ver LINKS_QUOTA_BY_PACKAGE en workers/stripe-webhook/src/portal.js): 3 / 6 / 12."
+    },
     "primaryCta": {
       "type": "object",
       "required": [

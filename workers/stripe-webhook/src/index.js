@@ -9,17 +9,24 @@
  *   POST /session             Valida slug+token (secretos en KV) y devuelve datos públicos
  *   POST /draft                Guarda el borrador del builder (antes de pagar)
  *   GET  /draft/:id             Lo lee (gracias.html lo usa para el recap)
+ *   PUT  /draft/:id             {sessionToken,data} -> lo edita (Dashboard, antes de publicar)
  *   POST /upload               Logo/fotos del cliente -> R2 + aviso al owner
  *   POST /notify/approved      Cliente aprueba su diseño en revisión -> aviso al owner
  *   POST /notify/published     (admin) avisa al cliente que ya está publicada
  *   POST /notify/change-received (admin) confirma que se recibió su solicitud de cambios
+ *
+ *   GET  /card-links/:slug      Links autoeditados del cliente (público, sin auth)
+ *   PUT  /card-links/:slug      {token,links} -> el cliente edita sus links dentro de su
+ *                               cupo de tier (sin costo, sin revisión humana) — ver portal.js
  *
  *   POST /account/register        {email,password} -> crea cuenta + sesión
  *   POST /account/login           {email,password} -> sesión
  *   POST /account/logout          {sessionToken} -> la invalida
  *   POST /account/request-reset   {email} -> correo con link de reset (siempre {ok:true})
  *   POST /account/reset-password  {token,password} -> nueva contraseña
- *   POST /account/me              {sessionToken} -> correo + lista de pedidos (Dashboard)
+ *   POST /account/me              {sessionToken} -> correo + lista de pedidos (Dashboard),
+ *                                  cada pedido sin `slug` trae su borrador ({draft}) para
+ *                                  poder editarlo antes de publicar.
  *
  * Secretos (ownerEmail, ownerToken, referralCode) viven en Cloudflare KV
  * (PORTAL_KV). El JSON público en Pages ya no debe incluirlos.
@@ -48,15 +55,21 @@ import {
 import {
   stripSecrets,
   resolveClient,
+  getSecrets,
   rateLimitAccess,
   rateLimitBucket,
   recordReferralRedemption,
   parseClientReferenceId,
   saveDraft,
   getDraft,
+  updateDraft,
   linkSessionToDraft,
   getDraftBySession,
   recordPendingOrder,
+  resolveLinksQuota,
+  validateLinks,
+  getLinks,
+  setLinks,
 } from "./portal.js";
 import {
   normalizeEmail,
@@ -75,7 +88,7 @@ import {
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, X-Admin-Secret",
 };
 
@@ -100,6 +113,32 @@ export default {
     if (request.method === "GET" && url.pathname.startsWith("/draft-by-session/")) {
       try {
         return await handleGetDraftBySession(env, url.pathname.slice("/draft-by-session/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
+    if (request.method === "GET" && url.pathname.startsWith("/card-links/")) {
+      try {
+        return await handleGetCardLinks(env, url.pathname.slice("/card-links/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
+
+    // PUT: ediciones autoservicio autenticadas (token por tarjeta o sesión de cuenta).
+    if (request.method === "PUT" && url.pathname.startsWith("/card-links/")) {
+      try {
+        return await handlePutCardLinks(request, env, url.pathname.slice("/card-links/".length));
+      } catch (err) {
+        console.error(err);
+        return jsonResponse({ error: "internal error" }, 500);
+      }
+    }
+    if (request.method === "PUT" && url.pathname.startsWith("/draft/")) {
+      try {
+        return await handlePutDraft(request, env, url.pathname.slice("/draft/".length));
       } catch (err) {
         console.error(err);
         return jsonResponse({ error: "internal error" }, 500);
@@ -315,14 +354,66 @@ async function handleSession(request, env) {
     return jsonResponse({ error: "unauthorized" }, 403);
   }
 
+  const secrets = (await getSecrets(env, slug)) || {};
+  const linksOverride = await getLinks(env, slug);
+  const links = linksOverride?.links || data.links || [];
+
   return jsonResponse({
     ok: true,
     data: {
       ...stripSecrets(data),
+      links,
       referralCode: data.referralCode || "",
       orderStage: data.orderStage || "",
+      package: secrets.package || "",
+      linksQuota: resolveLinksQuota(secrets.package, links.length),
     },
   });
+}
+
+// ============================================================
+// GET  /card-links/:slug — links autoeditados (público, sin auth: ya son
+// visibles en la tarjeta pública, no hay nada que proteger)
+// PUT  /card-links/:slug — {token,links} el cliente edita sus propios
+// links dentro de su cupo de tier. Sin revisión humana ni costo — pasarse
+// del cupo empuja a subir de paquete, no cobra por link (decisión
+// 2026-07-21, ver PENDIENTES.md).
+// ============================================================
+async function handleGetCardLinks(env, slugParam) {
+  const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  if (!slug || !env.PORTAL_KV) return jsonResponse({ error: "not found" }, 404);
+  const record = await getLinks(env, slug);
+  if (!record) return jsonResponse({ error: "not found" }, 404);
+  return jsonResponse({ ok: true, links: record.links });
+}
+
+async function handlePutCardLinks(request, env, slugParam) {
+  const slug = String(slugParam || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const body = await safeJson(request);
+  const token = String(body?.token || "").trim();
+  if (!slug || !token) return jsonResponse({ error: "missing fields" }, 400);
+
+  const data = await loadClient(env, slug);
+  if (!data || !data.ownerToken || data.ownerToken !== token) {
+    return jsonResponse({ error: "unauthorized" }, 403);
+  }
+  if (data.orderStage !== "published") {
+    return jsonResponse({ error: "tu tarjeta todavía no está publicada" }, 409);
+  }
+
+  const secrets = (await getSecrets(env, slug)) || {};
+  const currentCount = Array.isArray(data.links) ? data.links.length : 0;
+  const quota = resolveLinksQuota(secrets.package, currentCount);
+
+  let links;
+  try {
+    links = validateLinks(body?.links, quota);
+  } catch (err) {
+    return jsonResponse({ error: err.message, quota }, 422);
+  }
+
+  await setLinks(env, slug, links);
+  return jsonResponse({ ok: true, links, quota });
 }
 
 // ============================================================
@@ -364,6 +455,39 @@ async function handleGetDraftBySession(env, sessionId) {
   const found = await getDraftBySession(env, sessionId);
   if (!found) return jsonResponse({ error: "not found" }, 404);
   return jsonResponse({ ok: true, draftId: found.draftId, email: found.email, data: found.data });
+}
+
+// ============================================================
+// PUT /draft/:id — el cliente edita su borrador desde el Dashboard
+// (mi-cuenta/cuenta.html) mientras su pedido sigue sin `slug` — esto es
+// lo que ve el equipo como "form" de intake, y lo que eventualmente
+// alimenta la tarjeta en vivo al publicarla.
+// ============================================================
+async function handlePutDraft(request, env, draftId) {
+  const body = await safeJson(request);
+  const sessionToken = String(body?.sessionToken || "").trim();
+  const data = body?.data;
+  if (!draftId || !sessionToken || !data || typeof data !== "object") {
+    return jsonResponse({ error: "missing fields" }, 400);
+  }
+  if (!env.PORTAL_KV) return jsonResponse({ error: "drafts not configured" }, 503);
+
+  const email = await resolveAccountSession(env, sessionToken);
+  if (!email) return jsonResponse({ error: "unauthorized" }, 403);
+
+  const existing = await getDraft(env, draftId);
+  if (!existing || normalizeEmail(existing.email) !== email) {
+    return jsonResponse({ error: "unauthorized" }, 403);
+  }
+
+  try {
+    const updated = await updateDraft(env, draftId, data);
+    if (!updated) return jsonResponse({ error: "not found" }, 404);
+    return jsonResponse({ ok: true });
+  } catch (err) {
+    console.error("updateDraft failed:", err);
+    return jsonResponse({ error: "could not save draft" }, 413);
+  }
 }
 
 // ============================================================
@@ -473,7 +597,19 @@ async function handleAccountMe(request, env) {
   if (!email) return jsonResponse({ error: "unauthorized" }, 403);
 
   const orders = await listOrdersForAccount(env, email);
-  return jsonResponse({ ok: true, email, orders });
+  // Mientras un pedido no tenga `slug` (aún no publicado), su borrador es
+  // lo único editable — lo adjuntamos para que el Dashboard lo muestre
+  // como form. Una vez publicado, el borrador ya no importa (el editor de
+  // links y las subidas de logo/fotos toman el relevo).
+  const enrichedOrders = await Promise.all(
+    orders.map(async (order) => {
+      if (order.slug || !order.draftId) return order;
+      const draft = await getDraft(env, order.draftId).catch(() => null);
+      return draft ? { ...order, draft: { draftId: order.draftId, data: draft.data } } : order;
+    })
+  );
+
+  return jsonResponse({ ok: true, email, orders: enrichedOrders });
 }
 
 // ============================================================

@@ -7,8 +7,13 @@ import {
   parseClientReferenceId,
   saveDraft,
   getDraft,
+  updateDraft,
   linkSessionToDraft,
   getDraftBySession,
+  resolveLinksQuota,
+  validateLinks,
+  getLinks,
+  setLinks,
 } from "../src/portal.js";
 
 function fakeKvEnv() {
@@ -128,5 +133,86 @@ describe("linkSessionToDraft / getDraftBySession", () => {
   it("regresa null si no hay mapeo", async () => {
     const env = fakeKvEnv();
     assert.equal(await getDraftBySession(env, "cs_no_existe"), null);
+  });
+});
+
+describe("updateDraft", () => {
+  it("edita el data conservando email y createdAt", async () => {
+    const env = fakeKvEnv();
+    const draftId = await saveDraft(env, "cliente@correo.com", { businessName: "Antes" });
+    const before = await getDraft(env, draftId);
+
+    const updated = await updateDraft(env, draftId, { businessName: "Después" });
+    assert.equal(updated.email, "cliente@correo.com");
+    assert.equal(updated.data.businessName, "Después");
+
+    const after = await getDraft(env, draftId);
+    assert.equal(after.email, before.email);
+    assert.equal(after.createdAt, before.createdAt);
+    assert.equal(after.data.businessName, "Después");
+  });
+
+  it("regresa null si el borrador no existe", async () => {
+    const env = fakeKvEnv();
+    assert.equal(await updateDraft(env, "no-existe", { x: 1 }), null);
+  });
+
+  it("rechaza datos demasiado grandes", async () => {
+    const env = fakeKvEnv();
+    const draftId = await saveDraft(env, "a@b.com", { businessName: "X" });
+    await assert.rejects(() => updateDraft(env, draftId, { businessName: "x".repeat(600000) }));
+  });
+});
+
+describe("resolveLinksQuota", () => {
+  it("usa el cupo del paquete conocido", () => {
+    assert.equal(resolveLinksQuota("lanzamiento"), 3);
+    assert.equal(resolveLinksQuota("personalizado"), 6);
+    assert.equal(resolveLinksQuota("premium"), 12);
+  });
+
+  it("no distingue mayúsculas", () => {
+    assert.equal(resolveLinksQuota("Premium"), 12);
+  });
+
+  it("cliente viejo sin paquete no pierde links que ya tenía", () => {
+    assert.equal(resolveLinksQuota("", 9), 9);
+    assert.equal(resolveLinksQuota(undefined, 2), 6); // default (personalizado) si trae menos
+  });
+});
+
+describe("validateLinks", () => {
+  it("acepta links válidos dentro del cupo", () => {
+    const out = validateLinks(
+      [{ label: "Instagram", url: "https://instagram.com/x" }, { label: "WhatsApp", url: "https://wa.me/521234567890" }],
+      3
+    );
+    assert.equal(out.length, 2);
+    assert.equal(out[0].label, "Instagram");
+    assert.equal(out[0].icon, "link-45deg"); // default
+  });
+
+  it("rechaza si se pasa del cupo", () => {
+    assert.throws(() => validateLinks([{ label: "A", url: "https://a.com" }, { label: "B", url: "https://b.com" }], 1));
+  });
+
+  it("rechaza links sin nombre o con URL inválida", () => {
+    assert.throws(() => validateLinks([{ label: "", url: "https://a.com" }], 5));
+    assert.throws(() => validateLinks([{ label: "A", url: "javascript:alert(1)" }], 5));
+  });
+
+  it("rechaza si no es un arreglo", () => {
+    assert.throws(() => validateLinks("no-es-arreglo", 5));
+  });
+});
+
+describe("getLinks / setLinks", () => {
+  it("guarda y regresa el override de links", async () => {
+    const env = fakeKvEnv();
+    assert.equal(await getLinks(env, "lulu"), null);
+    await setLinks(env, "lulu", [{ label: "IG", url: "https://instagram.com/lulu" }]);
+    const record = await getLinks(env, "lulu");
+    assert.equal(record.links.length, 1);
+    assert.equal(record.links[0].label, "IG");
   });
 });
