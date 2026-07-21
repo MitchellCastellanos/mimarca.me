@@ -95,6 +95,14 @@
     universal: "universal-gold",
   };
 
+  // ----- categoría -> foto de cover para el hero (heroBackgroundUrl) -----
+  const HERO_COVER_BY_CATEGORY = {
+    belleza: "/images/mi-tarjeta/hero-covers/belleza.jpg",
+    comida: "/images/mi-tarjeta/hero-covers/comida.jpg",
+    profesional: "/images/mi-tarjeta/hero-covers/profesional.jpg",
+    universal: "/images/mi-tarjeta/hero-covers/universal.jpg",
+  };
+
   // ----- loading copy rotation -----
   const loadingSteps = [
     { t: "Leyendo tus datos...", s: "Nombre, links y logo" },
@@ -136,6 +144,7 @@
     const tagline = elTagline.value.trim() || "Tu frase corta aquí";
     const cat = elCategory.value;
     const theme = THEME_BY_CATEGORY[cat] || THEME_BY_CATEGORY.universal;
+    const heroBackgroundUrl = HERO_COVER_BY_CATEGORY[cat] || HERO_COVER_BY_CATEGORY.universal;
 
     const links = [];
     const igRaw = elInstagram.value.trim();
@@ -159,7 +168,7 @@
       slug,
       theme,
       language: "es-MX",
-      business: { name, tagline, logoUrl: logoDataURL || "" },
+      business: { name, tagline, logoUrl: logoDataURL || "", heroBackgroundUrl },
       ...(primaryCta ? { primaryCta } : {}),
       links,
       brandCardCopy: "Diseñada a la medida por mimarca.",
